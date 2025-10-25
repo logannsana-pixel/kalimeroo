@@ -1,8 +1,20 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
+import { DistrictSelector } from "@/components/DistrictSelector";
 import heroFood from "@/assets/hero-food.jpg";
 
 export const Hero = () => {
+  const navigate = useNavigate();
+  const [selectedDistrict, setSelectedDistrict] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
+
+  const handleSearch = () => {
+    if (selectedDistrict) {
+      navigate("/restaurants", { state: { district: selectedDistrict, city: selectedCity } });
+    }
+  };
+
   return (
     <section className="relative min-h-[600px] flex items-center justify-center overflow-hidden">
       <div 
@@ -27,15 +39,22 @@ export const Hero = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 mb-8">
-            <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Entrez votre adresse de livraison..."
-                className="w-full pl-12 pr-4 py-4 rounded-lg border border-border bg-background/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            <div className="flex-1">
+              <DistrictSelector
+                onSelect={(district, city) => {
+                  setSelectedDistrict(district);
+                  setSelectedCity(city);
+                }}
+                selectedDistrict={selectedDistrict}
               />
             </div>
-            <Button variant="hero" size="lg" className="px-8">
+            <Button 
+              variant="hero" 
+              size="lg" 
+              className="px-8"
+              onClick={handleSearch}
+              disabled={!selectedDistrict}
+            >
               Trouver des restaurants
             </Button>
           </div>

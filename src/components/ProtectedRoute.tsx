@@ -1,0 +1,51 @@
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+
+interface ProtectedRouteProps {
+  children: React.ReactNode;
+  allowedRoles?: string[];
+}
+
+export const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
+  const { user, userRole, loading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading) {
+      if (!user) {
+        navigate("/auth");
+      } else if (allowedRoles && userRole && !allowedRoles.includes(userRole)) {
+        // Redirect based on user role
+        switch (userRole) {
+          case "restaurant":
+            navigate("/restaurant-dashboard");
+            break;
+          case "delivery":
+            navigate("/delivery-dashboard");
+            break;
+          default:
+            navigate("/");
+        }
+      }
+    }
+  }, [user, userRole, loading, navigate, allowedRoles]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Chargement...</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
+
+  if (allowedRoles && userRole && !allowedRoles.includes(userRole)) {
+    return null;
+  }
+
+  return <>{children}</>;
+};
