@@ -68,25 +68,33 @@ export default function RestaurantDashboard() {
         return;
       }
 
-      const { data, error } = await supabase
+      const { data: ordersData, error } = await supabase
         .from("orders")
-        .select(`
-          id,
-          created_at,
-          status,
-          total,
-          delivery_address,
-          phone,
-          notes,
-          profiles (
-            full_name
-          )
-        `)
+        .select("*")
         .eq("restaurant_id", restaurant.id)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setOrders(data || []);
+      
+      // Fetch user profiles separately
+      if (ordersData && ordersData.length > 0) {
+        const userIds = [...new Set(ordersData.map(o => o.user_id))];
+        const { data: profilesData } = await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", userIds);
+
+        const profilesMap = new Map(profilesData?.map(p => [p.id, p]) || []);
+        
+        const ordersWithProfiles = ordersData.map(order => ({
+          ...order,
+          profiles: profilesMap.get(order.user_id) || { full_name: "Utilisateur" }
+        }));
+        
+        setOrders(ordersWithProfiles);
+      } else {
+        setOrders([]);
+      }
     } catch (error) {
       console.error("Error fetching orders:", error);
       toast.error("Erreur lors du chargement des commandes");
@@ -95,7 +103,7 @@ export default function RestaurantDashboard() {
     }
   };
 
-  const updateOrderStatus = async (orderId: string, status: string) => {
+  const updateOrderStatus = async (orderId: string, status: "pending" | "confirmed" | "preparing" | "delivering" | "delivered" | "cancelled") => {
     try {
       const { error } = await supabase
         .from("orders")
@@ -126,11 +134,11 @@ export default function RestaurantDashboard() {
     }
   };
 
-  const getNextStatus = (currentStatus: string) => {
-    const statusFlow: Record<string, { next: string; label: string }> = {
+  const getNextStatus = (currentStatus: string): { next: "pending" | "confirmed" | "preparing" | "delivering" | "delivered" | "cancelled"; label: string } | undefined => {
+    const statusFlow: Record<string, { next: "pending" | "confirmed" | "preparing" | "delivering" | "delivered" | "cancelled"; label: string }> = {
       pending: { next: "confirmed", label: "Confirmer" },
       confirmed: { next: "preparing", label: "En préparation" },
-      preparing: { next: "on_delivery", label: "Prêt pour livraison" },
+      preparing: { next: "delivering", label: "Prêt pour livraison" },
     };
     return statusFlow[currentStatus];
   };
@@ -168,7 +176,7 @@ export default function RestaurantDashboard() {
           </Card>
         ) : (
           <div className="grid gap-4">
-            {orders.map((order) => {
+              {orders.map((order) => {
               const nextStatus = getNextStatus(order.status);
               return (
                 <Card key={order.id}>
@@ -183,7 +191,7 @@ export default function RestaurantDashboard() {
                           {order.status === "pending" && "En attente"}
                           {order.status === "confirmed" && "Confirmée"}
                           {order.status === "preparing" && "En préparation"}
-                          {order.status === "on_delivery" && "En livraison"}
+                          {order.status === "delivering" && "En livraison"}
                           {order.status === "delivered" && "Livrée"}
                         </span>
                       </Badge>
@@ -223,7 +231,7 @@ export default function RestaurantDashboard() {
                         <p className="font-bold text-lg">
                           Total: {Number(order.total).toFixed(2)}€
                         </p>
-                        {nextStatus && order.status !== "on_delivery" && (
+                        {nextStatus && order.status !== "delivering" && (
                           <Button
                             onClick={() => updateOrderStatus(order.id, nextStatus.next)}
                           >

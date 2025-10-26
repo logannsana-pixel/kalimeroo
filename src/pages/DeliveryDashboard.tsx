@@ -61,29 +61,42 @@ export default function DeliveryDashboard() {
   const fetchOrders = async () => {
     try {
       // Fetch orders ready for delivery or assigned to this driver
-      const { data, error } = await supabase
+      const { data: ordersData, error } = await supabase
         .from("orders")
-        .select(`
-          id,
-          created_at,
-          status,
-          total,
-          delivery_address,
-          phone,
-          notes,
-          restaurants (
-            name,
-            address
-          ),
-          profiles (
-            full_name
-          )
-        `)
-        .or(`status.eq.on_delivery,and(status.eq.preparing,delivery_driver_id.is.null)`)
+        .select("*")
+        .or(`status.eq.delivering,and(status.eq.preparing,delivery_driver_id.is.null)`)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setOrders(data || []);
+      
+      // Fetch restaurants and profiles separately
+      if (ordersData && ordersData.length > 0) {
+        const restaurantIds = [...new Set(ordersData.map(o => o.restaurant_id))];
+        const userIds = [...new Set(ordersData.map(o => o.user_id))];
+        
+        const { data: restaurantsData } = await supabase
+          .from("restaurants")
+          .select("id, name, address")
+          .in("id", restaurantIds);
+          
+        const { data: profilesData } = await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", userIds);
+
+        const restaurantsMap = new Map(restaurantsData?.map(r => [r.id, r]) || []);
+        const profilesMap = new Map(profilesData?.map(p => [p.id, p]) || []);
+        
+        const ordersWithDetails = ordersData.map(order => ({
+          ...order,
+          restaurants: restaurantsMap.get(order.restaurant_id) || { name: "Restaurant", address: "" },
+          profiles: profilesMap.get(order.user_id) || { full_name: "Utilisateur" }
+        }));
+        
+        setOrders(ordersWithDetails);
+      } else {
+        setOrders([]);
+      }
     } catch (error) {
       console.error("Error fetching orders:", error);
       toast.error("Erreur lors du chargement des commandes");
@@ -98,7 +111,7 @@ export default function DeliveryDashboard() {
         .from("orders")
         .update({ 
           delivery_driver_id: user?.id,
-          status: "on_delivery" 
+          status: "delivering" 
         })
         .eq("id", orderId);
 
@@ -141,7 +154,7 @@ export default function DeliveryDashboard() {
   }
 
   const availableOrders = orders.filter(o => o.status === "preparing");
-  const activeDeliveries = orders.filter(o => o.status === "on_delivery");
+  const activeDeliveries = orders.filter(o => o.status === "delivering");
 
   return (
     <div className="min-h-screen flex flex-col">
