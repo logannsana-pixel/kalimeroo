@@ -18,10 +18,10 @@ export const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) 
       } else if (allowedRoles && userRole && !allowedRoles.includes(userRole)) {
         // Redirect based on user role
         switch (userRole) {
-          case "restaurant":
+          case "restaurant_owner":
             navigate("/restaurant-dashboard");
             break;
-          case "delivery":
+          case "delivery_driver":
             navigate("/delivery-dashboard");
             break;
           default:

@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Utensils } from "lucide-react";
 import { z } from "zod";
@@ -14,13 +15,19 @@ const authSchema = z.object({
   email: z.string().email("Email invalide").max(255, "Email trop long"),
   password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères").max(100, "Mot de passe trop long"),
   fullName: z.string().trim().min(2, "Le nom doit contenir au moins 2 caractères").max(100, "Nom trop long").optional(),
+  role: z.enum(["customer", "restaurant_owner", "delivery_driver"]).optional(),
 });
 
 const Auth = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [loginData, setLoginData] = useState({ email: "", password: "" });
-  const [signupData, setSignupData] = useState({ email: "", password: "", fullName: "" });
+  const [signupData, setSignupData] = useState({ 
+    email: "", 
+    password: "", 
+    fullName: "", 
+    role: "customer" as "customer" | "restaurant_owner" | "delivery_driver" 
+  });
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,7 +48,24 @@ const Auth = () => {
         }
       } else {
         toast.success("Connexion réussie !");
-        navigate("/");
+        // Get user role and redirect accordingly
+        const { data: roleData } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", (await supabase.auth.getUser()).data.user?.id)
+          .single();
+        
+        const userRole = roleData?.role;
+        switch (userRole) {
+          case "restaurant_owner":
+            navigate("/restaurant-dashboard");
+            break;
+          case "delivery_driver":
+            navigate("/delivery-dashboard");
+            break;
+          default:
+            navigate("/");
+        }
       }
     } catch (err) {
       if (err instanceof z.ZodError) {
@@ -67,6 +91,7 @@ const Auth = () => {
           emailRedirectTo: redirectUrl,
           data: {
             full_name: validated.fullName,
+            role: validated.role || "customer",
           },
         },
       });
@@ -79,7 +104,18 @@ const Auth = () => {
         }
       } else {
         toast.success("Compte créé avec succès !");
-        navigate("/");
+        // Redirect based on selected role
+        const userRole = validated.role || "customer";
+        switch (userRole) {
+          case "restaurant_owner":
+            navigate("/restaurant-dashboard");
+            break;
+          case "delivery_driver":
+            navigate("/delivery-dashboard");
+            break;
+          default:
+            navigate("/");
+        }
       }
     } catch (err) {
       if (err instanceof z.ZodError) {
@@ -154,6 +190,24 @@ const Auth = () => {
                     required
                     maxLength={100}
                   />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-role">Je suis</Label>
+                  <Select
+                    value={signupData.role}
+                    onValueChange={(value: "customer" | "restaurant_owner" | "delivery_driver") => 
+                      setSignupData({ ...signupData, role: value })
+                    }
+                  >
+                    <SelectTrigger id="signup-role">
+                      <SelectValue placeholder="Sélectionnez votre rôle" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="customer">Client</SelectItem>
+                      <SelectItem value="restaurant_owner">Restaurant</SelectItem>
+                      <SelectItem value="delivery_driver">Livreur</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-email">Email</Label>
