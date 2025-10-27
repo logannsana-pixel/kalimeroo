@@ -16,6 +16,7 @@ import Orders from "./pages/Orders";
 import Profile from "./pages/Profile";
 import RestaurantDashboard from "./pages/RestaurantDashboard";
 import DeliveryDashboard from "./pages/DeliveryDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -78,6 +79,14 @@ const App = () => (
                 element={
                   <ProtectedRoute allowedRoles={["delivery_driver"]}>
                     <DeliveryDashboard />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin-dashboard" 
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <AdminDashboard />
                   </ProtectedRoute>
                 } 
               />

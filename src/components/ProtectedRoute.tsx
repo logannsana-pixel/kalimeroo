@@ -24,6 +24,9 @@ export const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) 
           case "delivery_driver":
             navigate("/delivery-dashboard");
             break;
+          case "admin":
+            navigate("/admin-dashboard");
+            break;
           default:
             navigate("/");
         }

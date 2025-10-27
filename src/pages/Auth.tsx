@@ -15,7 +15,7 @@ const authSchema = z.object({
   email: z.string().email("Email invalide").max(255, "Email trop long"),
   password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères").max(100, "Mot de passe trop long"),
   fullName: z.string().trim().min(2, "Le nom doit contenir au moins 2 caractères").max(100, "Nom trop long").optional(),
-  role: z.enum(["customer", "restaurant_owner", "delivery_driver"]).optional(),
+  role: z.enum(["customer", "restaurant_owner", "delivery_driver", "admin"]).optional(),
 });
 
 const Auth = () => {
@@ -26,7 +26,7 @@ const Auth = () => {
     email: "", 
     password: "", 
     fullName: "", 
-    role: "customer" as "customer" | "restaurant_owner" | "delivery_driver" 
+    role: "customer" as "customer" | "restaurant_owner" | "delivery_driver" | "admin"
   });
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -62,6 +62,9 @@ const Auth = () => {
             break;
           case "delivery_driver":
             navigate("/delivery-dashboard");
+            break;
+          case "admin":
+            navigate("/admin-dashboard");
             break;
           default:
             navigate("/");
@@ -106,16 +109,19 @@ const Auth = () => {
         toast.success("Compte créé avec succès !");
         // Redirect based on selected role
         const userRole = validated.role || "customer";
-        switch (userRole) {
-          case "restaurant_owner":
-            navigate("/restaurant-dashboard");
-            break;
-          case "delivery_driver":
-            navigate("/delivery-dashboard");
-            break;
-          default:
-            navigate("/");
-        }
+      switch (userRole) {
+        case "restaurant_owner":
+          navigate("/restaurant-dashboard");
+          break;
+        case "delivery_driver":
+          navigate("/delivery-dashboard");
+          break;
+        case "admin":
+          navigate("/admin-dashboard");
+          break;
+        default:
+          navigate("/");
+      }
       }
     } catch (err) {
       if (err instanceof z.ZodError) {
