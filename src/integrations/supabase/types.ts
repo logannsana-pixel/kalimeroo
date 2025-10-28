@@ -199,6 +199,7 @@ export type Database = {
           address: string | null
           avatar_url: string | null
           created_at: string
+          district: string | null
           full_name: string | null
           id: string
           is_available: boolean | null
@@ -209,6 +210,7 @@ export type Database = {
           address?: string | null
           avatar_url?: string | null
           created_at?: string
+          district?: string | null
           full_name?: string | null
           id: string
           is_available?: boolean | null
@@ -219,6 +221,7 @@ export type Database = {
           address?: string | null
           avatar_url?: string | null
           created_at?: string
+          district?: string | null
           full_name?: string | null
           id?: string
           is_available?: boolean | null

@@ -14,6 +14,7 @@ import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import Orders from "./pages/Orders";
 import Profile from "./pages/Profile";
+import CustomerDashboard from "./pages/CustomerDashboard";
 import RestaurantDashboard from "./pages/RestaurantDashboard";
 import DeliveryDashboard from "./pages/DeliveryDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -67,7 +68,15 @@ const App = () => (
                 } 
               />
               <Route 
-                path="/restaurant-dashboard" 
+                path="/customer-dashboard" 
+                element={
+                  <ProtectedRoute allowedRoles={["customer"]}>
+                    <CustomerDashboard />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/restaurant-dashboard"
                 element={
                   <ProtectedRoute allowedRoles={["restaurant_owner"]}>
                     <RestaurantDashboard />

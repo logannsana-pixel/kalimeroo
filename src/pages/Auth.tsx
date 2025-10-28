@@ -7,15 +7,23 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Utensils } from "lucide-react";
+import { Utensils, Upload } from "lucide-react";
 import { z } from "zod";
+import { allDistricts } from "@/data/congoDistricts";
 
 const authSchema = z.object({
   email: z.string().email("Email invalide").max(255, "Email trop long"),
   password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères").max(100, "Mot de passe trop long"),
   fullName: z.string().trim().min(2, "Le nom doit contenir au moins 2 caractères").max(100, "Nom trop long").optional(),
   role: z.enum(["customer", "restaurant_owner", "delivery_driver", "admin"]).optional(),
+  phone: z.string().optional(),
+  district: z.string().optional(),
+  restaurantName: z.string().optional(),
+  restaurantAddress: z.string().optional(),
+  cuisineType: z.string().optional(),
+  restaurantDescription: z.string().optional(),
 });
 
 const Auth = () => {
@@ -25,9 +33,29 @@ const Auth = () => {
   const [signupData, setSignupData] = useState({ 
     email: "", 
     password: "", 
-    fullName: "", 
-    role: "customer" as "customer" | "restaurant_owner" | "delivery_driver" | "admin"
+    fullName: "",
+    phone: "",
+    district: "",
+    role: "customer" as "customer" | "restaurant_owner" | "delivery_driver" | "admin",
+    restaurantName: "",
+    restaurantAddress: "",
+    cuisineType: "",
+    restaurantDescription: "",
   });
+  const [restaurantImage, setRestaurantImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>("");
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setRestaurantImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,6 +115,29 @@ const Auth = () => {
       const validated = authSchema.parse(signupData);
       const redirectUrl = `${window.location.origin}/`;
 
+      let restaurantImageUrl = "";
+      
+      // Upload restaurant image if provided
+      if (restaurantImage && validated.role === "restaurant_owner") {
+        const fileExt = restaurantImage.name.split('.').pop();
+        const fileName = `${Math.random()}.${fileExt}`;
+        const { error: uploadError, data } = await supabase.storage
+          .from('restaurant-images')
+          .upload(fileName, restaurantImage);
+
+        if (uploadError) {
+          toast.error("Erreur lors du téléchargement de l'image");
+          setIsLoading(false);
+          return;
+        }
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('restaurant-images')
+          .getPublicUrl(fileName);
+        
+        restaurantImageUrl = publicUrl;
+      }
+
       const { error } = await supabase.auth.signUp({
         email: validated.email,
         password: validated.password,
@@ -94,7 +145,15 @@ const Auth = () => {
           emailRedirectTo: redirectUrl,
           data: {
             full_name: validated.fullName,
+            phone: validated.phone,
+            district: validated.district,
+            address: validated.district,
             role: validated.role || "customer",
+            restaurant_name: validated.restaurantName,
+            restaurant_address: validated.restaurantAddress,
+            cuisine_type: validated.cuisineType,
+            restaurant_description: validated.restaurantDescription,
+            restaurant_image_url: restaurantImageUrl,
           },
         },
       });
@@ -107,21 +166,20 @@ const Auth = () => {
         }
       } else {
         toast.success("Compte créé avec succès !");
-        // Redirect based on selected role
         const userRole = validated.role || "customer";
-      switch (userRole) {
-        case "restaurant_owner":
-          navigate("/restaurant-dashboard");
-          break;
-        case "delivery_driver":
-          navigate("/delivery-dashboard");
-          break;
-        case "admin":
-          navigate("/admin-dashboard");
-          break;
-        default:
-          navigate("/");
-      }
+        switch (userRole) {
+          case "restaurant_owner":
+            navigate("/restaurant-dashboard");
+            break;
+          case "delivery_driver":
+            navigate("/delivery-dashboard");
+            break;
+          case "admin":
+            navigate("/admin-dashboard");
+            break;
+          default:
+            navigate("/");
+        }
       }
     } catch (err) {
       if (err instanceof z.ZodError) {
@@ -186,18 +244,6 @@ const Auth = () => {
             <TabsContent value="signup">
               <form onSubmit={handleSignup} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signup-name">Nom complet</Label>
-                  <Input
-                    id="signup-name"
-                    type="text"
-                    placeholder="Jean Dupont"
-                    value={signupData.fullName}
-                    onChange={(e) => setSignupData({ ...signupData, fullName: e.target.value })}
-                    required
-                    maxLength={100}
-                  />
-                </div>
-                <div className="space-y-2">
                   <Label htmlFor="signup-role">Je suis</Label>
                   <Select
                     value={signupData.role}
@@ -215,6 +261,20 @@ const Auth = () => {
                     </SelectContent>
                   </Select>
                 </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="signup-name">Nom complet</Label>
+                  <Input
+                    id="signup-name"
+                    type="text"
+                    placeholder="Jean Dupont"
+                    value={signupData.fullName}
+                    onChange={(e) => setSignupData({ ...signupData, fullName: e.target.value })}
+                    required
+                    maxLength={100}
+                  />
+                </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="signup-email">Email</Label>
                   <Input
@@ -227,6 +287,129 @@ const Auth = () => {
                     maxLength={255}
                   />
                 </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="signup-phone">Téléphone</Label>
+                  <Input
+                    id="signup-phone"
+                    type="tel"
+                    placeholder="06 555 444"
+                    value={signupData.phone}
+                    onChange={(e) => setSignupData({ ...signupData, phone: e.target.value })}
+                    required
+                  />
+                </div>
+
+                {signupData.role === "customer" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-district">Quartier</Label>
+                    <Select
+                      value={signupData.district}
+                      onValueChange={(value) => setSignupData({ ...signupData, district: value })}
+                    >
+                      <SelectTrigger id="signup-district">
+                        <SelectValue placeholder="Sélectionnez votre quartier" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {allDistricts.map((item) => (
+                          <SelectItem key={`${item.city}-${item.district}`} value={`${item.city} - ${item.district}`}>
+                            {item.city} - {item.district}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {signupData.role === "restaurant_owner" && (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="restaurant-name">Nom du restaurant</Label>
+                      <Input
+                        id="restaurant-name"
+                        type="text"
+                        placeholder="Le Goût Royal"
+                        value={signupData.restaurantName}
+                        onChange={(e) => setSignupData({ ...signupData, restaurantName: e.target.value })}
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="cuisine-type">Type de cuisine</Label>
+                      <Select
+                        value={signupData.cuisineType}
+                        onValueChange={(value) => setSignupData({ ...signupData, cuisineType: value })}
+                      >
+                        <SelectTrigger id="cuisine-type">
+                          <SelectValue placeholder="Sélectionnez le type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Africaine">Africaine</SelectItem>
+                          <SelectItem value="Pizza">Pizza</SelectItem>
+                          <SelectItem value="Fast Food">Fast Food</SelectItem>
+                          <SelectItem value="Chinoise">Chinoise</SelectItem>
+                          <SelectItem value="Indienne">Indienne</SelectItem>
+                          <SelectItem value="Italienne">Italienne</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="restaurant-address">Quartier / Adresse</Label>
+                      <Select
+                        value={signupData.restaurantAddress}
+                        onValueChange={(value) => setSignupData({ ...signupData, restaurantAddress: value })}
+                      >
+                        <SelectTrigger id="restaurant-address">
+                          <SelectValue placeholder="Sélectionnez le quartier" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {allDistricts.map((item) => (
+                            <SelectItem key={`${item.city}-${item.district}`} value={`${item.city} - ${item.district}`}>
+                              {item.city} - {item.district}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="restaurant-description">Description</Label>
+                      <Textarea
+                        id="restaurant-description"
+                        placeholder="Cuisine locale moderne..."
+                        value={signupData.restaurantDescription}
+                        onChange={(e) => setSignupData({ ...signupData, restaurantDescription: e.target.value })}
+                        rows={3}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="restaurant-image">Logo / Image du restaurant</Label>
+                      <div className="flex items-center gap-4">
+                        <Input
+                          id="restaurant-image"
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageChange}
+                          className="hidden"
+                        />
+                        <Label 
+                          htmlFor="restaurant-image"
+                          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md cursor-pointer hover:bg-primary/90"
+                        >
+                          <Upload className="h-4 w-4" />
+                          Choisir une image
+                        </Label>
+                        {imagePreview && (
+                          <img src={imagePreview} alt="Preview" className="h-16 w-16 object-cover rounded-md" />
+                        )}
+                      </div>
+                    </div>
+                  </>
+                )}
+
                 <div className="space-y-2">
                   <Label htmlFor="signup-password">Mot de passe</Label>
                   <Input
@@ -239,6 +422,7 @@ const Auth = () => {
                     maxLength={100}
                   />
                 </div>
+
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? "Création..." : "Créer un compte"}
                 </Button>

@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { ImageUpload } from "@/components/ImageUpload";
 import { toast } from "sonner";
 
 interface Restaurant {
@@ -25,6 +26,7 @@ interface Restaurant {
 export const RestaurantProfileTab = () => {
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [loading, setLoading] = useState(true);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -83,6 +85,25 @@ export const RestaurantProfileTab = () => {
     if (!restaurant) return;
 
     try {
+      let imageUrl = formData.image_url;
+
+      // Upload image if file is selected
+      if (imageFile) {
+        const fileExt = imageFile.name.split('.').pop();
+        const fileName = `${Math.random()}.${fileExt}`;
+        const { error: uploadError } = await supabase.storage
+          .from('restaurant-images')
+          .upload(fileName, imageFile);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('restaurant-images')
+          .getPublicUrl(fileName);
+        
+        imageUrl = publicUrl;
+      }
+
       const { error } = await supabase
         .from('restaurants')
         .update({
@@ -91,7 +112,7 @@ export const RestaurantProfileTab = () => {
           address: formData.address,
           phone: formData.phone || null,
           cuisine_type: formData.cuisine_type || null,
-          image_url: formData.image_url || null,
+          image_url: imageUrl || null,
           is_active: formData.is_active,
           delivery_fee: parseFloat(formData.delivery_fee),
           min_order: parseFloat(formData.min_order),
@@ -183,15 +204,11 @@ export const RestaurantProfileTab = () => {
               </div>
             </div>
 
-            <div>
-              <Label htmlFor="image_url">URL de l'image</Label>
-              <Input
-                id="image_url"
-                value={formData.image_url}
-                onChange={(e) => setFormData({...formData, image_url: e.target.value})}
-                placeholder="https://..."
-              />
-            </div>
+            <ImageUpload
+              label="Logo / Image du restaurant"
+              onImageChange={setImageFile}
+              currentImage={formData.image_url}
+            />
 
             <div className="grid md:grid-cols-3 gap-4">
               <div>

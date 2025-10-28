@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ImageUpload } from "@/components/ImageUpload";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -26,6 +27,7 @@ export const MenuTab = () => {
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -80,6 +82,7 @@ export const MenuTab = () => {
       is_available: true
     });
     setEditingItem(null);
+    setImageFile(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -87,12 +90,31 @@ export const MenuTab = () => {
     if (!restaurantId) return;
 
     try {
+      let imageUrl = formData.image_url;
+
+      // Upload image if file is selected
+      if (imageFile) {
+        const fileExt = imageFile.name.split('.').pop();
+        const fileName = `${Math.random()}.${fileExt}`;
+        const { error: uploadError } = await supabase.storage
+          .from('menu-images')
+          .upload(fileName, imageFile);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('menu-images')
+          .getPublicUrl(fileName);
+        
+        imageUrl = publicUrl;
+      }
+
       const itemData = {
         name: formData.name,
         description: formData.description || null,
         price: parseFloat(formData.price),
         category: formData.category || null,
-        image_url: formData.image_url || null,
+        image_url: imageUrl || null,
         is_available: formData.is_available,
         restaurant_id: restaurantId
       };
@@ -231,15 +253,11 @@ export const MenuTab = () => {
                   rows={3}
                 />
               </div>
-              <div>
-                <Label htmlFor="image_url">URL de l'image</Label>
-                <Input
-                  id="image_url"
-                  value={formData.image_url}
-                  onChange={(e) => setFormData({...formData, image_url: e.target.value})}
-                  placeholder="https://..."
-                />
-              </div>
+              <ImageUpload
+                label="Image du plat"
+                onImageChange={setImageFile}
+                currentImage={editingItem?.image_url || ""}
+              />
               <div className="flex items-center space-x-2">
                 <Switch
                   id="available"
