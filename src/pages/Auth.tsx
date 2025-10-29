@@ -115,29 +115,6 @@ const Auth = () => {
       const validated = authSchema.parse(signupData);
       const redirectUrl = `${window.location.origin}/`;
 
-      let restaurantImageUrl = "";
-      
-      // Upload restaurant image if provided
-      if (restaurantImage && validated.role === "restaurant_owner") {
-        const fileExt = restaurantImage.name.split('.').pop();
-        const fileName = `${Math.random()}.${fileExt}`;
-        const { error: uploadError, data } = await supabase.storage
-          .from('restaurant-images')
-          .upload(fileName, restaurantImage);
-
-        if (uploadError) {
-          toast.error("Erreur lors du téléchargement de l'image");
-          setIsLoading(false);
-          return;
-        }
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('restaurant-images')
-          .getPublicUrl(fileName);
-        
-        restaurantImageUrl = publicUrl;
-      }
-
       const { error } = await supabase.auth.signUp({
         email: validated.email,
         password: validated.password,
@@ -153,7 +130,7 @@ const Auth = () => {
             restaurant_address: validated.restaurantAddress,
             cuisine_type: validated.cuisineType,
             restaurant_description: validated.restaurantDescription,
-            restaurant_image_url: restaurantImageUrl,
+            restaurant_image_url: "", // Image sera ajoutée depuis le dashboard
           },
         },
       });
@@ -165,7 +142,7 @@ const Auth = () => {
           toast.error(error.message);
         }
       } else {
-        toast.success("Compte créé avec succès !");
+        toast.success("Compte créé avec succès ! Vous pouvez maintenant ajouter votre logo depuis le dashboard.");
         const userRole = validated.role || "customer";
         switch (userRole) {
           case "restaurant_owner":
@@ -387,25 +364,9 @@ const Auth = () => {
 
                     <div className="space-y-2">
                       <Label htmlFor="restaurant-image">Logo / Image du restaurant</Label>
-                      <div className="flex items-center gap-4">
-                        <Input
-                          id="restaurant-image"
-                          type="file"
-                          accept="image/*"
-                          onChange={handleImageChange}
-                          className="hidden"
-                        />
-                        <Label 
-                          htmlFor="restaurant-image"
-                          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md cursor-pointer hover:bg-primary/90"
-                        >
-                          <Upload className="h-4 w-4" />
-                          Choisir une image
-                        </Label>
-                        {imagePreview && (
-                          <img src={imagePreview} alt="Preview" className="h-16 w-16 object-cover rounded-md" />
-                        )}
-                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Vous pourrez ajouter votre logo depuis le dashboard après l'inscription
+                      </p>
                     </div>
                   </>
                 )}
