@@ -170,7 +170,7 @@ export default function Orders() {
                   </div>
                   <div className="flex justify-between font-semibold text-base pt-2 border-t">
                     <span>Total</span>
-                    <span>{Number(order.total).toFixed(2)}€</span>
+                    <span>{Number(order.total).toFixed(0)} FCFA</span>
                   </div>
                 </div>
               </CardContent>

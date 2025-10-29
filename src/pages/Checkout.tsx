@@ -209,7 +209,7 @@ export default function Checkout() {
                           {item.menu_items.name} x{item.quantity}
                         </span>
                         <span>
-                          {(Number(item.menu_items.price) * item.quantity).toFixed(2)}€
+                          {(Number(item.menu_items.price) * item.quantity).toFixed(0)} FCFA
                         </span>
                       </div>
                     ))}
@@ -217,7 +217,7 @@ export default function Checkout() {
                   <div className="border-t pt-2 space-y-2">
                     <div className="flex justify-between">
                       <span>Sous-total</span>
-                      <span>{subtotal.toFixed(2)}€</span>
+                      <span>{subtotal.toFixed(0)} FCFA</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Frais de livraison</span>

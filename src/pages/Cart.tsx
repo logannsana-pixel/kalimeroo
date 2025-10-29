@@ -78,7 +78,7 @@ export default function Cart() {
                         {item.menu_items.name}
                       </h3>
                       <p className="text-lg font-bold text-primary mb-2">
-                        {Number(item.menu_items.price).toFixed(2)}€
+                        {Number(item.menu_items.price).toFixed(0)} FCFA
                       </p>
                       <div className="flex items-center gap-2">
                         <Button
@@ -121,7 +121,7 @@ export default function Cart() {
               <CardContent className="space-y-4">
                 <div className="flex justify-between">
                   <span>Sous-total</span>
-                  <span className="font-semibold">{subtotal.toFixed(2)}€</span>
+                  <span className="font-semibold">{subtotal.toFixed(0)} FCFA</span>
                 </div>
                 <Button
                   className="w-full"

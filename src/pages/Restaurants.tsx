@@ -98,7 +98,7 @@ export default function Restaurants() {
                     </div>
                     <div className="flex items-center text-muted-foreground">
                       <DollarSign className="w-4 h-4" />
-                      <span>{restaurant.delivery_fee.toFixed(2)}€</span>
+                      <span>{restaurant.delivery_fee.toFixed(0)} FCFA</span>
                     </div>
                   </div>
                   <div className="mt-2">

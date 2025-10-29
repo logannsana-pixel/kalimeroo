@@ -140,10 +140,10 @@ export default function RestaurantDetail() {
                 </div>
                 <div className="flex items-center">
                   <DollarSign className="w-4 h-4 mr-1" />
-                  <span>Livraison: {restaurant.delivery_fee.toFixed(2)}€</span>
+                  <span>Livraison: {restaurant.delivery_fee.toFixed(0)} FCFA</span>
                 </div>
                 <div>
-                  <span>Commande min: {restaurant.min_order.toFixed(2)}€</span>
+                  <span>Commande min: {restaurant.min_order.toFixed(0)} FCFA</span>
                 </div>
                 <div className="bg-secondary px-3 py-1 rounded-full">
                   {restaurant.cuisine_type}
@@ -177,7 +177,7 @@ export default function RestaurantDetail() {
                       </p>
                       <div className="flex items-center justify-between">
                         <span className="text-lg font-bold">
-                          {Number(item.price).toFixed(2)}€
+                          {Number(item.price).toFixed(0)} FCFA
                         </span>
                         <div className="flex items-center gap-2">
                           {quantities[item.id] > 0 && (
