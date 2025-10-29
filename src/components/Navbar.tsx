@@ -1,14 +1,29 @@
 import { Link } from "react-router-dom";
-import { ShoppingCart, User, Utensils } from "lucide-react";
+import { ShoppingCart, User, Utensils, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
 
 export const Navbar = () => {
-  const { user, signOut } = useAuth();
+  const { user, userRole, signOut } = useAuth();
   const { getCartCount } = useCart();
   const cartCount = getCartCount();
+
+  const getDashboardLink = () => {
+    switch (userRole) {
+      case "restaurant_owner":
+        return "/restaurant-dashboard";
+      case "delivery_driver":
+        return "/delivery-dashboard";
+      case "admin":
+        return "/admin-dashboard";
+      case "customer":
+        return "/customer-dashboard";
+      default:
+        return "/";
+    }
+  };
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -23,19 +38,31 @@ export const Navbar = () => {
         <div className="flex items-center gap-4">
           {user ? (
             <>
-              <Link to="/restaurants">
-                <Button variant="ghost">Restaurants</Button>
-              </Link>
-              <Link to="/cart">
-                <Button variant="ghost" size="icon" className="relative">
-                  <ShoppingCart className="h-5 w-5" />
-                  {cartCount > 0 && (
-                    <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
-                      {cartCount}
-                    </Badge>
-                  )}
-                </Button>
-              </Link>
+              {userRole === "customer" && (
+                <>
+                  <Link to="/restaurants">
+                    <Button variant="ghost">Restaurants</Button>
+                  </Link>
+                  <Link to="/cart">
+                    <Button variant="ghost" size="icon" className="relative">
+                      <ShoppingCart className="h-5 w-5" />
+                      {cartCount > 0 && (
+                        <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
+                          {cartCount}
+                        </Badge>
+                      )}
+                    </Button>
+                  </Link>
+                </>
+              )}
+              {(userRole === "restaurant_owner" || userRole === "delivery_driver" || userRole === "admin") && (
+                <Link to={getDashboardLink()}>
+                  <Button variant="ghost">
+                    <LayoutDashboard className="h-5 w-5 mr-2" />
+                    Dashboard
+                  </Button>
+                </Link>
+              )}
               <Link to="/profile">
                 <Button variant="ghost" size="icon">
                   <User className="h-5 w-5" />

@@ -1,51 +1,80 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Star, Clock, Truck } from "lucide-react";
-import burgerImg from "@/assets/burger.jpg";
-import sushiImg from "@/assets/sushi.jpg";
-import pastaImg from "@/assets/pasta.jpg";
-import pizzaImg from "@/assets/pizza.jpg";
+import { supabase } from "@/integrations/supabase/client";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const restaurants = [
-  {
-    name: "Burger House",
-    image: burgerImg,
-    rating: 4.8,
-    reviews: 1250,
-    deliveryTime: "25-35 min",
-    deliveryFee: "2.99€",
-    categories: ["Burgers", "Américain"],
-  },
-  {
-    name: "Sushi Master",
-    image: sushiImg,
-    rating: 4.9,
-    reviews: 980,
-    deliveryTime: "30-40 min",
-    deliveryFee: "3.49€",
-    categories: ["Japonais", "Sushi"],
-  },
-  {
-    name: "La Trattoria",
-    image: pastaImg,
-    rating: 4.7,
-    reviews: 1520,
-    deliveryTime: "25-35 min",
-    deliveryFee: "2.99€",
-    categories: ["Italien", "Pâtes"],
-  },
-  {
-    name: "Pizza Bella",
-    image: pizzaImg,
-    rating: 4.8,
-    reviews: 2100,
-    deliveryTime: "20-30 min",
-    deliveryFee: "1.99€",
-    categories: ["Italien", "Pizza"],
-  },
-];
+interface Restaurant {
+  id: string;
+  name: string;
+  image_url: string | null;
+  rating: number;
+  cuisine_type: string | null;
+  delivery_time: string | null;
+  delivery_fee: number;
+}
 
 export const FeaturedRestaurants = () => {
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchRestaurants = async () => {
+      const { data, error } = await supabase
+        .from("restaurants")
+        .select("id, name, image_url, rating, cuisine_type, delivery_time, delivery_fee")
+        .eq("is_active", true)
+        .order("rating", { ascending: false })
+        .limit(4);
+
+      if (!error && data) {
+        setRestaurants(data);
+      }
+      setLoading(false);
+    };
+
+    fetchRestaurants();
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="py-20 bg-muted/30">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold mb-4">Restaurants populaires</h2>
+            <p className="text-xl text-muted-foreground">
+              Découvrez nos meilleurs partenaires
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[...Array(4)].map((_, i) => (
+              <Skeleton key={i} className="h-80 w-full rounded-lg" />
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (restaurants.length === 0) {
+    return (
+      <section className="py-20 bg-muted/30">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-4xl font-bold mb-4">Restaurants populaires</h2>
+          <p className="text-xl text-muted-foreground mb-4">
+            Bientôt disponible 🍴
+          </p>
+          <p className="text-muted-foreground">
+            Nous travaillons pour vous proposer les meilleurs restaurants
+          </p>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="py-20 bg-muted/30">
       <div className="container mx-auto px-4">
@@ -59,43 +88,43 @@ export const FeaturedRestaurants = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {restaurants.map((restaurant, index) => (
             <Card 
-              key={index}
+              key={restaurant.id}
+              onClick={() => navigate(`/restaurant/${restaurant.id}`)}
               className="group cursor-pointer overflow-hidden border-none shadow-soft hover:shadow-hover transition-all duration-300 hover:-translate-y-2 bg-gradient-card animate-fade-in"
               style={{ animationDelay: `${index * 100}ms` }}
             >
               <div className="relative h-48 overflow-hidden">
                 <img 
-                  src={restaurant.image} 
+                  src={restaurant.image_url || "/placeholder.svg"}
                   alt={restaurant.name}
                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                 />
-                <Badge className="absolute top-3 right-3 bg-background/90 text-foreground">
-                  <Star className="w-3 h-3 fill-primary text-primary mr-1" />
-                  {restaurant.rating}
-                </Badge>
+                {restaurant.rating > 0 && (
+                  <Badge className="absolute top-3 right-3 bg-background/90 text-foreground">
+                    <Star className="w-3 h-3 fill-primary text-primary mr-1" />
+                    {restaurant.rating.toFixed(1)}
+                  </Badge>
+                )}
               </div>
               <CardContent className="p-4">
                 <h3 className="text-lg font-semibold mb-2">{restaurant.name}</h3>
-                <div className="flex flex-wrap gap-1 mb-3">
-                  {restaurant.categories.map((cat, i) => (
-                    <Badge key={i} variant="secondary" className="text-xs">
-                      {cat}
+                {restaurant.cuisine_type && (
+                  <div className="flex flex-wrap gap-1 mb-3">
+                    <Badge variant="secondary" className="text-xs">
+                      {restaurant.cuisine_type}
                     </Badge>
-                  ))}
-                </div>
+                  </div>
+                )}
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <Clock className="w-4 h-4" />
-                    <span>{restaurant.deliveryTime}</span>
+                    <span>{restaurant.delivery_time || "30-45 min"}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Truck className="w-4 h-4" />
-                    <span>{restaurant.deliveryFee}</span>
+                    <span>{restaurant.delivery_fee} FCFA</span>
                   </div>
                 </div>
-                <p className="text-xs text-muted-foreground mt-2">
-                  {restaurant.reviews} avis
-                </p>
               </CardContent>
             </Card>
           ))}
