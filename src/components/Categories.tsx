@@ -54,17 +54,19 @@ export const Categories = () => {
 
   if (loading) {
     return (
-      <section className="py-20">
+      <section className="py-12 md:py-16 lg:py-20">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">Catégories populaires</h2>
-            <p className="text-xl text-muted-foreground">
+          <div className="text-center mb-10 md:mb-16">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 md:mb-4">
+              Catégories populaires
+            </h2>
+            <p className="text-base md:text-xl text-muted-foreground">
               Trouvez votre cuisine préférée
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             {[...Array(4)].map((_, i) => (
-              <Skeleton key={i} className="h-48 w-full rounded-lg" />
+              <Skeleton key={i} className="h-40 sm:h-48 w-full rounded-lg" />
             ))}
           </div>
         </div>
@@ -74,10 +76,12 @@ export const Categories = () => {
 
   if (categories.length === 0) {
     return (
-      <section className="py-20">
+      <section className="py-12 md:py-16 lg:py-20">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-4xl font-bold mb-4">Catégories populaires</h2>
-          <p className="text-xl text-muted-foreground">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 md:mb-4">
+            Catégories populaires
+          </h2>
+          <p className="text-base md:text-xl text-muted-foreground">
             Bientôt disponible 🍴
           </p>
         </div>
@@ -86,16 +90,18 @@ export const Categories = () => {
   }
 
   return (
-    <section className="py-20">
+    <section className="py-12 md:py-16 lg:py-20">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16 animate-fade-in">
-          <h2 className="text-4xl font-bold mb-4">Catégories populaires</h2>
-          <p className="text-xl text-muted-foreground">
+        <div className="text-center mb-10 md:mb-16 animate-fade-in">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 md:mb-4">
+            Catégories populaires
+          </h2>
+          <p className="text-base md:text-xl text-muted-foreground">
             Trouvez votre cuisine préférée
           </p>
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
           {categories.map((category, index) => (
             <Card 
               key={category.name}

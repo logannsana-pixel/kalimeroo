@@ -27,57 +27,67 @@ export const Navbar = () => {
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 font-bold text-xl">
-          <Utensils className="h-6 w-6 text-primary" />
-          <span className="bg-gradient-hero bg-clip-text text-transparent">
-            DeliverEat
-          </span>
+      <div className="container flex h-14 md:h-16 items-center justify-between px-4">
+        <Link to="/" className="flex items-center space-x-2">
+          <div className="flex items-center justify-center w-7 h-7 md:w-8 md:h-8 bg-primary rounded-lg">
+            <span className="text-white font-bold text-base md:text-lg">D</span>
+          </div>
+          <span className="font-bold text-base md:text-lg">DeliverEat</span>
         </Link>
 
-        <div className="flex items-center gap-4">
-          {user ? (
-            <>
-              {userRole === "customer" && (
-                <>
-                  <Link to="/restaurants">
-                    <Button variant="ghost">Restaurants</Button>
-                  </Link>
-                  <Link to="/cart">
-                    <Button variant="ghost" size="icon" className="relative">
-                      <ShoppingCart className="h-5 w-5" />
-                      {cartCount > 0 && (
-                        <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
-                          {cartCount}
-                        </Badge>
-                      )}
-                    </Button>
-                  </Link>
-                </>
-              )}
-              {(userRole === "restaurant_owner" || userRole === "delivery_driver" || userRole === "admin") && (
-                <Link to={getDashboardLink()}>
-                  <Button variant="ghost">
-                    <LayoutDashboard className="h-5 w-5 mr-2" />
-                    Dashboard
+        {user ? (
+          <div className="flex items-center gap-2 md:gap-4">
+            {userRole === "customer" && (
+              <>
+                <Link to="/restaurants" className="hidden sm:block">
+                  <Button variant="ghost" size="sm" className="text-sm">
+                    Restaurants
                   </Button>
                 </Link>
-              )}
-              <Link to="/profile">
-                <Button variant="ghost" size="icon">
-                  <User className="h-5 w-5" />
+                <Link to="/cart" className="relative">
+                  <Button variant="ghost" size="icon" className="h-9 w-9 md:h-10 md:w-10">
+                    <ShoppingCart className="h-4 w-4 md:h-5 md:w-5" />
+                    {cartCount > 0 && (
+                      <span className="absolute -top-1 -right-1 h-4 w-4 md:h-5 md:w-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">
+                        {cartCount}
+                      </span>
+                    )}
+                  </Button>
+                </Link>
+              </>
+            )}
+            {(userRole === "restaurant_owner" || userRole === "delivery_driver" || userRole === "admin") && (
+              <Link to={getDashboardLink()}>
+                <Button variant="ghost" size="sm" className="hidden md:inline-flex text-sm">
+                  <LayoutDashboard className="h-4 w-4 md:h-5 md:w-5 mr-2" />
+                  Dashboard
+                </Button>
+                <Button variant="ghost" size="icon" className="md:hidden h-9 w-9">
+                  <LayoutDashboard className="h-4 w-4" />
                 </Button>
               </Link>
-              <Button onClick={signOut} variant="outline">
-                Déconnexion
+            )}
+            <Link to="/profile" className="hidden sm:block">
+              <Button variant="ghost" size="icon" className="h-9 w-9 md:h-10 md:w-10">
+                <User className="h-4 w-4 md:h-5 md:w-5" />
               </Button>
-            </>
-          ) : (
-            <Link to="/auth">
-              <Button variant="hero">Se connecter</Button>
             </Link>
-          )}
-        </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={signOut}
+              className="hidden sm:inline-flex text-sm"
+            >
+              Déconnexion
+            </Button>
+          </div>
+        ) : (
+          <Link to="/auth">
+            <Button size="sm" className="text-sm">
+              Se connecter
+            </Button>
+          </Link>
+        )}
       </div>
     </nav>
   );

@@ -118,34 +118,36 @@ export default function RestaurantDetail() {
       <Navbar />
       <main className="flex-1">
         {/* Restaurant Header */}
-        <div className="relative h-64 md:h-80">
+        <div className="relative h-48 sm:h-64 md:h-80">
           <img
             src={restaurant.image_url || "/placeholder.svg"}
             alt={restaurant.name}
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6 text-white">
             <div className="container mx-auto">
-              <h1 className="text-4xl font-bold mb-2">{restaurant.name}</h1>
-              <p className="text-lg mb-4">{restaurant.description}</p>
-              <div className="flex flex-wrap gap-4 text-sm">
-                <div className="flex items-center">
-                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-400 mr-1" />
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">{restaurant.name}</h1>
+              <p className="text-sm sm:text-base md:text-lg mb-3 md:mb-4 line-clamp-2">
+                {restaurant.description}
+              </p>
+              <div className="flex flex-wrap gap-2 sm:gap-3 md:gap-4 text-xs sm:text-sm">
+                <div className="flex items-center bg-black/30 px-2 py-1 rounded">
+                  <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-yellow-400 text-yellow-400 mr-1" />
                   <span>{restaurant.rating}</span>
                 </div>
-                <div className="flex items-center">
-                  <Clock className="w-4 h-4 mr-1" />
+                <div className="flex items-center bg-black/30 px-2 py-1 rounded">
+                  <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                   <span>{restaurant.delivery_time}</span>
                 </div>
-                <div className="flex items-center">
-                  <DollarSign className="w-4 h-4 mr-1" />
-                  <span>Livraison: {restaurant.delivery_fee.toFixed(0)} FCFA</span>
+                <div className="flex items-center bg-black/30 px-2 py-1 rounded">
+                  <DollarSign className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                  <span>{restaurant.delivery_fee.toFixed(0)} FCFA</span>
                 </div>
-                <div>
-                  <span>Commande min: {restaurant.min_order.toFixed(0)} FCFA</span>
+                <div className="bg-black/30 px-2 py-1 rounded">
+                  <span>Min: {restaurant.min_order.toFixed(0)} FCFA</span>
                 </div>
-                <div className="bg-secondary px-3 py-1 rounded-full">
+                <div className="bg-primary/90 px-2 py-1 rounded">
                   {restaurant.cuisine_type}
                 </div>
               </div>
@@ -154,69 +156,82 @@ export default function RestaurantDetail() {
         </div>
 
         {/* Menu Items */}
-        <div className="container mx-auto px-4 py-8">
-          {Object.entries(groupedMenuItems).map(([category, items]) => (
-            <div key={category} className="mb-12">
-              <h2 className="text-2xl font-bold mb-6">{category}</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {items.map((item) => (
-                  <Card key={item.id} className="overflow-hidden">
-                    {item.image_url && (
-                      <div className="h-48 overflow-hidden">
-                        <img
-                          src={item.image_url}
-                          alt={item.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    )}
-                    <CardContent className="p-4">
-                      <h3 className="font-semibold text-lg mb-2">{item.name}</h3>
-                      <p className="text-sm text-muted-foreground mb-4">
-                        {item.description}
-                      </p>
-                      <div className="flex items-center justify-between">
-                        <span className="text-lg font-bold">
-                          {Number(item.price).toFixed(0)} FCFA
-                        </span>
-                        <div className="flex items-center gap-2">
-                          {quantities[item.id] > 0 && (
-                            <>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => handleQuantityChange(item.id, -1)}
-                              >
-                                <Minus className="w-4 h-4" />
-                              </Button>
-                              <span className="w-8 text-center">
-                                {quantities[item.id]}
-                              </span>
-                            </>
-                          )}
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleQuantityChange(item.id, 1)}
-                          >
-                            <Plus className="w-4 h-4" />
-                          </Button>
-                          {quantities[item.id] > 0 && (
+        <div className="container mx-auto px-4 py-6 md:py-8">
+          {Object.keys(groupedMenuItems).length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">Aucun plat disponible pour le moment</p>
+            </div>
+          ) : (
+            Object.entries(groupedMenuItems).map(([category, items]) => (
+              <div key={category} className="mb-8 md:mb-12">
+                <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6 sticky top-0 bg-background/95 backdrop-blur py-2 z-10">
+                  {category}
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                  {items.map((item) => (
+                    <Card key={item.id} className="overflow-hidden flex flex-col">
+                      {item.image_url && (
+                        <div className="h-40 sm:h-48 overflow-hidden">
+                          <img
+                            src={item.image_url}
+                            alt={item.name}
+                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                          />
+                        </div>
+                      )}
+                      <CardContent className="p-3 md:p-4 flex-1 flex flex-col">
+                        <h3 className="font-semibold text-base md:text-lg mb-1 md:mb-2">
+                          {item.name}
+                        </h3>
+                        <p className="text-xs md:text-sm text-muted-foreground mb-3 md:mb-4 line-clamp-2 flex-1">
+                          {item.description}
+                        </p>
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-base md:text-lg font-bold whitespace-nowrap">
+                            {Number(item.price).toFixed(0)} FCFA
+                          </span>
+                          <div className="flex items-center gap-1 md:gap-2">
+                            {quantities[item.id] > 0 && (
+                              <>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-8 w-8 p-0"
+                                  onClick={() => handleQuantityChange(item.id, -1)}
+                                >
+                                  <Minus className="w-3 h-3 md:w-4 md:h-4" />
+                                </Button>
+                                <span className="w-6 md:w-8 text-center text-sm">
+                                  {quantities[item.id]}
+                                </span>
+                              </>
+                            )}
                             <Button
                               size="sm"
-                              onClick={() => handleAddToCart(item.id)}
+                              variant="outline"
+                              className="h-8 w-8 p-0"
+                              onClick={() => handleQuantityChange(item.id, 1)}
                             >
-                              <ShoppingCart className="w-4 h-4" />
+                              <Plus className="w-3 h-3 md:w-4 md:h-4" />
                             </Button>
-                          )}
+                            {quantities[item.id] > 0 && (
+                              <Button
+                                size="sm"
+                                className="h-8 w-8 p-0"
+                                onClick={() => handleAddToCart(item.id)}
+                              >
+                                <ShoppingCart className="w-3 h-3 md:w-4 md:h-4" />
+                              </Button>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </main>
       <Footer />

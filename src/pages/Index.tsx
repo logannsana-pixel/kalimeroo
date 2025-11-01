@@ -4,10 +4,12 @@ import { HowItWorks } from "@/components/HowItWorks";
 import { Categories } from "@/components/Categories";
 import { FeaturedRestaurants } from "@/components/FeaturedRestaurants";
 import { Footer } from "@/components/Footer";
+import { LocationModal } from "@/components/LocationModal";
 
 const Index = () => {
   return (
     <>
+      <LocationModal />
       <Navbar />
       <main className="min-h-screen">
         <Hero />

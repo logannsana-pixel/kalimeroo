@@ -41,17 +41,19 @@ export const FeaturedRestaurants = () => {
 
   if (loading) {
     return (
-      <section className="py-20 bg-muted/30">
+      <section className="py-12 md:py-16 lg:py-20 bg-muted/30">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">Restaurants populaires</h2>
-            <p className="text-xl text-muted-foreground">
+          <div className="text-center mb-10 md:mb-16">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 md:mb-4">
+              Restaurants populaires
+            </h2>
+            <p className="text-base md:text-xl text-muted-foreground">
               Découvrez nos meilleurs partenaires
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             {[...Array(4)].map((_, i) => (
-              <Skeleton key={i} className="h-80 w-full rounded-lg" />
+              <Skeleton key={i} className="h-64 md:h-80 w-full rounded-lg" />
             ))}
           </div>
         </div>
@@ -61,13 +63,15 @@ export const FeaturedRestaurants = () => {
 
   if (restaurants.length === 0) {
     return (
-      <section className="py-20 bg-muted/30">
+      <section className="py-12 md:py-16 lg:py-20 bg-muted/30">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-4xl font-bold mb-4">Restaurants populaires</h2>
-          <p className="text-xl text-muted-foreground mb-4">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 md:mb-4">
+            Restaurants populaires
+          </h2>
+          <p className="text-base md:text-xl text-muted-foreground mb-4">
             Bientôt disponible 🍴
           </p>
-          <p className="text-muted-foreground">
+          <p className="text-sm md:text-base text-muted-foreground">
             Nous travaillons pour vous proposer les meilleurs restaurants
           </p>
         </div>
@@ -76,16 +80,18 @@ export const FeaturedRestaurants = () => {
   }
 
   return (
-    <section className="py-20 bg-muted/30">
+    <section className="py-12 md:py-16 lg:py-20 bg-muted/30">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16 animate-fade-in">
-          <h2 className="text-4xl font-bold mb-4">Restaurants populaires</h2>
-          <p className="text-xl text-muted-foreground">
+        <div className="text-center mb-10 md:mb-16 animate-fade-in">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 md:mb-4">
+            Restaurants populaires
+          </h2>
+          <p className="text-base md:text-xl text-muted-foreground">
             Découvrez nos meilleurs partenaires
           </p>
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {restaurants.map((restaurant, index) => (
             <Card 
               key={restaurant.id}
@@ -93,35 +99,37 @@ export const FeaturedRestaurants = () => {
               className="group cursor-pointer overflow-hidden border-none shadow-soft hover:shadow-hover transition-all duration-300 hover:-translate-y-2 bg-gradient-card animate-fade-in"
               style={{ animationDelay: `${index * 100}ms` }}
             >
-              <div className="relative h-48 overflow-hidden">
+              <div className="relative h-40 sm:h-48 overflow-hidden">
                 <img 
                   src={restaurant.image_url || "/placeholder.svg"}
                   alt={restaurant.name}
                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                 />
                 {restaurant.rating > 0 && (
-                  <Badge className="absolute top-3 right-3 bg-background/90 text-foreground">
+                  <Badge className="absolute top-2 md:top-3 right-2 md:right-3 bg-background/90 text-foreground text-xs">
                     <Star className="w-3 h-3 fill-primary text-primary mr-1" />
                     {restaurant.rating.toFixed(1)}
                   </Badge>
                 )}
               </div>
-              <CardContent className="p-4">
-                <h3 className="text-lg font-semibold mb-2">{restaurant.name}</h3>
+              <CardContent className="p-3 md:p-4">
+                <h3 className="text-base md:text-lg font-semibold mb-2 line-clamp-1">
+                  {restaurant.name}
+                </h3>
                 {restaurant.cuisine_type && (
-                  <div className="flex flex-wrap gap-1 mb-3">
+                  <div className="flex flex-wrap gap-1 mb-2 md:mb-3">
                     <Badge variant="secondary" className="text-xs">
                       {restaurant.cuisine_type}
                     </Badge>
                   </div>
                 )}
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <div className="flex items-center justify-between text-xs md:text-sm text-muted-foreground">
                   <div className="flex items-center gap-1">
-                    <Clock className="w-4 h-4" />
+                    <Clock className="w-3 h-3 md:w-4 md:h-4" />
                     <span>{restaurant.delivery_time || "30-45 min"}</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Truck className="w-4 h-4" />
+                    <Truck className="w-3 h-3 md:w-4 md:h-4" />
                     <span>{restaurant.delivery_fee} FCFA</span>
                   </div>
                 </div>

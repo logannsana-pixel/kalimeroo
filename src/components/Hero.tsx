@@ -1,22 +1,18 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { DistrictSelector } from "@/components/DistrictSelector";
+import { useLocation } from "@/contexts/LocationContext";
 import heroFood from "@/assets/hero-food.jpg";
 
 export const Hero = () => {
   const navigate = useNavigate();
-  const [selectedDistrict, setSelectedDistrict] = useState("");
-  const [selectedCity, setSelectedCity] = useState("");
+  const { district, city } = useLocation();
 
   const handleSearch = () => {
-    if (selectedDistrict) {
-      navigate("/restaurants", { state: { district: selectedDistrict, city: selectedCity } });
-    }
+    navigate("/restaurants");
   };
 
   return (
-    <section className="relative min-h-[600px] flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-[500px] md:min-h-[600px] flex items-center justify-center overflow-hidden">
       <div 
         className="absolute inset-0 z-0"
         style={{
@@ -30,47 +26,43 @@ export const Hero = () => {
       
       <div className="container mx-auto px-4 z-10 animate-fade-in">
         <div className="max-w-2xl">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6 leading-tight">
             Manger comme au restaurant{" "}
             <span className="text-primary">sans sortir de chez soi</span>
           </h1>
-          <p className="text-xl text-muted-foreground mb-8">
+          <p className="text-base md:text-xl text-muted-foreground mb-6 md:mb-8">
             Des centaines de restaurants à portée de main. Commandez vos plats préférés et savourez-les en toute tranquillité.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 mb-8">
-            <div className="flex-1">
-              <DistrictSelector
-                onSelect={(district, city) => {
-                  setSelectedDistrict(district);
-                  setSelectedCity(city);
-                }}
-                selectedDistrict={selectedDistrict}
-              />
+          {district && (
+            <div className="mb-6 p-3 bg-primary/10 rounded-lg border border-primary/20">
+              <p className="text-sm text-muted-foreground">
+                Livraison vers : <span className="font-semibold text-foreground">{district}, {city}</span>
+              </p>
             </div>
-            <Button 
-              variant="hero" 
-              size="lg" 
-              className="px-8"
-              onClick={handleSearch}
-              disabled={!selectedDistrict}
-            >
-              Trouver des restaurants
-            </Button>
-          </div>
+          )}
           
-          <div className="flex gap-6 text-sm text-muted-foreground">
+          <Button 
+            variant="default"
+            size="lg" 
+            className="w-full sm:w-auto px-8 mb-8"
+            onClick={handleSearch}
+          >
+            Découvrir les restaurants
+          </Button>
+          
+          <div className="grid grid-cols-3 gap-4 text-center">
             <div>
-              <span className="font-bold text-primary text-2xl">500+</span>
-              <p>Restaurants</p>
+              <span className="font-bold text-primary text-xl md:text-2xl block">500+</span>
+              <p className="text-xs md:text-sm text-muted-foreground">Restaurants</p>
             </div>
             <div>
-              <span className="font-bold text-primary text-2xl">50k+</span>
-              <p>Commandes livrées</p>
+              <span className="font-bold text-primary text-xl md:text-2xl block">50k+</span>
+              <p className="text-xs md:text-sm text-muted-foreground">Commandes</p>
             </div>
             <div>
-              <span className="font-bold text-primary text-2xl">4.8/5</span>
-              <p>Note moyenne</p>
+              <span className="font-bold text-primary text-xl md:text-2xl block">4.8/5</span>
+              <p className="text-xs md:text-sm text-muted-foreground">Note</p>
             </div>
           </div>
         </div>

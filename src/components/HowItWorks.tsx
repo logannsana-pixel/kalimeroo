@@ -30,28 +30,30 @@ const steps = [
 
 export const HowItWorks = () => {
   return (
-    <section className="py-20 bg-muted/30">
+    <section className="py-12 md:py-16 lg:py-20 bg-muted/30">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16 animate-fade-in">
-          <h2 className="text-4xl font-bold mb-4">Comment ça marche ?</h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+        <div className="text-center mb-10 md:mb-16 animate-fade-in">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 md:mb-4">
+            Comment ça marche ?
+          </h2>
+          <p className="text-base md:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
             Commander sur DeliverEat est simple et rapide
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
           {steps.map((step, index) => (
             <Card 
               key={index} 
               className="border-none shadow-soft hover:shadow-hover transition-all duration-300 hover:-translate-y-1 bg-gradient-card animate-fade-in"
               style={{ animationDelay: `${index * 100}ms` }}
             >
-              <CardContent className="pt-8 text-center">
-                <div className={`inline-flex p-4 rounded-full bg-muted mb-4 ${step.color}`}>
-                  <step.icon className="w-8 h-8" />
+              <CardContent className="pt-6 md:pt-8 text-center p-4 md:p-6">
+                <div className={`inline-flex p-3 md:p-4 rounded-full bg-muted mb-3 md:mb-4 ${step.color}`}>
+                  <step.icon className="w-6 h-6 md:w-8 md:h-8" />
                 </div>
-                <h3 className="text-xl font-semibold mb-2">{step.title}</h3>
-                <p className="text-muted-foreground">{step.description}</p>
+                <h3 className="text-base md:text-xl font-semibold mb-2">{step.title}</h3>
+                <p className="text-sm md:text-base text-muted-foreground">{step.description}</p>
               </CardContent>
             </Card>
           ))}
