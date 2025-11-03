@@ -1,4 +1,5 @@
 import { Navbar } from "@/components/Navbar";
+import { BottomNav } from "@/components/BottomNav";
 import { Footer } from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,34 +13,35 @@ export default function Cart() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col pb-16 md:pb-0">
         <Navbar />
-        <main className="flex-1 container mx-auto px-4 py-8">
-          <h1 className="text-3xl font-bold mb-8">Mon panier</h1>
+        <main className="flex-1 container mx-auto px-4 py-4 md:py-8">
+          <h1 className="text-xl md:text-3xl font-bold mb-6 md:mb-8">Mon panier</h1>
           <p>Chargement...</p>
         </main>
         <Footer />
+        <BottomNav />
       </div>
     );
   }
 
   if (cartItems.length === 0) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col pb-16 md:pb-0">
         <Navbar />
-        <main className="flex-1 container mx-auto px-4 py-8">
-          <h1 className="text-3xl font-bold mb-8">Mon panier</h1>
+        <main className="flex-1 container mx-auto px-4 py-4 md:py-8">
+          <h1 className="text-xl md:text-3xl font-bold mb-6 md:mb-8">Mon panier</h1>
           <div className="max-w-4xl mx-auto">
             <Card>
               <CardHeader>
                 <CardTitle>Panier vide</CardTitle>
               </CardHeader>
-              <CardContent className="text-center py-12">
-                <ShoppingCart className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-muted-foreground mb-4">
+              <CardContent className="text-center py-8 md:py-12">
+                <ShoppingCart className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-4 text-muted-foreground" />
+                <p className="text-sm md:text-base text-muted-foreground mb-4">
                   Votre panier est vide. Explorez nos restaurants pour ajouter des plats !
                 </p>
-                <Button onClick={() => navigate("/restaurants")}>
+                <Button onClick={() => navigate("/restaurants")} size="sm" className="md:size-default">
                   Découvrir les restaurants
                 </Button>
               </CardContent>
@@ -47,6 +49,7 @@ export default function Cart() {
           </div>
         </main>
         <Footer />
+        <BottomNav />
       </div>
     );
   }
@@ -54,10 +57,10 @@ export default function Cart() {
   const subtotal = getCartTotal();
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col pb-16 md:pb-0">
       <Navbar />
-      <main className="flex-1 container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8">Mon panier</h1>
+      <main className="flex-1 container mx-auto px-4 py-4 md:py-8">
+        <h1 className="text-xl md:text-3xl font-bold mb-6 md:mb-8">Mon panier</h1>
         
         <div className="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Cart Items */}
@@ -143,6 +146,7 @@ export default function Cart() {
         </div>
       </main>
       <Footer />
+      <BottomNav />
     </div>
   );
 }

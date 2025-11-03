@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
+import { BottomNav } from "@/components/BottomNav";
 import { Footer } from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -95,18 +96,19 @@ export default function RestaurantDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col pb-16 md:pb-0">
         <Navbar />
-        <main className="flex-1 container mx-auto px-4 py-8">
-          <Skeleton className="h-64 w-full rounded-lg mb-8" />
-          <Skeleton className="h-8 w-1/3 mb-4" />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <main className="flex-1 container mx-auto px-4 py-4 md:py-8">
+          <Skeleton className="h-48 md:h-64 w-full rounded-lg mb-6 md:mb-8" />
+          <Skeleton className="h-6 md:h-8 w-1/3 mb-4" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {[...Array(6)].map((_, i) => (
-              <Skeleton key={i} className="h-64 w-full" />
+              <Skeleton key={i} className="h-48 md:h-64 w-full" />
             ))}
           </div>
         </main>
         <Footer />
+        <BottomNav />
       </div>
     );
   }
@@ -114,7 +116,7 @@ export default function RestaurantDetail() {
   if (!restaurant) return null;
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col pb-16 md:pb-0">
       <Navbar />
       <main className="flex-1">
         {/* Restaurant Header */}
@@ -235,6 +237,7 @@ export default function RestaurantDetail() {
         </div>
       </main>
       <Footer />
+      <BottomNav />
     </div>
   );
 }

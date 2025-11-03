@@ -1,4 +1,5 @@
 import { Navbar } from "@/components/Navbar";
+import { BottomNav } from "@/components/BottomNav";
 import { Hero } from "@/components/Hero";
 import { HowItWorks } from "@/components/HowItWorks";
 import { Categories } from "@/components/Categories";
@@ -11,13 +12,14 @@ const Index = () => {
     <>
       <LocationModal />
       <Navbar />
-      <main className="min-h-screen">
+      <main className="min-h-screen pb-16 md:pb-0">
         <Hero />
         <HowItWorks />
         <Categories />
         <FeaturedRestaurants />
         <Footer />
       </main>
+      <BottomNav />
     </>
   );
 };

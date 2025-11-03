@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Navbar } from "@/components/Navbar";
+import { BottomNav } from "@/components/BottomNav";
 import { Footer } from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -106,10 +107,10 @@ export default function Checkout() {
   const subtotal = getCartTotal();
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col pb-16 md:pb-0">
       <Navbar />
-      <main className="flex-1 container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8">Finaliser la commande</h1>
+      <main className="flex-1 container mx-auto px-4 py-4 md:py-8">
+        <h1 className="text-xl md:text-3xl font-bold mb-6 md:mb-8">Finaliser la commande</h1>
 
         <form onSubmit={handleSubmit}>
           <div className="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -246,6 +247,7 @@ export default function Checkout() {
         </form>
       </main>
       <Footer />
+      <BottomNav />
     </div>
   );
 }

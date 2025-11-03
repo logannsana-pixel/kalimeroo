@@ -1,4 +1,5 @@
 import { Navbar } from "@/components/Navbar";
+import { BottomNav } from "@/components/BottomNav";
 import { Footer } from "@/components/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { OrdersTab } from "@/components/restaurant/OrdersTab";
@@ -8,17 +9,17 @@ import { StatsTab } from "@/components/restaurant/StatsTab";
 
 export default function RestaurantDashboard() {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col pb-16 md:pb-0">
       <Navbar />
-      <main className="flex-1 container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8">Tableau de bord Restaurant</h1>
+      <main className="flex-1 container mx-auto px-4 py-4 md:py-8">
+        <h1 className="text-xl md:text-3xl font-bold mb-6 md:mb-8">Tableau de bord Restaurant</h1>
         
         <Tabs defaultValue="orders" className="w-full">
-          <TabsList className="grid w-full max-w-xl grid-cols-4">
-            <TabsTrigger value="orders">Commandes</TabsTrigger>
-            <TabsTrigger value="menu">Menu</TabsTrigger>
-            <TabsTrigger value="profile">Profil</TabsTrigger>
-            <TabsTrigger value="stats">Statistiques</TabsTrigger>
+          <TabsList className="grid w-full max-w-xl grid-cols-4 mb-4">
+            <TabsTrigger value="orders" className="text-xs md:text-sm">Commandes</TabsTrigger>
+            <TabsTrigger value="menu" className="text-xs md:text-sm">Menu</TabsTrigger>
+            <TabsTrigger value="profile" className="text-xs md:text-sm">Profil</TabsTrigger>
+            <TabsTrigger value="stats" className="text-xs md:text-sm">Stats</TabsTrigger>
           </TabsList>
           
           <TabsContent value="orders" className="mt-6">
@@ -39,6 +40,7 @@ export default function RestaurantDashboard() {
         </Tabs>
       </main>
       <Footer />
+      <BottomNav />
     </div>
   );
 }

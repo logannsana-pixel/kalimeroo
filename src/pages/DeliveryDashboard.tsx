@@ -1,4 +1,5 @@
 import { Navbar } from "@/components/Navbar";
+import { BottomNav } from "@/components/BottomNav";
 import { Footer } from "@/components/Footer";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -140,29 +141,30 @@ export default function DeliveryDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col pb-16 md:pb-0">
         <Navbar />
-        <main className="flex-1 container mx-auto px-4 py-8">
-          <h1 className="text-3xl font-bold mb-8">Tableau de bord Livreur</h1>
+        <main className="flex-1 container mx-auto px-4 py-4 md:py-8">
+          <h1 className="text-xl md:text-3xl font-bold mb-6 md:mb-8">Tableau de bord Livreur</h1>
           <p>Chargement...</p>
         </main>
         <Footer />
+        <BottomNav />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col pb-16 md:pb-0">
       <Navbar />
-      <main className="flex-1 container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8">Tableau de bord Livreur</h1>
+      <main className="flex-1 container mx-auto px-4 py-4 md:py-8">
+        <h1 className="text-xl md:text-3xl font-bold mb-6 md:mb-8">Tableau de bord Livreur</h1>
         
         <Tabs defaultValue="active" className="w-full">
-          <TabsList className="grid w-full max-w-2xl grid-cols-4">
-            <TabsTrigger value="active">En cours</TabsTrigger>
-            <TabsTrigger value="available">Disponibles</TabsTrigger>
-            <TabsTrigger value="history">Historique</TabsTrigger>
-            <TabsTrigger value="profile">Profil</TabsTrigger>
+          <TabsList className="grid w-full max-w-2xl grid-cols-4 mb-4">
+            <TabsTrigger value="active" className="text-xs md:text-sm">En cours</TabsTrigger>
+            <TabsTrigger value="available" className="text-xs md:text-sm">Disponibles</TabsTrigger>
+            <TabsTrigger value="history" className="text-xs md:text-sm">Historique</TabsTrigger>
+            <TabsTrigger value="profile" className="text-xs md:text-sm">Profil</TabsTrigger>
           </TabsList>
           
           <TabsContent value="active" className="mt-6">
@@ -183,6 +185,7 @@ export default function DeliveryDashboard() {
         </Tabs>
       </main>
       <Footer />
+      <BottomNav />
     </div>
   );
 }

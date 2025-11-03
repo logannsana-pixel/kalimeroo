@@ -35,20 +35,21 @@ export const Navbar = () => {
           <span className="font-bold text-base md:text-lg">DeliverEat</span>
         </Link>
 
+        {/* Desktop Navigation */}
         {user ? (
-          <div className="flex items-center gap-2 md:gap-4">
+          <div className="hidden md:flex items-center gap-4">
             {userRole === "customer" && (
               <>
-                <Link to="/restaurants" className="hidden sm:block">
+                <Link to="/restaurants">
                   <Button variant="ghost" size="sm" className="text-sm">
                     Restaurants
                   </Button>
                 </Link>
                 <Link to="/cart" className="relative">
-                  <Button variant="ghost" size="icon" className="h-9 w-9 md:h-10 md:w-10">
-                    <ShoppingCart className="h-4 w-4 md:h-5 md:w-5" />
+                  <Button variant="ghost" size="icon" className="h-10 w-10">
+                    <ShoppingCart className="h-5 w-5" />
                     {cartCount > 0 && (
-                      <span className="absolute -top-1 -right-1 h-4 w-4 md:h-5 md:w-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">
+                      <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">
                         {cartCount}
                       </span>
                     )}
@@ -58,31 +59,28 @@ export const Navbar = () => {
             )}
             {(userRole === "restaurant_owner" || userRole === "delivery_driver" || userRole === "admin") && (
               <Link to={getDashboardLink()}>
-                <Button variant="ghost" size="sm" className="hidden md:inline-flex text-sm">
-                  <LayoutDashboard className="h-4 w-4 md:h-5 md:w-5 mr-2" />
+                <Button variant="ghost" size="sm" className="text-sm">
+                  <LayoutDashboard className="h-5 w-5 mr-2" />
                   Dashboard
-                </Button>
-                <Button variant="ghost" size="icon" className="md:hidden h-9 w-9">
-                  <LayoutDashboard className="h-4 w-4" />
                 </Button>
               </Link>
             )}
-            <Link to="/profile" className="hidden sm:block">
-              <Button variant="ghost" size="icon" className="h-9 w-9 md:h-10 md:w-10">
-                <User className="h-4 w-4 md:h-5 md:w-5" />
+            <Link to="/profile">
+              <Button variant="ghost" size="icon" className="h-10 w-10">
+                <User className="h-5 w-5" />
               </Button>
             </Link>
             <Button 
               variant="outline" 
               size="sm" 
               onClick={signOut}
-              className="hidden sm:inline-flex text-sm"
+              className="text-sm"
             >
               Déconnexion
             </Button>
           </div>
         ) : (
-          <Link to="/auth">
+          <Link to="/auth" className="hidden md:block">
             <Button size="sm" className="text-sm">
               Se connecter
             </Button>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Navbar } from "@/components/Navbar";
+import { BottomNav } from "@/components/BottomNav";
 import { Footer } from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -99,31 +100,32 @@ export default function Orders() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col pb-16 md:pb-0">
         <Navbar />
-        <main className="flex-1 container mx-auto px-4 py-8">
-          <h1 className="text-3xl font-bold mb-8">Mes commandes</h1>
+        <main className="flex-1 container mx-auto px-4 py-4 md:py-8">
+          <h1 className="text-xl md:text-3xl font-bold mb-6 md:mb-8">Mes commandes</h1>
           <p>Chargement...</p>
         </main>
         <Footer />
+        <BottomNav />
       </div>
     );
   }
 
   if (orders.length === 0) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col pb-16 md:pb-0">
         <Navbar />
-        <main className="flex-1 container mx-auto px-4 py-8">
-          <h1 className="text-3xl font-bold mb-8">Mes commandes</h1>
+        <main className="flex-1 container mx-auto px-4 py-4 md:py-8">
+          <h1 className="text-xl md:text-3xl font-bold mb-6 md:mb-8">Mes commandes</h1>
           <div className="max-w-4xl mx-auto">
             <Card>
               <CardHeader>
                 <CardTitle>Aucune commande</CardTitle>
               </CardHeader>
-              <CardContent className="text-center py-12">
-                <Package className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-muted-foreground">
+              <CardContent className="text-center py-8 md:py-12">
+                <Package className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-4 text-muted-foreground" />
+                <p className="text-sm md:text-base text-muted-foreground">
                   Vous n'avez pas encore passé de commande.
                 </p>
               </CardContent>
@@ -131,15 +133,16 @@ export default function Orders() {
           </div>
         </main>
         <Footer />
+        <BottomNav />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col pb-16 md:pb-0">
       <Navbar />
-      <main className="flex-1 container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8">Mes commandes</h1>
+      <main className="flex-1 container mx-auto px-4 py-4 md:py-8">
+        <h1 className="text-xl md:text-3xl font-bold mb-6 md:mb-8">Mes commandes</h1>
         
         <div className="max-w-4xl mx-auto space-y-4">
           {orders.map((order) => (
@@ -179,6 +182,7 @@ export default function Orders() {
         </div>
       </main>
       <Footer />
+      <BottomNav />
     </div>
   );
 }

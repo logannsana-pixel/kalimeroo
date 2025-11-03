@@ -1,4 +1,5 @@
 import { Navbar } from "@/components/Navbar";
+import { BottomNav } from "@/components/BottomNav";
 import { Footer } from "@/components/Footer";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -154,22 +155,23 @@ export default function CustomerDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col pb-16 md:pb-0">
         <Navbar />
-        <main className="flex-1 container mx-auto px-4 py-8">
-          <h1 className="text-3xl font-bold mb-8">Mon espace</h1>
+        <main className="flex-1 container mx-auto px-4 py-4 md:py-8">
+          <h1 className="text-xl md:text-3xl font-bold mb-6 md:mb-8">Mon espace</h1>
           <p>Chargement...</p>
         </main>
         <Footer />
+        <BottomNav />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col pb-16 md:pb-0">
       <Navbar />
-      <main className="flex-1 container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8">Mon espace</h1>
+      <main className="flex-1 container mx-auto px-4 py-4 md:py-8">
+        <h1 className="text-xl md:text-3xl font-bold mb-6 md:mb-8">Mon espace</h1>
         
         <Tabs defaultValue="orders" className="w-full">
           <TabsList className="grid w-full max-w-xl grid-cols-2">
@@ -328,6 +330,7 @@ export default function CustomerDashboard() {
         </Tabs>
       </main>
       <Footer />
+      <BottomNav />
     </div>
   );
 }

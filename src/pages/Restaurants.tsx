@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { Navbar } from "@/components/Navbar";
+import { BottomNav } from "@/components/BottomNav";
 import { Footer } from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
@@ -93,10 +94,10 @@ export default function Restaurants() {
   }, [restaurants, searchQuery, selectedCategory, sortBy]);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col pb-16 md:pb-0">
       <Navbar />
-      <main className="flex-1 container mx-auto px-4 py-6 md:py-8">
-        <h1 className="text-2xl md:text-3xl font-bold mb-6 md:mb-8">
+      <main className="flex-1 container mx-auto px-4 py-4 md:py-8">
+        <h1 className="text-xl md:text-3xl font-bold mb-6 md:mb-8">
           Restaurants disponibles à {city}
         </h1>
 
@@ -186,6 +187,7 @@ export default function Restaurants() {
         )}
       </main>
       <Footer />
+      <BottomNav />
     </div>
   );
 }
