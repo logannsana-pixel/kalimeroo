@@ -49,6 +49,94 @@ export type Database = {
           },
         ]
       }
+      menu_item_option_groups: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number | null
+          id: string
+          is_required: boolean | null
+          max_selections: number | null
+          menu_item_id: string
+          min_selections: number | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_required?: boolean | null
+          max_selections?: number | null
+          menu_item_id: string
+          min_selections?: number | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_required?: boolean | null
+          max_selections?: number | null
+          menu_item_id?: string
+          min_selections?: number | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "menu_item_option_groups_menu_item_id_fkey"
+            columns: ["menu_item_id"]
+            isOneToOne: false
+            referencedRelation: "menu_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      menu_item_options: {
+        Row: {
+          created_at: string
+          display_order: number | null
+          id: string
+          is_available: boolean | null
+          name: string
+          option_group_id: string
+          price_modifier: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          is_available?: boolean | null
+          name: string
+          option_group_id: string
+          price_modifier?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          is_available?: boolean | null
+          name?: string
+          option_group_id?: string
+          price_modifier?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "menu_item_options_option_group_id_fkey"
+            columns: ["option_group_id"]
+            isOneToOne: false
+            referencedRelation: "menu_item_option_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       menu_items: {
         Row: {
           category: string | null
@@ -104,6 +192,7 @@ export type Database = {
           order_id: string
           price: number
           quantity: number
+          selected_options: Json | null
         }
         Insert: {
           created_at?: string
@@ -112,6 +201,7 @@ export type Database = {
           order_id: string
           price: number
           quantity?: number
+          selected_options?: Json | null
         }
         Update: {
           created_at?: string
@@ -120,6 +210,7 @@ export type Database = {
           order_id?: string
           price?: number
           quantity?: number
+          selected_options?: Json | null
         }
         Relationships: [
           {

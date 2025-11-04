@@ -19,7 +19,7 @@ interface CartItem {
 interface CartContextType {
   cartItems: CartItem[];
   loading: boolean;
-  addToCart: (menuItemId: string, quantity?: number) => Promise<void>;
+  addToCart: (menuItemId: string, quantity?: number, selectedOptions?: any[]) => Promise<void>;
   updateQuantity: (cartItemId: string, quantity: number) => Promise<void>;
   removeFromCart: (cartItemId: string) => Promise<void>;
   clearCart: () => Promise<void>;
@@ -91,14 +91,29 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     fetchCart();
   }, [user]);
 
-  const addToCart = async (menuItemId: string, quantity: number = 1) => {
+  const addToCart = async (menuItemId: string, quantity: number = 1, selectedOptions: any[] = []) => {
     if (!user) {
       toast.error("Veuillez vous connecter pour ajouter au panier");
       return;
     }
 
     try {
-      // Check if item already exists in cart
+      // Always add as new item if there are selected options
+      if (selectedOptions.length > 0) {
+        const { error } = await supabase.from("cart_items").insert({
+          user_id: user.id,
+          menu_item_id: menuItemId,
+          quantity,
+          selected_options: selectedOptions,
+        });
+
+        if (error) throw error;
+        await fetchCart();
+        toast.success("Ajouté au panier");
+        return;
+      }
+
+      // Check if item already exists in cart (without options)
       const existingItem = cartItems.find(
         (item) => item.menu_item_id === menuItemId
       );

@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Star, Clock, DollarSign, Plus, Minus, ShoppingCart } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
 import { toast } from "sonner";
+import { MenuItemDetailModal } from "@/components/MenuItemDetailModal";
 
 interface Restaurant {
   id: string;
@@ -41,6 +42,8 @@ export default function RestaurantDetail() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [quantities, setQuantities] = useState<Record<string, number>>({});
+  const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     fetchRestaurantData();
@@ -81,10 +84,20 @@ export default function RestaurantDetail() {
     }));
   };
 
-  const handleAddToCart = async (itemId: string) => {
-    const quantity = quantities[itemId] || 1;
-    await addToCart(itemId, quantity);
+  const handleItemClick = (item: MenuItem) => {
+    setSelectedItem(item);
+    setIsModalOpen(true);
+  };
+
+  const handleAddToCart = async (itemId: string, quantity: number = 1, selectedOptions: any[] = []) => {
+    await addToCart(itemId, quantity, selectedOptions);
     setQuantities((prev) => ({ ...prev, [itemId]: 0 }));
+  };
+
+  const handleQuickAdd = async (e: React.MouseEvent, itemId: string) => {
+    e.stopPropagation();
+    const quantity = quantities[itemId] || 1;
+    await handleAddToCart(itemId, quantity);
   };
 
   const groupedMenuItems = menuItems.reduce((acc, item) => {
@@ -171,7 +184,11 @@ export default function RestaurantDetail() {
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                   {items.map((item) => (
-                    <Card key={item.id} className="overflow-hidden flex flex-col">
+                    <Card 
+                      key={item.id} 
+                      className="overflow-hidden flex flex-col cursor-pointer hover:shadow-lg transition-shadow"
+                      onClick={() => handleItemClick(item)}
+                    >
                       {item.image_url && (
                         <div className="h-40 sm:h-48 overflow-hidden">
                           <img
@@ -199,7 +216,10 @@ export default function RestaurantDetail() {
                                   size="sm"
                                   variant="outline"
                                   className="h-8 w-8 p-0"
-                                  onClick={() => handleQuantityChange(item.id, -1)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleQuantityChange(item.id, -1);
+                                  }}
                                 >
                                   <Minus className="w-3 h-3 md:w-4 md:h-4" />
                                 </Button>
@@ -212,7 +232,10 @@ export default function RestaurantDetail() {
                               size="sm"
                               variant="outline"
                               className="h-8 w-8 p-0"
-                              onClick={() => handleQuantityChange(item.id, 1)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleQuantityChange(item.id, 1);
+                              }}
                             >
                               <Plus className="w-3 h-3 md:w-4 md:h-4" />
                             </Button>
@@ -220,7 +243,7 @@ export default function RestaurantDetail() {
                               <Button
                                 size="sm"
                                 className="h-8 w-8 p-0"
-                                onClick={() => handleAddToCart(item.id)}
+                                onClick={(e) => handleQuickAdd(e, item.id)}
                               >
                                 <ShoppingCart className="w-3 h-3 md:w-4 md:h-4" />
                               </Button>
@@ -238,6 +261,13 @@ export default function RestaurantDetail() {
       </main>
       <Footer />
       <BottomNav />
+      
+      <MenuItemDetailModal
+        item={selectedItem}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onAddToCart={handleAddToCart}
+      />
     </div>
   );
 }
