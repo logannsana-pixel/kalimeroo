@@ -14,6 +14,53 @@ export type Database = {
   }
   public: {
     Tables: {
+      bundles: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          display_order: number | null
+          id: string
+          is_available: boolean | null
+          name: string
+          price: number
+          restaurant_id: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_available?: boolean | null
+          name: string
+          price?: number
+          restaurant_id: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_available?: boolean | null
+          name?: string
+          price?: number
+          restaurant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bundles_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cart_items: {
         Row: {
           created_at: string
@@ -98,6 +145,7 @@ export type Database = {
       }
       menu_item_options: {
         Row: {
+          bundle_id: string | null
           created_at: string
           display_order: number | null
           id: string
@@ -108,6 +156,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          bundle_id?: string | null
           created_at?: string
           display_order?: number | null
           id?: string
@@ -118,6 +167,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          bundle_id?: string | null
           created_at?: string
           display_order?: number | null
           id?: string
@@ -128,6 +178,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "menu_item_options_bundle_id_fkey"
+            columns: ["bundle_id"]
+            isOneToOne: false
+            referencedRelation: "bundles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "menu_item_options_option_group_id_fkey"
             columns: ["option_group_id"]
@@ -289,6 +346,7 @@ export type Database = {
         Row: {
           address: string | null
           avatar_url: string | null
+          city: string | null
           created_at: string
           district: string | null
           full_name: string | null
@@ -300,6 +358,7 @@ export type Database = {
         Insert: {
           address?: string | null
           avatar_url?: string | null
+          city?: string | null
           created_at?: string
           district?: string | null
           full_name?: string | null
@@ -311,6 +370,7 @@ export type Database = {
         Update: {
           address?: string | null
           avatar_url?: string | null
+          city?: string | null
           created_at?: string
           district?: string | null
           full_name?: string | null
@@ -324,6 +384,8 @@ export type Database = {
       restaurants: {
         Row: {
           address: string
+          business_hours: Json | null
+          city: string | null
           created_at: string
           cuisine_type: string | null
           delivery_fee: number | null
@@ -341,6 +403,8 @@ export type Database = {
         }
         Insert: {
           address: string
+          business_hours?: Json | null
+          city?: string | null
           created_at?: string
           cuisine_type?: string | null
           delivery_fee?: number | null
@@ -358,6 +422,8 @@ export type Database = {
         }
         Update: {
           address?: string
+          business_hours?: Json | null
+          city?: string | null
           created_at?: string
           cuisine_type?: string | null
           delivery_fee?: number | null

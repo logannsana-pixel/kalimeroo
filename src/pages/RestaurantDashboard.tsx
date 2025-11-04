@@ -7,6 +7,7 @@ import { MenuTab } from "@/components/restaurant/MenuTab";
 import { RestaurantProfileTab } from "@/components/restaurant/RestaurantProfileTab";
 import { StatsTab } from "@/components/restaurant/StatsTab";
 import { MenuOptionsTab } from "@/components/restaurant/MenuOptionsTab";
+import { BundlesTab } from "@/components/restaurant/BundlesTab";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -39,9 +40,10 @@ export default function RestaurantDashboard() {
         <h1 className="text-xl md:text-3xl font-bold mb-6 md:mb-8">Tableau de bord Restaurant</h1>
         
         <Tabs defaultValue="orders" className="w-full">
-          <TabsList className="grid w-full max-w-2xl grid-cols-5 mb-4">
+          <TabsList className="grid w-full max-w-3xl grid-cols-6 mb-4">
             <TabsTrigger value="orders" className="text-xs md:text-sm">Commandes</TabsTrigger>
             <TabsTrigger value="menu" className="text-xs md:text-sm">Menu</TabsTrigger>
+            <TabsTrigger value="bundles" className="text-xs md:text-sm">Bundles</TabsTrigger>
             <TabsTrigger value="options" className="text-xs md:text-sm">Options</TabsTrigger>
             <TabsTrigger value="profile" className="text-xs md:text-sm">Profil</TabsTrigger>
             <TabsTrigger value="stats" className="text-xs md:text-sm">Stats</TabsTrigger>
@@ -53,6 +55,10 @@ export default function RestaurantDashboard() {
           
           <TabsContent value="menu" className="mt-6">
             <MenuTab />
+          </TabsContent>
+          
+          <TabsContent value="bundles" className="mt-6">
+            <BundlesTab />
           </TabsContent>
           
           <TabsContent value="options" className="mt-6">
