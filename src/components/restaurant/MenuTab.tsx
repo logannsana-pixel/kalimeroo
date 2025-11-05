@@ -2,12 +2,9 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { ImageUpload } from "@/components/ImageUpload";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DishBuilder } from "@/components/restaurant/DishBuilder";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -27,16 +24,6 @@ export const MenuTab = () => {
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    price: '',
-    category: '',
-    image_url: '',
-    is_available: true
-  });
 
   useEffect(() => {
     fetchRestaurantAndMenu();
@@ -72,25 +59,11 @@ export const MenuTab = () => {
     }
   };
 
-  const resetForm = () => {
-    setFormData({
-      name: '',
-      description: '',
-      price: '',
-      category: '',
-      image_url: '',
-      is_available: true
-    });
-    setEditingItem(null);
-    setImageFile(null);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (dishData: any, imageFile: File | null) => {
     if (!restaurantId) return;
 
     try {
-      let imageUrl = formData.image_url;
+      let imageUrl = editingItem?.image_url || "";
 
       // Upload image if file is selected
       if (imageFile) {
@@ -110,12 +83,12 @@ export const MenuTab = () => {
       }
 
       const itemData = {
-        name: formData.name,
-        description: formData.description || null,
-        price: parseFloat(formData.price),
-        category: formData.category || null,
+        name: dishData.name,
+        description: dishData.description || null,
+        price: parseFloat(dishData.price),
+        category: dishData.category || null,
         image_url: imageUrl || null,
-        is_available: formData.is_available,
+        is_available: dishData.is_available,
         restaurant_id: restaurantId
       };
 
@@ -137,7 +110,7 @@ export const MenuTab = () => {
       }
 
       setIsDialogOpen(false);
-      resetForm();
+      setEditingItem(null);
       fetchRestaurantAndMenu();
     } catch (error) {
       console.error('Error saving menu item:', error);
@@ -147,14 +120,6 @@ export const MenuTab = () => {
 
   const handleEdit = (item: MenuItem) => {
     setEditingItem(item);
-    setFormData({
-      name: item.name,
-      description: item.description || '',
-      price: item.price.toString(),
-      category: item.category || '',
-      image_url: item.image_url || '',
-      is_available: item.is_available
-    });
     setIsDialogOpen(true);
   };
 
@@ -200,81 +165,35 @@ export const MenuTab = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Gestion du menu</h2>
+        <Button onClick={() => setIsDialogOpen(true)}>
+          <Plus className="w-4 h-4 mr-2" />
+          Ajouter un plat
+        </Button>
+
         <Dialog open={isDialogOpen} onOpenChange={(open) => {
           setIsDialogOpen(open);
-          if (!open) resetForm();
+          if (!open) setEditingItem(null);
         }}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              Ajouter un plat
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>{editingItem ? 'Modifier le plat' : 'Ajouter un plat'}</DialogTitle>
+              <DialogTitle>{editingItem ? 'Modifier le plat' : 'Créer un nouveau plat'}</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Label htmlFor="name">Nom du plat *</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="price">Prix (FCFA) *</Label>
-                <Input
-                  id="price"
-                  type="number"
-                  step="0.01"
-                  value={formData.price}
-                  onChange={(e) => setFormData({...formData, price: e.target.value})}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="category">Catégorie</Label>
-                <Input
-                  id="category"
-                  value={formData.category}
-                  onChange={(e) => setFormData({...formData, category: e.target.value})}
-                  placeholder="Ex: Entrées, Plats, Desserts"
-                />
-              </div>
-              <div>
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  rows={3}
-                />
-              </div>
-              <ImageUpload
-                label="Image du plat"
-                onImageChange={setImageFile}
-                currentImage={editingItem?.image_url || ""}
-              />
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="available"
-                  checked={formData.is_available}
-                  onCheckedChange={(checked) => setFormData({...formData, is_available: checked})}
-                />
-                <Label htmlFor="available">Disponible</Label>
-              </div>
-              <div className="flex gap-2 justify-end">
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Annuler
-                </Button>
-                <Button type="submit">
-                  {editingItem ? 'Modifier' : 'Ajouter'}
-                </Button>
-              </div>
-            </form>
+            <DishBuilder
+              initialData={editingItem ? {
+                name: editingItem.name,
+                description: editingItem.description || "",
+                category: editingItem.category || "",
+                price: editingItem.price.toString(),
+                is_available: editingItem.is_available,
+                image: editingItem.image_url as any
+              } : undefined}
+              onSubmit={handleSubmit}
+              onCancel={() => {
+                setIsDialogOpen(false);
+                setEditingItem(null);
+              }}
+              isEditing={!!editingItem}
+            />
           </DialogContent>
         </Dialog>
       </div>

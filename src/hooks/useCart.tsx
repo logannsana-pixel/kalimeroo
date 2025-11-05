@@ -7,6 +7,7 @@ interface CartItem {
   id: string;
   quantity: number;
   menu_item_id: string;
+  selected_options?: any[];
   menu_items: {
     id: string;
     name: string;

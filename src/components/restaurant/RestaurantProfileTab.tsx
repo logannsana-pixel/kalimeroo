@@ -53,7 +53,7 @@ export const RestaurantProfileTab = () => {
         .from('restaurants')
         .select('*')
         .eq('owner_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       
