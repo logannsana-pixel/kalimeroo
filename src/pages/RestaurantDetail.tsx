@@ -11,6 +11,7 @@ import { Star, Clock, DollarSign, Plus, Minus, ShoppingCart } from "lucide-react
 import { useCart } from "@/hooks/useCart";
 import { toast } from "sonner";
 import { MenuItemDetailModal } from "@/components/MenuItemDetailModal";
+import { ReviewsList } from "@/components/ReviewsList";
 
 interface Restaurant {
   id: string;
@@ -257,6 +258,12 @@ export default function RestaurantDetail() {
               </div>
             ))
           )}
+        </div>
+
+        {/* Reviews Section */}
+        <div className="container mx-auto px-4 py-6 md:py-8 border-t">
+          <h2 className="text-2xl font-bold mb-6">Avis clients</h2>
+          <ReviewsList restaurantId={restaurant.id} />
         </div>
       </main>
       <Footer />

@@ -13,17 +13,20 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { RestaurantProfileTab } from "@/components/restaurant/RestaurantProfileTab";
 import { DeliveryProfileTab } from "@/components/delivery/DeliveryProfileTab";
+import { ImageUpload } from "@/components/ImageUpload";
 
 export default function Profile() {
   const { user, userRole, signOut } = useAuth();
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [formData, setFormData] = useState({
     full_name: '',
     phone: '',
     address: '',
     city: '',
-    district: ''
+    district: '',
+    avatar_url: ''
   });
 
   useEffect(() => {
@@ -49,7 +52,8 @@ export default function Profile() {
           phone: data.phone || '',
           address: data.address || '',
           city: data.city || '',
-          district: data.district || ''
+          district: data.district || '',
+          avatar_url: data.avatar_url || ''
         });
       }
     } catch (error) {
@@ -64,11 +68,31 @@ export default function Profile() {
     if (!user) return;
 
     try {
+      let avatarUrl = formData.avatar_url;
+
+      // Upload avatar if file is selected
+      if (imageFile) {
+        const fileExt = imageFile.name.split('.').pop();
+        const fileName = `${user.id}/${Math.random()}.${fileExt}`;
+        const { error: uploadError } = await supabase.storage
+          .from('restaurant-images')
+          .upload(fileName, imageFile);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('restaurant-images')
+          .getPublicUrl(fileName);
+        
+        avatarUrl = publicUrl;
+      }
+
       const { error } = await supabase
         .from('profiles')
         .upsert({
           id: user.id,
           ...formData,
+          avatar_url: avatarUrl || null,
           updated_at: new Date().toISOString()
         });
 
@@ -127,6 +151,12 @@ export default function Profile() {
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+                  <ImageUpload
+                    label="Photo de profil"
+                    onImageChange={setImageFile}
+                    currentImage={formData.avatar_url}
+                  />
+
                   <div>
                     <Label htmlFor="full_name">Nom complet</Label>
                     <Input

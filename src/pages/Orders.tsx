@@ -4,11 +4,23 @@ import { BottomNav } from "@/components/BottomNav";
 import { Footer } from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Package, Clock, CheckCircle, XCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Package, Clock, CheckCircle, XCircle, Star, ChevronDown, ChevronUp } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { ReviewForm } from "@/components/ReviewForm";
+
+interface OrderItem {
+  id: string;
+  quantity: number;
+  price: number;
+  menu_items: {
+    name: string;
+  };
+}
 
 interface Order {
   id: string;
@@ -16,15 +28,24 @@ interface Order {
   status: string;
   total: number;
   delivery_address: string;
+  subtotal: number;
+  delivery_fee: number;
+  phone: string;
+  notes: string | null;
   restaurants: {
+    id: string;
     name: string;
   };
+  order_items: OrderItem[];
+  reviews: { id: string }[];
 }
 
 export default function Orders() {
   const { user } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+  const [reviewingOrder, setReviewingOrder] = useState<Order | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -41,9 +62,25 @@ export default function Orders() {
           created_at,
           status,
           total,
+          subtotal,
+          delivery_fee,
           delivery_address,
+          phone,
+          notes,
           restaurants (
+            id,
             name
+          ),
+          order_items (
+            id,
+            quantity,
+            price,
+            menu_items (
+              name
+            )
+          ),
+          reviews (
+            id
           )
         `)
         .eq("user_id", user?.id)
@@ -56,6 +93,14 @@ export default function Orders() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const toggleOrderDetails = (orderId: string) => {
+    setExpandedOrder(expandedOrder === orderId ? null : orderId);
+  };
+
+  const canReview = (order: Order) => {
+    return order.status === "delivered" && order.reviews.length === 0;
   };
 
   const getStatusIcon = (status: string) => {
@@ -149,37 +194,128 @@ export default function Orders() {
             <Card key={order.id}>
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg">
+                  <CardTitle className="text-base md:text-lg">
                     {order.restaurants.name}
                   </CardTitle>
                   <Badge variant={getStatusVariant(order.status)}>
-                    <span className="flex items-center gap-1">
+                    <span className="flex items-center gap-1 text-xs">
                       {getStatusIcon(order.status)}
-                      {getStatusLabel(order.status)}
+                      <span className="hidden sm:inline">{getStatusLabel(order.status)}</span>
                     </span>
                   </Badge>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-4">
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">
-                      Commande du {format(new Date(order.created_at), "PPP", { locale: fr })}
+                      {format(new Date(order.created_at), "PPP", { locale: fr })}
                     </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Adresse de livraison:</span>
-                    <span className="text-right max-w-xs">{order.delivery_address}</span>
-                  </div>
-                  <div className="flex justify-between font-semibold text-base pt-2 border-t">
+                  <div className="flex justify-between font-semibold text-base">
                     <span>Total</span>
                     <span>{Number(order.total).toFixed(0)} FCFA</span>
                   </div>
                 </div>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                  onClick={() => toggleOrderDetails(order.id)}
+                >
+                  {expandedOrder === order.id ? (
+                    <>
+                      <ChevronUp className="w-4 h-4 mr-2" />
+                      Masquer les détails
+                    </>
+                  ) : (
+                    <>
+                      <ChevronDown className="w-4 h-4 mr-2" />
+                      Voir les détails
+                    </>
+                  )}
+                </Button>
+
+                {expandedOrder === order.id && (
+                  <div className="space-y-4 pt-4 border-t">
+                    <div>
+                      <h4 className="font-semibold mb-2">Articles commandés</h4>
+                      <div className="space-y-2">
+                        {order.order_items.map((item) => (
+                          <div key={item.id} className="flex justify-between text-sm">
+                            <span>
+                              {item.quantity}x {item.menu_items.name}
+                            </span>
+                            <span>{Number(item.price).toFixed(0)} FCFA</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 text-sm border-t pt-2">
+                      <div className="flex justify-between">
+                        <span>Sous-total</span>
+                        <span>{Number(order.subtotal).toFixed(0)} FCFA</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Frais de livraison</span>
+                        <span>{Number(order.delivery_fee).toFixed(0)} FCFA</span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 text-sm">
+                      <div>
+                        <span className="text-muted-foreground">Adresse:</span>
+                        <p className="mt-1">{order.delivery_address}</p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Téléphone:</span>
+                        <p className="mt-1">{order.phone}</p>
+                      </div>
+                      {order.notes && (
+                        <div>
+                          <span className="text-muted-foreground">Notes:</span>
+                          <p className="mt-1">{order.notes}</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {canReview(order) && (
+                      <Button
+                        onClick={() => setReviewingOrder(order)}
+                        className="w-full"
+                        variant="default"
+                      >
+                        <Star className="w-4 h-4 mr-2" />
+                        Laisser un avis
+                      </Button>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))}
         </div>
+
+        <Dialog open={!!reviewingOrder} onOpenChange={(open) => !open && setReviewingOrder(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Laisser un avis pour {reviewingOrder?.restaurants.name}</DialogTitle>
+            </DialogHeader>
+            {reviewingOrder && (
+              <ReviewForm
+                restaurantId={reviewingOrder.restaurants.id}
+                orderId={reviewingOrder.id}
+                onSuccess={() => {
+                  setReviewingOrder(null);
+                  fetchOrders();
+                }}
+                onCancel={() => setReviewingOrder(null)}
+              />
+            )}
+          </DialogContent>
+        </Dialog>
       </main>
       <Footer />
       <BottomNav />
