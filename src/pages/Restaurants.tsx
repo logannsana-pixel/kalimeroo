@@ -7,8 +7,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Star, Clock, DollarSign } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { RestaurantFilters } from "@/components/RestaurantFilters";
 import { useLocation } from "@/contexts/LocationContext";
+import { AdvancedSearch, SearchFilters } from "@/components/AdvancedSearch";
+import { FavoritesButton } from "@/components/FavoritesButton";
 
 interface Restaurant {
   id: string;
@@ -26,9 +27,13 @@ export default function Restaurants() {
   const { city } = useLocation();
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [sortBy, setSortBy] = useState("rating");
+  const [filters, setFilters] = useState<SearchFilters>({
+    query: "",
+    category: "all",
+    minPrice: 0,
+    maxPrice: 100,
+    minRating: 0,
+  });
 
   useEffect(() => {
     fetchRestaurants();
@@ -36,10 +41,12 @@ export default function Restaurants() {
 
   const fetchRestaurants = async () => {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from("restaurants")
-        .select("*")
+        .select("*, menu_items(id, name, price, category)")
         .eq("is_active", true);
+
+      const { data, error } = await query;
 
       if (error) throw error;
       setRestaurants(data || []);
@@ -50,48 +57,49 @@ export default function Restaurants() {
     }
   };
 
-  // Extract unique categories
-  const categories = useMemo(() => {
-    const uniqueCategories = new Set(restaurants.map(r => r.cuisine_type).filter(Boolean));
-    return Array.from(uniqueCategories);
-  }, [restaurants]);
-
-  // Filter and sort restaurants
+  // Filter restaurants based on advanced search
   const filteredRestaurants = useMemo(() => {
     let filtered = restaurants;
 
-    // Search filter
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
+    // Text search
+    if (filters.query) {
+      const query = filters.query.toLowerCase();
       filtered = filtered.filter(
-        (r) =>
+        (r: any) =>
           r.name.toLowerCase().includes(query) ||
           r.cuisine_type?.toLowerCase().includes(query) ||
-          r.description?.toLowerCase().includes(query)
+          r.description?.toLowerCase().includes(query) ||
+          r.menu_items?.some((item: any) => 
+            item.name.toLowerCase().includes(query) ||
+            item.category?.toLowerCase().includes(query)
+          )
       );
     }
 
     // Category filter
-    if (selectedCategory !== "all") {
-      filtered = filtered.filter((r) => r.cuisine_type === selectedCategory);
+    if (filters.category !== "all") {
+      filtered = filtered.filter(
+        (r: any) => r.cuisine_type === filters.category ||
+        r.menu_items?.some((item: any) => item.category === filters.category)
+      );
     }
 
-    // Sort
-    filtered = [...filtered].sort((a, b) => {
-      switch (sortBy) {
-        case "rating":
-          return (b.rating || 0) - (a.rating || 0);
-        case "delivery_time":
-          return parseInt(a.delivery_time) - parseInt(b.delivery_time);
-        case "delivery_fee":
-          return (a.delivery_fee || 0) - (b.delivery_fee || 0);
-        default:
-          return 0;
-      }
+    // Price filter (based on menu items)
+    filtered = filtered.filter((r: any) => {
+      if (!r.menu_items || r.menu_items.length === 0) return true;
+      return r.menu_items.some((item: any) => 
+        item.price >= filters.minPrice && item.price <= filters.maxPrice
+      );
     });
 
+    // Rating filter
+    filtered = filtered.filter((r) => (r.rating || 0) >= filters.minRating);
+
+    // Sort by rating
+    filtered = [...filtered].sort((a, b) => (b.rating || 0) - (a.rating || 0));
+
     return filtered;
-  }, [restaurants, searchQuery, selectedCategory, sortBy]);
+  }, [restaurants, filters]);
 
   return (
     <div className="min-h-screen flex flex-col pb-16 md:pb-0">
@@ -101,15 +109,9 @@ export default function Restaurants() {
           Restaurants disponibles à {city}
         </h1>
 
-        <RestaurantFilters
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          selectedCategory={selectedCategory}
-          onCategoryChange={setSelectedCategory}
-          sortBy={sortBy}
-          onSortChange={setSortBy}
-          categories={categories}
-        />
+        <div className="mb-6">
+          <AdvancedSearch onSearch={setFilters} />
+        </div>
 
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
@@ -126,7 +128,7 @@ export default function Restaurants() {
         ) : filteredRestaurants.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-lg text-muted-foreground mb-2">
-              {searchQuery || selectedCategory !== "all"
+              {filters.query || filters.category !== "all"
                 ? "Aucun restaurant ne correspond à vos critères"
                 : "Aucun restaurant disponible pour le moment"}
             </p>
@@ -143,15 +145,18 @@ export default function Restaurants() {
               {filteredRestaurants.map((restaurant) => (
                 <Card
                   key={restaurant.id}
-                  className="cursor-pointer hover:shadow-hover transition-all duration-300 overflow-hidden"
+                  className="cursor-pointer hover:shadow-hover transition-all duration-300 overflow-hidden group"
                   onClick={() => navigate(`/restaurant/${restaurant.id}`)}
                 >
                   <div className="relative h-40 sm:h-48 overflow-hidden">
                     <img
                       src={restaurant.image_url || "/placeholder.svg"}
                       alt={restaurant.name}
-                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
+                    <div className="absolute top-2 right-2" onClick={(e) => e.stopPropagation()}>
+                      <FavoritesButton restaurantId={restaurant.id} />
+                    </div>
                   </div>
                   <CardHeader className="pb-3">
                     <CardTitle className="flex items-start justify-between gap-2">
@@ -176,7 +181,7 @@ export default function Restaurants() {
                         <span>{restaurant.delivery_fee.toFixed(0)} FCFA</span>
                       </div>
                     </div>
-                    <span className="inline-block text-xs bg-secondary px-2 py-1 rounded-full">
+                    <span className="inline-block text-xs bg-gradient-secondary text-secondary-foreground px-3 py-1 rounded-full">
                       {restaurant.cuisine_type}
                     </span>
                   </CardContent>

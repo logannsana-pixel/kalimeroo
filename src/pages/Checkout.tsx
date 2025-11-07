@@ -3,6 +3,7 @@ import { Navbar } from "@/components/Navbar";
 import { BottomNav } from "@/components/BottomNav";
 import { Footer } from "@/components/Footer";
 import { CheckoutSteps } from "@/components/checkout/CheckoutSteps";
+import { PromoCodeInput } from "@/components/PromoCodeInput";
 import { useCart } from "@/hooks/useCart";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -14,6 +15,8 @@ export default function Checkout() {
   const { user } = useAuth();
   const { cartItems, getCartTotal, clearCart } = useCart();
   const [deliveryFee, setDeliveryFee] = useState(0);
+  const [promoCodeId, setPromoCodeId] = useState<string>("");
+  const [discount, setDiscount] = useState(0);
 
   if (!user) {
     navigate("/auth");
@@ -48,7 +51,7 @@ export default function Checkout() {
   const handleSubmit = async (checkoutData: any) => {
     try {
       const subtotal = getCartTotal();
-      const total = subtotal + deliveryFee;
+      const total = subtotal + deliveryFee - discount;
 
       const fullAddress = `${checkoutData.city} - ${checkoutData.district}${
         checkoutData.addressComplement ? `, ${checkoutData.addressComplement}` : ""
@@ -65,6 +68,8 @@ export default function Checkout() {
           notes: checkoutData.notes,
           subtotal,
           delivery_fee: deliveryFee,
+          promo_code_id: promoCodeId || null,
+          discount_amount: discount,
           total,
           status: "pending",
         })
@@ -72,6 +77,22 @@ export default function Checkout() {
         .single();
 
       if (orderError) throw orderError;
+
+      // Update promo code usage
+      if (promoCodeId) {
+        const { data: promo } = await supabase
+          .from("promo_codes")
+          .select("uses_count")
+          .eq("id", promoCodeId)
+          .single();
+        
+        if (promo) {
+          await supabase
+            .from("promo_codes")
+            .update({ uses_count: promo.uses_count + 1 })
+            .eq("id", promoCodeId);
+        }
+      }
 
       // Create order items with selected options
       const orderItems = cartItems.map((item) => ({
@@ -100,6 +121,7 @@ export default function Checkout() {
   };
 
   const subtotal = getCartTotal();
+  const total = subtotal + deliveryFee - discount;
 
   return (
     <div className="min-h-screen flex flex-col pb-16 md:pb-0">
@@ -109,10 +131,22 @@ export default function Checkout() {
           Finaliser la commande
         </h1>
 
+        <div className="max-w-2xl mx-auto mb-6">
+          <PromoCodeInput 
+            subtotal={subtotal} 
+            onPromoApplied={(discountAmount, promoId) => {
+              setDiscount(discountAmount);
+              setPromoCodeId(promoId);
+            }} 
+          />
+        </div>
+
         <CheckoutSteps
           cartItems={cartItems}
           subtotal={subtotal}
           deliveryFee={deliveryFee}
+          discount={discount}
+          total={total}
           onSubmit={handleSubmit}
         />
       </main>

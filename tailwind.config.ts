@@ -22,6 +22,7 @@ export default {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
+          glow: "hsl(var(--primary-glow))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -108,10 +109,13 @@ export default {
       backgroundImage: {
         "gradient-hero": "var(--gradient-hero)",
         "gradient-card": "var(--gradient-card)",
+        "gradient-primary": "var(--gradient-primary)",
+        "gradient-secondary": "var(--gradient-secondary)",
       },
       boxShadow: {
-        "soft": "var(--shadow-soft)",
-        "hover": "var(--shadow-hover)",
+        soft: "var(--shadow-soft)",
+        hover: "var(--shadow-hover)",
+        glow: "var(--shadow-glow)",
       },
     },
   },

@@ -25,10 +25,13 @@ interface CheckoutStepsProps {
   cartItems: any[];
   subtotal: number;
   deliveryFee: number;
+  discount?: number;
+  total?: number;
   onSubmit: (data: CheckoutData) => Promise<void>;
 }
 
-export function CheckoutSteps({ cartItems, subtotal, deliveryFee, onSubmit }: CheckoutStepsProps) {
+export function CheckoutSteps({ cartItems, subtotal, deliveryFee, discount = 0, total: propTotal, onSubmit }: CheckoutStepsProps) {
+  const total = propTotal ?? (subtotal + deliveryFee - discount);
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   
