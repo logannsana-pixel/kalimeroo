@@ -306,6 +306,13 @@ export type Database = {
             referencedRelation: "orders"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "messages_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "restaurant_orders_masked"
+            referencedColumns: ["id"]
+          },
         ]
       }
       order_items: {
@@ -349,6 +356,13 @@ export type Database = {
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "restaurant_orders_masked"
             referencedColumns: ["id"]
           },
         ]
@@ -620,6 +634,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "reviews_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "restaurant_orders_masked"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "reviews_restaurant_id_fkey"
             columns: ["restaurant_id"]
             isOneToOne: false
@@ -651,7 +672,116 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      anonymous_reviews: {
+        Row: {
+          comment: string | null
+          created_at: string | null
+          id: string | null
+          order_id: string | null
+          rating: number | null
+          restaurant_id: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string | null
+          id?: string | null
+          order_id?: never
+          rating?: number | null
+          restaurant_id?: string | null
+          updated_at?: string | null
+          user_id?: never
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string | null
+          id?: string | null
+          order_id?: never
+          rating?: number | null
+          restaurant_id?: string | null
+          updated_at?: string | null
+          user_id?: never
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      restaurant_orders_masked: {
+        Row: {
+          created_at: string | null
+          delivery_address: string | null
+          delivery_driver_id: string | null
+          delivery_fee: number | null
+          discount_amount: number | null
+          id: string | null
+          notes: string | null
+          phone: string | null
+          promo_code_id: string | null
+          restaurant_id: string | null
+          status: Database["public"]["Enums"]["order_status"] | null
+          subtotal: number | null
+          total: number | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          delivery_address?: never
+          delivery_driver_id?: string | null
+          delivery_fee?: number | null
+          discount_amount?: number | null
+          id?: string | null
+          notes?: string | null
+          phone?: never
+          promo_code_id?: string | null
+          restaurant_id?: string | null
+          status?: Database["public"]["Enums"]["order_status"] | null
+          subtotal?: number | null
+          total?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          delivery_address?: never
+          delivery_driver_id?: string | null
+          delivery_fee?: number | null
+          discount_amount?: number | null
+          id?: string | null
+          notes?: string | null
+          phone?: never
+          promo_code_id?: string | null
+          restaurant_id?: string | null
+          status?: Database["public"]["Enums"]["order_status"] | null
+          subtotal?: number | null
+          total?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_promo_code_id_fkey"
+            columns: ["promo_code_id"]
+            isOneToOne: false
+            referencedRelation: "promo_codes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       has_role: {
