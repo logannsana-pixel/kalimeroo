@@ -90,10 +90,10 @@ export const RestaurantProfileTab = () => {
       // Upload image if file is selected
       if (imageFile) {
         const fileExt = imageFile.name.split('.').pop();
-        const fileName = `${Math.random()}.${fileExt}`;
+        const fileName = `${restaurant.id}-${Date.now()}.${fileExt}`;
         const { error: uploadError } = await supabase.storage
           .from('restaurant-images')
-          .upload(fileName, imageFile);
+          .upload(fileName, imageFile, { upsert: true });
 
         if (uploadError) throw uploadError;
 
@@ -102,6 +102,9 @@ export const RestaurantProfileTab = () => {
           .getPublicUrl(fileName);
         
         imageUrl = publicUrl;
+        // Update local state immediately
+        setFormData(prev => ({ ...prev, image_url: imageUrl }));
+        setImageFile(null);
       }
 
       const { error } = await supabase

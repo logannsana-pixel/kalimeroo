@@ -9,9 +9,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Star, Clock, DollarSign, Plus, Minus, ShoppingCart } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
+import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { MenuItemDetailModal } from "@/components/MenuItemDetailModal";
 import { ReviewsList } from "@/components/ReviewsList";
+import { GuestCheckoutModal } from "@/components/checkout/GuestCheckoutModal";
 
 interface Restaurant {
   id: string;
@@ -38,13 +40,16 @@ interface MenuItem {
 export default function RestaurantDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { addToCart } = useCart();
+  const { user } = useAuth();
+  const { addToCart, refreshCart } = useCart();
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [pendingAction, setPendingAction] = useState<{ itemId: string; quantity: number; options: any[] } | null>(null);
 
   useEffect(() => {
     fetchRestaurantData();
@@ -91,8 +96,23 @@ export default function RestaurantDetail() {
   };
 
   const handleAddToCart = async (itemId: string, quantity: number = 1, selectedOptions: any[] = []) => {
+    if (!user) {
+      setPendingAction({ itemId, quantity, options: selectedOptions });
+      setShowAuthModal(true);
+      return;
+    }
     await addToCart(itemId, quantity, selectedOptions);
     setQuantities((prev) => ({ ...prev, [itemId]: 0 }));
+  };
+
+  const handleAuthSuccess = async () => {
+    setShowAuthModal(false);
+    await refreshCart();
+    if (pendingAction) {
+      await addToCart(pendingAction.itemId, pendingAction.quantity, pendingAction.options);
+      setQuantities((prev) => ({ ...prev, [pendingAction.itemId]: 0 }));
+      setPendingAction(null);
+    }
   };
 
   const handleQuickAdd = async (e: React.MouseEvent, itemId: string) => {
@@ -274,6 +294,15 @@ export default function RestaurantDetail() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onAddToCart={handleAddToCart}
+      />
+      
+      <GuestCheckoutModal
+        isOpen={showAuthModal}
+        onClose={() => {
+          setShowAuthModal(false);
+          setPendingAction(null);
+        }}
+        onSuccess={handleAuthSuccess}
       />
     </div>
   );
