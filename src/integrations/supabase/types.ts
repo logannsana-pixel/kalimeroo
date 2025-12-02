@@ -677,31 +677,25 @@ export type Database = {
           comment: string | null
           created_at: string | null
           id: string | null
-          order_id: string | null
           rating: number | null
           restaurant_id: string | null
           updated_at: string | null
-          user_id: string | null
         }
         Insert: {
           comment?: string | null
           created_at?: string | null
           id?: string | null
-          order_id?: never
           rating?: number | null
           restaurant_id?: string | null
           updated_at?: string | null
-          user_id?: never
         }
         Update: {
           comment?: string | null
           created_at?: string | null
           id?: string | null
-          order_id?: never
           rating?: number | null
           restaurant_id?: string | null
           updated_at?: string | null
-          user_id?: never
         }
         Relationships: [
           {
