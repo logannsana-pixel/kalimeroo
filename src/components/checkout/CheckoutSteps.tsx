@@ -31,7 +31,7 @@ interface CheckoutStepsProps {
 }
 
 export function CheckoutSteps({ cartItems, subtotal, deliveryFee, discount = 0, total: propTotal, onSubmit }: CheckoutStepsProps) {
-  const total = propTotal ?? (subtotal + deliveryFee - discount);
+  const calculatedTotal = propTotal ?? (subtotal + deliveryFee - discount);
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   
@@ -93,7 +93,6 @@ export function CheckoutSteps({ cartItems, subtotal, deliveryFee, discount = 0, 
     ? congoDistricts.filter(d => d.city === formData.city)
     : [];
 
-  const total = subtotal + deliveryFee;
   const totalSteps = 3;
   const progress = (step / totalSteps) * 100;
 
@@ -392,7 +391,7 @@ export function CheckoutSteps({ cartItems, subtotal, deliveryFee, discount = 0, 
               </div>
               <div className="flex justify-between font-bold text-lg pt-2 border-t">
                 <span>Total</span>
-                <span>{total.toFixed(0)} FCFA</span>
+                <span>{calculatedTotal.toFixed(0)} FCFA</span>
               </div>
             </div>
           </CardContent>
