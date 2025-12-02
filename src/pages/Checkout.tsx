@@ -4,6 +4,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { Footer } from "@/components/Footer";
 import { CheckoutSteps } from "@/components/checkout/CheckoutSteps";
 import { PromoCodeInput } from "@/components/PromoCodeInput";
+import { GuestCheckoutModal } from "@/components/checkout/GuestCheckoutModal";
 import { useCart } from "@/hooks/useCart";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -13,21 +14,29 @@ import { toast } from "sonner";
 export default function Checkout() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { cartItems, getCartTotal, clearCart } = useCart();
+  const { cartItems, getCartTotal, clearCart, refreshCart } = useCart();
   const [deliveryFee, setDeliveryFee] = useState(0);
   const [promoCodeId, setPromoCodeId] = useState<string>("");
   const [discount, setDiscount] = useState(0);
+  const [showGuestModal, setShowGuestModal] = useState(false);
 
-  if (!user) {
-    navigate("/auth");
-    return null;
-  }
+  // Show modal for non-authenticated users instead of redirecting
+  useEffect(() => {
+    if (!user) {
+      setShowGuestModal(true);
+    }
+  }, [user]);
+
+  const handleGuestAuthSuccess = () => {
+    setShowGuestModal(false);
+    refreshCart();
+  };
 
   const restaurantId = cartItems[0]?.menu_items?.restaurant_id;
 
   useEffect(() => {
     const fetchDeliveryFee = async () => {
-      if (restaurantId) {
+      if (restaurantId && user) {
         const { data } = await supabase
           .from("restaurants")
           .select("delivery_fee")
@@ -41,9 +50,27 @@ export default function Checkout() {
     };
 
     fetchDeliveryFee();
-  }, [restaurantId]);
+  }, [restaurantId, user]);
 
-  if (cartItems.length === 0) {
+  // If no user and no cart items, redirect to home
+  if (!user && cartItems.length === 0) {
+    return (
+      <div className="min-h-screen flex flex-col pb-16 md:pb-0">
+        <Navbar />
+        <main className="flex-1 container mx-auto px-4 py-8 flex items-center justify-center">
+          <GuestCheckoutModal
+            isOpen={showGuestModal}
+            onClose={() => navigate("/")}
+            onSuccess={handleGuestAuthSuccess}
+          />
+        </main>
+        <Footer />
+        <BottomNav />
+      </div>
+    );
+  }
+
+  if (user && cartItems.length === 0) {
     navigate("/cart");
     return null;
   }
@@ -131,27 +158,41 @@ export default function Checkout() {
           Finaliser la commande
         </h1>
 
-        <div className="max-w-2xl mx-auto mb-6">
-          <PromoCodeInput 
-            subtotal={subtotal} 
-            onPromoApplied={(discountAmount, promoId) => {
-              setDiscount(discountAmount);
-              setPromoCodeId(promoId);
-            }} 
-          />
-        </div>
+        {user ? (
+          <>
+            <div className="max-w-2xl mx-auto mb-6">
+              <PromoCodeInput 
+                subtotal={subtotal} 
+                onPromoApplied={(discountAmount, promoId) => {
+                  setDiscount(discountAmount);
+                  setPromoCodeId(promoId);
+                }} 
+              />
+            </div>
 
-        <CheckoutSteps
-          cartItems={cartItems}
-          subtotal={subtotal}
-          deliveryFee={deliveryFee}
-          discount={discount}
-          total={total}
-          onSubmit={handleSubmit}
-        />
+            <CheckoutSteps
+              cartItems={cartItems}
+              subtotal={subtotal}
+              deliveryFee={deliveryFee}
+              discount={discount}
+              total={total}
+              onSubmit={handleSubmit}
+            />
+          </>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground mb-4">Connectez-vous pour finaliser votre commande</p>
+          </div>
+        )}
       </main>
       <Footer />
       <BottomNav />
+      
+      <GuestCheckoutModal
+        isOpen={showGuestModal}
+        onClose={() => navigate("/")}
+        onSuccess={handleGuestAuthSuccess}
+      />
     </div>
   );
 }

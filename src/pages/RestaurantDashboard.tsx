@@ -5,7 +5,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { OrdersTab } from "@/components/restaurant/OrdersTab";
 import { MenuTab } from "@/components/restaurant/MenuTab";
 import { RestaurantProfileTab } from "@/components/restaurant/RestaurantProfileTab";
-import { StatsTab } from "@/components/restaurant/StatsTab";
+import { AdvancedStatsTab } from "@/components/restaurant/AdvancedStatsTab";
+import { BusinessHoursTab } from "@/components/restaurant/BusinessHoursTab";
 import { MenuOptionsTab } from "@/components/restaurant/MenuOptionsTab";
 import { BundlesTab } from "@/components/restaurant/BundlesTab";
 import { PromoCodesTab } from "@/components/restaurant/PromoCodesTab";
@@ -41,18 +42,23 @@ export default function RestaurantDashboard() {
         <h1 className="text-xl md:text-3xl font-bold mb-6 md:mb-8">Tableau de bord Restaurant</h1>
         
         <Tabs defaultValue="orders" className="w-full">
-          <TabsList className="grid w-full max-w-4xl grid-cols-7 mb-4">
-            <TabsTrigger value="orders" className="text-xs md:text-sm">Commandes</TabsTrigger>
-            <TabsTrigger value="menu" className="text-xs md:text-sm">Menu</TabsTrigger>
-            <TabsTrigger value="bundles" className="text-xs md:text-sm">Bundles</TabsTrigger>
-            <TabsTrigger value="options" className="text-xs md:text-sm">Options</TabsTrigger>
-            <TabsTrigger value="promos" className="text-xs md:text-sm">Promos</TabsTrigger>
-            <TabsTrigger value="profile" className="text-xs md:text-sm">Profil</TabsTrigger>
-            <TabsTrigger value="stats" className="text-xs md:text-sm">Stats</TabsTrigger>
+          <TabsList className="flex w-full max-w-5xl overflow-x-auto mb-4 h-auto flex-wrap gap-1 bg-muted/50 p-1">
+            <TabsTrigger value="orders" className="text-xs md:text-sm flex-shrink-0">Commandes</TabsTrigger>
+            <TabsTrigger value="stats" className="text-xs md:text-sm flex-shrink-0">Analytics</TabsTrigger>
+            <TabsTrigger value="menu" className="text-xs md:text-sm flex-shrink-0">Menu</TabsTrigger>
+            <TabsTrigger value="bundles" className="text-xs md:text-sm flex-shrink-0">Bundles</TabsTrigger>
+            <TabsTrigger value="options" className="text-xs md:text-sm flex-shrink-0">Options</TabsTrigger>
+            <TabsTrigger value="promos" className="text-xs md:text-sm flex-shrink-0">Promos</TabsTrigger>
+            <TabsTrigger value="hours" className="text-xs md:text-sm flex-shrink-0">Horaires</TabsTrigger>
+            <TabsTrigger value="profile" className="text-xs md:text-sm flex-shrink-0">Profil</TabsTrigger>
           </TabsList>
           
           <TabsContent value="orders" className="mt-6">
             <OrdersTab />
+          </TabsContent>
+          
+          <TabsContent value="stats" className="mt-6">
+            <AdvancedStatsTab />
           </TabsContent>
           
           <TabsContent value="menu" className="mt-6">
@@ -71,12 +77,12 @@ export default function RestaurantDashboard() {
             <PromoCodesTab />
           </TabsContent>
           
-          <TabsContent value="profile" className="mt-6">
-            <RestaurantProfileTab />
+          <TabsContent value="hours" className="mt-6">
+            <BusinessHoursTab />
           </TabsContent>
           
-          <TabsContent value="stats" className="mt-6">
-            <StatsTab />
+          <TabsContent value="profile" className="mt-6">
+            <RestaurantProfileTab />
           </TabsContent>
         </Tabs>
       </main>
