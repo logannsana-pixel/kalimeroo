@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Clock, Package, CheckCircle, MapPin, Phone, User } from "lucide-react";
 import { Database } from "@/integrations/supabase/types";
 import { toast } from "sonner";
+import { ChatInterface } from "@/components/ChatInterface";
 
 type OrderStatus = Database["public"]["Enums"]["order_status"];
 
@@ -17,6 +18,7 @@ interface Order {
   delivery_address: string;
   phone: string;
   notes: string | null;
+  user_id: string;
   profiles: {
     full_name: string | null;
   } | null;
@@ -73,6 +75,7 @@ export const OrdersTab = () => {
 
           return {
             ...order,
+            user_id: order.user_id,
             profiles: profileData
           };
         })
@@ -175,11 +178,18 @@ export const OrdersTab = () => {
                       )}
                       <div className="flex items-center justify-between pt-3 border-t">
                         <span className="font-semibold text-lg">{order.total.toFixed(2)} FCFA</span>
-                        {nextStatus && (
-                          <Button onClick={() => updateOrderStatus(order.id, nextStatus.next)}>
-                            {nextStatus.label}
-                          </Button>
-                        )}
+                        <div className="flex gap-2">
+                          <ChatInterface
+                            orderId={order.id}
+                            receiverId={order.user_id}
+                            receiverName={order.profiles?.full_name || "Client"}
+                          />
+                          {nextStatus && (
+                            <Button onClick={() => updateOrderStatus(order.id, nextStatus.next)}>
+                              {nextStatus.label}
+                            </Button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </CardContent>

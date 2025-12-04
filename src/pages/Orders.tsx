@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { ReviewForm } from "@/components/ReviewForm";
+import { ChatInterface } from "@/components/ChatInterface";
 
 interface OrderItem {
   id: string;
@@ -32,9 +33,11 @@ interface Order {
   delivery_fee: number;
   phone: string;
   notes: string | null;
+  delivery_driver_id: string | null;
   restaurants: {
     id: string;
     name: string;
+    owner_id: string | null;
   };
   order_items: OrderItem[];
   reviews: { id: string }[];
@@ -67,9 +70,11 @@ export default function Orders() {
           delivery_address,
           phone,
           notes,
+          delivery_driver_id,
           restaurants (
             id,
-            name
+            name,
+            owner_id
           ),
           order_items (
             id,
@@ -278,6 +283,23 @@ export default function Orders() {
                           <span className="text-muted-foreground">Notes:</span>
                           <p className="mt-1">{order.notes}</p>
                         </div>
+                      )}
+                    </div>
+
+                    <div className="flex gap-2">
+                      {order.restaurants.owner_id && (
+                        <ChatInterface
+                          orderId={order.id}
+                          receiverId={order.restaurants.owner_id}
+                          receiverName={order.restaurants.name}
+                        />
+                      )}
+                      {order.delivery_driver_id && order.status === "delivering" && (
+                        <ChatInterface
+                          orderId={order.id}
+                          receiverId={order.delivery_driver_id}
+                          receiverName="Livreur"
+                        />
                       )}
                     </div>
 

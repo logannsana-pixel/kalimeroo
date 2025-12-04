@@ -67,6 +67,7 @@ export type Database = {
           id: string
           menu_item_id: string
           quantity: number
+          selected_options: Json | null
           updated_at: string
           user_id: string
         }
@@ -75,6 +76,7 @@ export type Database = {
           id?: string
           menu_item_id: string
           quantity?: number
+          selected_options?: Json | null
           updated_at?: string
           user_id: string
         }
@@ -83,6 +85,7 @@ export type Database = {
           id?: string
           menu_item_id?: string
           quantity?: number
+          selected_options?: Json | null
           updated_at?: string
           user_id?: string
         }

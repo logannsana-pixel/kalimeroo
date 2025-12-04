@@ -10,6 +10,7 @@ import { DeliveryHistoryTab } from "@/components/delivery/DeliveryHistoryTab";
 import { DeliveryProfileTab } from "@/components/delivery/DeliveryProfileTab";
 import { Database } from "@/integrations/supabase/types";
 import { toast } from "sonner";
+import { ChatInterface } from "@/components/ChatInterface";
 
 type OrderStatus = Database["public"]["Enums"]["order_status"];
 
@@ -20,10 +21,12 @@ interface Order {
   total: number;
   delivery_address: string;
   phone: string;
+  user_id: string;
   restaurants: {
     name: string;
     address: string;
     phone: string | null;
+    owner_id: string | null;
   } | null;
   profiles: {
     full_name: string | null;
@@ -69,7 +72,7 @@ export default function DeliveryDashboard() {
         
         const { data: restaurantsData } = await supabase
           .from('restaurants')
-          .select('id, name, address, phone')
+          .select('id, name, address, phone, owner_id')
           .in('id', restaurantIds);
           
         const { data: profilesData } = await supabase
@@ -87,6 +90,7 @@ export default function DeliveryDashboard() {
           )
           .map(order => ({
             ...order,
+            user_id: order.user_id,
             restaurants: restaurantsMap.get(order.restaurant_id) || null,
             profiles: profilesMap.get(order.user_id) || null
           }));
