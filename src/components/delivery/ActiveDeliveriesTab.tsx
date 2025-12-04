@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Phone, Store, CheckCircle } from "lucide-react";
 import { Database } from "@/integrations/supabase/types";
+import { ChatInterface } from "@/components/ChatInterface";
 
 type OrderStatus = Database["public"]["Enums"]["order_status"];
 
@@ -13,10 +14,12 @@ interface Order {
   total: number;
   delivery_address: string;
   phone: string;
+  user_id: string;
   restaurants: {
     name: string;
     address: string;
     phone: string | null;
+    owner_id: string | null;
   } | null;
   profiles: {
     full_name: string | null;
@@ -76,6 +79,21 @@ export const ActiveDeliveriesTab = ({ orders, onComplete }: ActiveDeliveriesTabP
                   <Phone className="w-4 h-4 text-muted-foreground" />
                   <span>{order.phone}</span>
                 </div>
+              </div>
+
+              <div className="flex flex-wrap gap-2 pt-3 border-t">
+                <ChatInterface
+                  orderId={order.id}
+                  receiverId={order.user_id}
+                  receiverName={order.profiles?.full_name || "Client"}
+                />
+                {order.restaurants?.owner_id && (
+                  <ChatInterface
+                    orderId={order.id}
+                    receiverId={order.restaurants.owner_id}
+                    receiverName={order.restaurants.name}
+                  />
+                )}
               </div>
 
               <div className="flex items-center justify-between pt-3 border-t">

@@ -7,11 +7,12 @@ import { Utensils } from "lucide-react";
 import { RoleSelector } from "@/components/auth/RoleSelector";
 import { CustomerSignupForm } from "@/components/auth/CustomerSignupForm";
 import { RestaurantSignupForm } from "@/components/auth/RestaurantSignupForm";
+import { DeliverySignupForm } from "@/components/auth/DeliverySignupForm";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-type AuthStep = "login" | "role-select" | "customer-signup" | "restaurant-signup";
+type AuthStep = "login" | "role-select" | "customer-signup" | "restaurant-signup" | "delivery-signup";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -20,7 +21,6 @@ const Auth = () => {
   const [loginData, setLoginData] = useState({ email: "", password: "" });
 
   useEffect(() => {
-    // Check if user is already logged in
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
@@ -133,7 +133,6 @@ const Auth = () => {
     try {
       const redirectUrl = `${window.location.origin}/restaurant-dashboard`;
 
-      // Upload logo if provided
       let logoUrl = "";
       if (restaurantData.logo) {
         const fileExt = restaurantData.logo.name.split('.').pop();
@@ -189,9 +188,51 @@ const Auth = () => {
     }
   };
 
+  const handleDeliverySignup = async (deliveryData: any) => {
+    setIsLoading(true);
+
+    try {
+      const redirectUrl = `${window.location.origin}/delivery-dashboard`;
+
+      const { error, data } = await supabase.auth.signUp({
+        email: deliveryData.email,
+        password: deliveryData.password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            full_name: deliveryData.fullName,
+            phone: deliveryData.phone,
+            district: deliveryData.district,
+            city: deliveryData.city,
+            address: deliveryData.district,
+            role: "delivery_driver",
+            vehicle_type: deliveryData.vehicleType,
+            license_number: deliveryData.licenseNumber,
+          },
+        },
+      });
+
+      if (error) {
+        if (error.message.includes("already registered")) {
+          toast.error("Cet email est déjà utilisé");
+        } else {
+          toast.error(error.message);
+        }
+      } else {
+        toast.success("Compte livreur créé avec succès !");
+        navigate("/delivery-dashboard");
+      }
+    } catch (err) {
+      console.error("Signup error:", err);
+      toast.error("Une erreur est survenue");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-subtle p-4">
-      <Card className="w-full max-w-lg">
+      <Card className="w-full max-w-2xl">
         {step !== "login" && (
           <div className="px-6 pt-6">
             <div className="flex justify-center mb-4">
@@ -260,6 +301,8 @@ const Auth = () => {
               onSelectRole={(role) => {
                 if (role === "customer") {
                   setStep("customer-signup");
+                } else if (role === "delivery_driver") {
+                  setStep("delivery-signup");
                 } else {
                   setStep("restaurant-signup");
                 }
@@ -277,6 +320,13 @@ const Auth = () => {
           {step === "restaurant-signup" && (
             <RestaurantSignupForm
               onSubmit={handleRestaurantSignup}
+              onBack={() => setStep("role-select")}
+            />
+          )}
+
+          {step === "delivery-signup" && (
+            <DeliverySignupForm
+              onSubmit={handleDeliverySignup}
               onBack={() => setStep("role-select")}
             />
           )}
