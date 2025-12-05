@@ -5,9 +5,9 @@ import { Footer } from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Star, Clock, DollarSign } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Star, Clock, DollarSign, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useLocation } from "@/contexts/LocationContext";
 import { AdvancedSearch, SearchFilters } from "@/components/AdvancedSearch";
 import { FavoritesButton } from "@/components/FavoritesButton";
 
@@ -20,11 +20,11 @@ interface Restaurant {
   rating: number;
   delivery_time: string;
   delivery_fee: number;
+  city: string | null;
 }
 
 export default function Restaurants() {
   const navigate = useNavigate();
-  const { city } = useLocation();
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<SearchFilters>({
@@ -61,7 +61,7 @@ export default function Restaurants() {
   const filteredRestaurants = useMemo(() => {
     let filtered = restaurants;
 
-    // Text search
+    // Text search (includes city search)
     if (filters.query) {
       const query = filters.query.toLowerCase();
       filtered = filtered.filter(
@@ -69,6 +69,7 @@ export default function Restaurants() {
           r.name.toLowerCase().includes(query) ||
           r.cuisine_type?.toLowerCase().includes(query) ||
           r.description?.toLowerCase().includes(query) ||
+          r.city?.toLowerCase().includes(query) ||
           r.menu_items?.some((item: any) => 
             item.name.toLowerCase().includes(query) ||
             item.category?.toLowerCase().includes(query)
@@ -105,9 +106,14 @@ export default function Restaurants() {
     <div className="min-h-screen flex flex-col pb-16 md:pb-0">
       <Navbar />
       <main className="flex-1 container mx-auto px-4 py-4 md:py-8">
-        <h1 className="text-xl md:text-3xl font-bold mb-6 md:mb-8">
-          Restaurants disponibles à {city}
-        </h1>
+        <div className="mb-6 md:mb-8">
+          <h1 className="text-xl md:text-3xl font-bold mb-2">
+            Tous les restaurants
+          </h1>
+          <p className="text-sm md:text-base text-muted-foreground">
+            Commandez depuis n'importe quelle ville pour livraison partout au Congo
+          </p>
+        </div>
 
         <div className="mb-6">
           <AdvancedSearch onSearch={setFilters} />
@@ -133,7 +139,7 @@ export default function Restaurants() {
                 : "Aucun restaurant disponible pour le moment"}
             </p>
             <p className="text-sm text-muted-foreground">
-              Revenez bientôt, de nouveaux restaurants arrivent ! 🍴
+              Revenez bientôt, de nouveaux restaurants arrivent !
             </p>
           </div>
         ) : (
@@ -145,7 +151,7 @@ export default function Restaurants() {
               {filteredRestaurants.map((restaurant) => (
                 <Card
                   key={restaurant.id}
-                  className="cursor-pointer hover:shadow-hover transition-all duration-300 overflow-hidden group"
+                  className="cursor-pointer hover:shadow-hover transition-all duration-300 overflow-hidden group hover:-translate-y-1"
                   onClick={() => navigate(`/restaurant/${restaurant.id}`)}
                 >
                   <div className="relative h-40 sm:h-48 overflow-hidden">
@@ -157,13 +163,19 @@ export default function Restaurants() {
                     <div className="absolute top-2 right-2" onClick={(e) => e.stopPropagation()}>
                       <FavoritesButton restaurantId={restaurant.id} />
                     </div>
+                    {restaurant.city && (
+                      <Badge className="absolute top-2 left-2 bg-background/90 text-foreground text-xs">
+                        <MapPin className="w-3 h-3 mr-1" />
+                        {restaurant.city}
+                      </Badge>
+                    )}
                   </div>
                   <CardHeader className="pb-3">
                     <CardTitle className="flex items-start justify-between gap-2">
                       <span className="text-base md:text-lg line-clamp-1">{restaurant.name}</span>
                       <div className="flex items-center text-sm whitespace-nowrap">
                         <Star className="w-4 h-4 fill-primary text-primary mr-1" />
-                        <span>{restaurant.rating}</span>
+                        <span>{restaurant.rating || "Nouveau"}</span>
                       </div>
                     </CardTitle>
                   </CardHeader>
@@ -178,7 +190,7 @@ export default function Restaurants() {
                       </div>
                       <div className="flex items-center text-muted-foreground">
                         <DollarSign className="w-4 h-4" />
-                        <span>{restaurant.delivery_fee.toFixed(0)} FCFA</span>
+                        <span>{restaurant.delivery_fee?.toFixed(0) || 0} FCFA</span>
                       </div>
                     </div>
                     <span className="inline-block text-xs bg-gradient-secondary text-secondary-foreground px-3 py-1 rounded-full">
