@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Star, Clock, DollarSign, MapPin } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { AdvancedSearch, SearchFilters } from "@/components/AdvancedSearch";
 import { FavoritesButton } from "@/components/FavoritesButton";
 
@@ -25,15 +25,26 @@ interface Restaurant {
 
 export default function Restaurants() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Initialize filters from URL params
+  const initialQuery = searchParams.get("q") || "";
+  const initialCategory = searchParams.get("category") || "all";
+  
   const [filters, setFilters] = useState<SearchFilters>({
-    query: "",
-    category: "all",
+    query: initialQuery,
+    category: initialCategory,
     minPrice: 0,
-    maxPrice: 100,
+    maxPrice: 50000,
     minRating: 0,
   });
+
+  const initialFilters = useMemo(() => ({
+    query: initialQuery,
+    category: initialCategory,
+  }), [initialQuery, initialCategory]);
 
   useEffect(() => {
     fetchRestaurants();
@@ -116,7 +127,7 @@ export default function Restaurants() {
         </div>
 
         <div className="mb-6">
-          <AdvancedSearch onSearch={setFilters} />
+          <AdvancedSearch onSearch={setFilters} initialFilters={initialFilters} />
         </div>
 
         {loading ? (
