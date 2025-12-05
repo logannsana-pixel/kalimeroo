@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Star, Clock, Truck } from "lucide-react";
+import { Star, Clock, Truck, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -14,6 +14,7 @@ interface Restaurant {
   cuisine_type: string | null;
   delivery_time: string | null;
   delivery_fee: number;
+  city: string | null;
 }
 
 export const FeaturedRestaurants = () => {
@@ -25,7 +26,7 @@ export const FeaturedRestaurants = () => {
     const fetchRestaurants = async () => {
       const { data, error } = await supabase
         .from("restaurants")
-        .select("id, name, image_url, rating, cuisine_type, delivery_time, delivery_fee")
+        .select("id, name, image_url, rating, cuisine_type, delivery_time, delivery_fee, city")
         .eq("is_active", true)
         .order("rating", { ascending: false })
         .limit(4);
@@ -69,7 +70,7 @@ export const FeaturedRestaurants = () => {
             Restaurants populaires
           </h2>
           <p className="text-base md:text-xl text-muted-foreground mb-4">
-            Bientôt disponible 🍴
+            Bientôt disponible
           </p>
           <p className="text-sm md:text-base text-muted-foreground">
             Nous travaillons pour vous proposer les meilleurs restaurants
@@ -87,7 +88,7 @@ export const FeaturedRestaurants = () => {
             Restaurants populaires
           </h2>
           <p className="text-base md:text-xl text-muted-foreground">
-            Découvrez nos meilleurs partenaires
+            Commandez depuis toutes les villes du Congo
           </p>
         </div>
         
@@ -109,6 +110,12 @@ export const FeaturedRestaurants = () => {
                   <Badge className="absolute top-2 md:top-3 right-2 md:right-3 bg-background/90 text-foreground text-xs">
                     <Star className="w-3 h-3 fill-primary text-primary mr-1" />
                     {restaurant.rating.toFixed(1)}
+                  </Badge>
+                )}
+                {restaurant.city && (
+                  <Badge className="absolute top-2 md:top-3 left-2 md:left-3 bg-primary/90 text-primary-foreground text-xs">
+                    <MapPin className="w-3 h-3 mr-1" />
+                    {restaurant.city}
                   </Badge>
                 )}
               </div>
