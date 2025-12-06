@@ -279,6 +279,7 @@ export type Database = {
           created_at: string
           id: string
           is_read: boolean | null
+          is_typing: boolean | null
           order_id: string | null
           receiver_id: string
           sender_id: string
@@ -288,6 +289,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_read?: boolean | null
+          is_typing?: boolean | null
           order_id?: string | null
           receiver_id: string
           sender_id: string
@@ -297,6 +299,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_read?: boolean | null
+          is_typing?: boolean | null
           order_id?: string | null
           receiver_id?: string
           sender_id?: string
@@ -311,6 +314,54 @@ export type Database = {
           },
           {
             foreignKeyName: "messages_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "restaurant_orders_masked"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean | null
+          message: string
+          order_id: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          message: string
+          order_id?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          order_id?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_order_id_fkey"
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "restaurant_orders_masked"
@@ -793,8 +844,12 @@ export type Database = {
       app_role: "customer" | "restaurant_owner" | "delivery_driver" | "admin"
       order_status:
         | "pending"
+        | "accepted"
         | "confirmed"
         | "preparing"
+        | "pickup_pending"
+        | "pickup_accepted"
+        | "picked_up"
         | "ready"
         | "delivering"
         | "delivered"
@@ -929,8 +984,12 @@ export const Constants = {
       app_role: ["customer", "restaurant_owner", "delivery_driver", "admin"],
       order_status: [
         "pending",
+        "accepted",
         "confirmed",
         "preparing",
+        "pickup_pending",
+        "pickup_accepted",
+        "picked_up",
         "ready",
         "delivering",
         "delivered",

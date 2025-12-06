@@ -37,9 +37,13 @@ interface Profile {
 
 const statusColors: Record<OrderStatus, string> = {
   pending: "bg-yellow-100 text-yellow-800",
+  accepted: "bg-blue-100 text-blue-800",
   confirmed: "bg-blue-100 text-blue-800",
   preparing: "bg-purple-100 text-purple-800",
   ready: "bg-green-100 text-green-800",
+  pickup_pending: "bg-teal-100 text-teal-800",
+  pickup_accepted: "bg-cyan-100 text-cyan-800",
+  picked_up: "bg-indigo-100 text-indigo-800",
   delivering: "bg-orange-100 text-orange-800",
   delivered: "bg-gray-100 text-gray-800",
   cancelled: "bg-red-100 text-red-800",
@@ -47,9 +51,13 @@ const statusColors: Record<OrderStatus, string> = {
 
 const statusLabels: Record<OrderStatus, string> = {
   pending: "En attente",
+  accepted: "Acceptée",
   confirmed: "Confirmée",
   preparing: "En préparation",
   ready: "Prête",
+  pickup_pending: "Prête - En attente livreur",
+  pickup_accepted: "Livreur assigné",
+  picked_up: "Récupérée par livreur",
   delivering: "En livraison",
   delivered: "Livrée",
   cancelled: "Annulée",
