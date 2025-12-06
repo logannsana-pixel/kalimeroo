@@ -1,12 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Package, CheckCircle, MapPin, Phone, User } from "lucide-react";
+import { Clock, Package, CheckCircle, MapPin, Phone, User, X, RefreshCw } from "lucide-react";
 import { Database } from "@/integrations/supabase/types";
 import { toast } from "sonner";
 import { ChatInterface } from "@/components/ChatInterface";
+import { OrderCardSkeleton } from "@/components/ui/skeleton-card";
+import { ButtonLoader } from "@/components/ui/loading-spinner";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { RefreshButton } from "@/components/RefreshButton";
 
 type OrderStatus = Database["public"]["Enums"]["order_status"];
 
@@ -24,28 +28,36 @@ interface Order {
   } | null;
 }
 
+const statusConfig: Record<OrderStatus, { label: string; color: string; icon: any }> = {
+  pending: { label: "En attente", color: "bg-yellow-100 text-yellow-800", icon: Clock },
+  accepted: { label: "Acceptée", color: "bg-blue-100 text-blue-800", icon: CheckCircle },
+  confirmed: { label: "Confirmée", color: "bg-blue-100 text-blue-800", icon: CheckCircle },
+  preparing: { label: "En préparation", color: "bg-purple-100 text-purple-800", icon: Package },
+  ready: { label: "Prête", color: "bg-green-100 text-green-800", icon: CheckCircle },
+  pickup_pending: { label: "Attente livreur", color: "bg-teal-100 text-teal-800", icon: Package },
+  pickup_accepted: { label: "Livreur assigné", color: "bg-cyan-100 text-cyan-800", icon: Package },
+  picked_up: { label: "Récupérée", color: "bg-indigo-100 text-indigo-800", icon: Package },
+  delivering: { label: "En livraison", color: "bg-orange-100 text-orange-800", icon: MapPin },
+  delivered: { label: "Livrée", color: "bg-gray-100 text-gray-800", icon: CheckCircle },
+  cancelled: { label: "Annulée", color: "bg-red-100 text-red-800", icon: X },
+};
+
 export const OrdersTab = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean;
+    orderId: string;
+    newStatus: OrderStatus | null;
+    action: string;
+  }>({ open: false, orderId: '', newStatus: null, action: '' });
 
-  useEffect(() => {
-    fetchOrders();
-    
-    const channel = supabase
-      .channel('restaurant_orders')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'orders' },
-        () => fetchOrders()
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
-
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async (showRefresh = false) => {
     try {
+      if (showRefresh) setRefreshing(true);
+      
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
@@ -87,10 +99,33 @@ export const OrdersTab = () => {
       toast.error("Erreur lors du chargement des commandes");
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
-  };
+  }, []);
 
-  const updateOrderStatus = async (orderId: string, newStatus: OrderStatus) => {
+  useEffect(() => {
+    fetchOrders();
+    
+    const channel = supabase
+      .channel('restaurant_orders')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'orders' },
+        () => fetchOrders()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [fetchOrders]);
+
+  const handleStatusUpdate = async () => {
+    const { orderId, newStatus } = confirmDialog;
+    if (!newStatus) return;
+    
+    setActionLoading(orderId);
+    setConfirmDialog({ ...confirmDialog, open: false });
+
     try {
       const { error } = await supabase
         .from('orders')
@@ -104,38 +139,53 @@ export const OrdersTab = () => {
     } catch (error) {
       console.error('Error updating order:', error);
       toast.error("Erreur lors de la mise à jour");
+    } finally {
+      setActionLoading(null);
     }
   };
 
-  const getStatusIcon = (status: OrderStatus) => {
-    switch (status) {
-      case 'pending': return <Clock className="w-4 h-4" />;
-      case 'preparing': return <Package className="w-4 h-4" />;
-      case 'delivering': return <MapPin className="w-4 h-4" />;
-      case 'delivered': return <CheckCircle className="w-4 h-4" />;
-      default: return null;
-    }
+  const openConfirmDialog = (orderId: string, newStatus: OrderStatus, action: string) => {
+    setConfirmDialog({ open: true, orderId, newStatus, action });
   };
 
-  const getNextStatus = (currentStatus: OrderStatus) => {
+  const getNextStatus = (currentStatus: OrderStatus): { next: OrderStatus; label: string } | null => {
     switch (currentStatus) {
-      case 'pending': return { next: 'preparing' as OrderStatus, label: 'Accepter' };
-      case 'preparing': return { next: 'delivering' as OrderStatus, label: 'Prête à livrer' };
+      case 'pending': return { next: 'accepted', label: 'Accepter' };
+      case 'accepted': return { next: 'preparing', label: 'Commencer préparation' };
+      case 'preparing': return { next: 'pickup_pending', label: 'Prête - Attente livreur' };
       default: return null;
     }
   };
 
   if (loading) {
-    return <div className="text-center py-8">Chargement...</div>;
+    return (
+      <div className="space-y-4">
+        <div className="flex justify-end">
+          <RefreshButton onClick={() => {}} loading={true} />
+        </div>
+        {Array.from({ length: 3 }).map((_, i) => (
+          <OrderCardSkeleton key={i} />
+        ))}
+      </div>
+    );
   }
 
-  const pendingOrders = orders.filter(o => o.status === 'pending' || o.status === 'preparing');
-  const completedOrders = orders.filter(o => o.status === 'delivering' || o.status === 'delivered');
+  const pendingOrders = orders.filter(o => ['pending', 'accepted', 'preparing'].includes(o.status));
+  const readyOrders = orders.filter(o => ['pickup_pending', 'pickup_accepted', 'picked_up', 'delivering'].includes(o.status));
+  const completedOrders = orders.filter(o => ['delivered', 'cancelled'].includes(o.status));
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-end">
+        <RefreshButton onClick={() => fetchOrders(true)} loading={refreshing} />
+      </div>
+
+      {/* Pending orders */}
       <div>
-        <h2 className="text-2xl font-bold mb-4">Commandes en attente</h2>
+        <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+          <Clock className="h-5 w-5" />
+          Commandes à traiter ({pendingOrders.length})
+        </h2>
         {pendingOrders.length === 0 ? (
           <Card>
             <CardContent className="text-center py-8 text-muted-foreground">
@@ -146,16 +196,18 @@ export const OrdersTab = () => {
           <div className="space-y-4">
             {pendingOrders.map((order) => {
               const nextStatus = getNextStatus(order.status);
+              const config = statusConfig[order.status];
+              const StatusIcon = config.icon;
+              const isLoading = actionLoading === order.id;
+              
               return (
-                <Card key={order.id}>
-                  <CardHeader>
+                <Card key={order.id} className="border-l-4 border-l-primary">
+                  <CardHeader className="pb-2">
                     <div className="flex justify-between items-start">
                       <CardTitle className="text-lg">Commande #{order.id.slice(0, 8)}</CardTitle>
-                      <Badge variant={order.status === 'pending' ? 'secondary' : 'default'}>
-                        <div className="flex items-center gap-1">
-                          {getStatusIcon(order.status)}
-                          {order.status}
-                        </div>
+                      <Badge className={config.color}>
+                        <StatusIcon className="w-3 h-3 mr-1" />
+                        {config.label}
                       </Badge>
                     </div>
                   </CardHeader>
@@ -163,30 +215,45 @@ export const OrdersTab = () => {
                     <div className="space-y-3">
                       <div className="flex items-center gap-2 text-sm">
                         <User className="w-4 h-4 text-muted-foreground" />
-                        <span>{order.profiles?.full_name || 'Client'}</span>
+                        <span className="font-medium">{order.profiles?.full_name || 'Client'}</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm">
                         <Phone className="w-4 h-4 text-muted-foreground" />
-                        <span>{order.phone}</span>
+                        <a href={`tel:${order.phone}`} className="text-primary">{order.phone}</a>
                       </div>
-                      <div className="flex items-center gap-2 text-sm">
-                        <MapPin className="w-4 h-4 text-muted-foreground" />
+                      <div className="flex items-start gap-2 text-sm">
+                        <MapPin className="w-4 h-4 text-muted-foreground mt-0.5" />
                         <span>{order.delivery_address}</span>
                       </div>
                       {order.notes && (
-                        <p className="text-sm text-muted-foreground">Note: {order.notes}</p>
+                        <p className="text-sm bg-muted p-2 rounded">
+                          <strong>Note:</strong> {order.notes}
+                        </p>
                       )}
                       <div className="flex items-center justify-between pt-3 border-t">
-                        <span className="font-semibold text-lg">{order.total.toFixed(2)} FCFA</span>
+                        <span className="font-bold text-lg">{order.total.toFixed(0)} FCFA</span>
                         <div className="flex gap-2">
                           <ChatInterface
                             orderId={order.id}
                             receiverId={order.user_id}
                             receiverName={order.profiles?.full_name || "Client"}
                           />
+                          {order.status === 'pending' && (
+                            <Button 
+                              variant="destructive" 
+                              size="sm"
+                              onClick={() => openConfirmDialog(order.id, 'cancelled', 'Refuser cette commande')}
+                              disabled={isLoading}
+                            >
+                              Refuser
+                            </Button>
+                          )}
                           {nextStatus && (
-                            <Button onClick={() => updateOrderStatus(order.id, nextStatus.next)}>
-                              {nextStatus.label}
+                            <Button 
+                              onClick={() => openConfirmDialog(order.id, nextStatus.next, nextStatus.label)}
+                              disabled={isLoading}
+                            >
+                              {isLoading ? <ButtonLoader /> : nextStatus.label}
                             </Button>
                           )}
                         </div>
@@ -200,48 +267,93 @@ export const OrdersTab = () => {
         )}
       </div>
 
+      {/* Ready/In transit orders */}
+      {readyOrders.length > 0 && (
+        <div>
+          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+            <Package className="h-5 w-5" />
+            En cours de livraison ({readyOrders.length})
+          </h2>
+          <div className="space-y-4">
+            {readyOrders.map((order) => {
+              const config = statusConfig[order.status];
+              const StatusIcon = config.icon;
+              
+              return (
+                <Card key={order.id} className="opacity-80">
+                  <CardHeader className="pb-2">
+                    <div className="flex justify-between items-start">
+                      <CardTitle className="text-lg">Commande #{order.id.slice(0, 8)}</CardTitle>
+                      <Badge className={config.color}>
+                        <StatusIcon className="w-3 h-3 mr-1" />
+                        {config.label}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-sm">
+                        <User className="w-4 h-4 text-muted-foreground" />
+                        <span>{order.profiles?.full_name || 'Client'}</span>
+                      </div>
+                      <span className="font-semibold">{order.total.toFixed(0)} FCFA</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Completed orders */}
       <div>
-        <h2 className="text-2xl font-bold mb-4">Commandes en cours / terminées</h2>
+        <h2 className="text-xl font-bold mb-4">Historique récent</h2>
         {completedOrders.length === 0 ? (
           <Card>
             <CardContent className="text-center py-8 text-muted-foreground">
-              Aucune commande
+              Aucune commande terminée
             </CardContent>
           </Card>
         ) : (
-          <div className="space-y-4">
-            {completedOrders.map((order) => (
-              <Card key={order.id}>
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <CardTitle className="text-lg">Commande #{order.id.slice(0, 8)}</CardTitle>
-                    <Badge variant={order.status === 'delivered' ? 'default' : 'secondary'}>
-                      <div className="flex items-center gap-1">
-                        {getStatusIcon(order.status)}
-                        {order.status}
-                      </div>
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm">
-                      <User className="w-4 h-4 text-muted-foreground" />
-                      <span>{order.profiles?.full_name || 'Client'}</span>
-                    </div>
+          <div className="space-y-2">
+            {completedOrders.slice(0, 5).map((order) => {
+              const config = statusConfig[order.status];
+              
+              return (
+                <Card key={order.id} className="opacity-60">
+                  <CardContent className="py-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">
-                        {new Date(order.created_at).toLocaleDateString('fr-FR')}
-                      </span>
-                      <span className="font-semibold">{order.total.toFixed(2)} FCFA</span>
+                      <div>
+                        <span className="font-medium">#{order.id.slice(0, 8)}</span>
+                        <span className="text-sm text-muted-foreground ml-2">
+                          {order.profiles?.full_name || 'Client'}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge className={config.color} variant="outline">
+                          {config.label}
+                        </Badge>
+                        <span className="font-semibold">{order.total.toFixed(0)} FCFA</span>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        open={confirmDialog.open}
+        onOpenChange={(open) => setConfirmDialog({ ...confirmDialog, open })}
+        title={confirmDialog.action}
+        description="Êtes-vous sûr de vouloir effectuer cette action ?"
+        onConfirm={handleStatusUpdate}
+        loading={!!actionLoading}
+        variant={confirmDialog.newStatus === 'cancelled' ? 'destructive' : 'default'}
+      />
     </div>
   );
 };
