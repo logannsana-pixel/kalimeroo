@@ -1,6 +1,3 @@
-import { Navbar } from "@/components/Navbar";
-import { BottomNav } from "@/components/BottomNav";
-import { Footer } from "@/components/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { OrdersTab } from "@/components/restaurant/OrdersTab";
 import { MenuTab } from "@/components/restaurant/MenuTab";
@@ -13,22 +10,28 @@ import { PromoCodesTab } from "@/components/restaurant/PromoCodesTab";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { LogOut, ChefHat } from "lucide-react";
+import { NotificationBell } from "@/components/NotificationBell";
+import { RefreshButton } from "@/components/RefreshButton";
 
 export default function RestaurantDashboard() {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const [restaurantId, setRestaurantId] = useState<string>("");
+  const [restaurantName, setRestaurantName] = useState<string>("");
 
   useEffect(() => {
     const fetchRestaurant = async () => {
       if (user) {
         const { data } = await supabase
           .from("restaurants")
-          .select("id")
+          .select("id, name")
           .eq("owner_id", user.id)
           .single();
         
         if (data) {
           setRestaurantId(data.id);
+          setRestaurantName(data.name);
         }
       }
     };
@@ -36,10 +39,30 @@ export default function RestaurantDashboard() {
   }, [user]);
 
   return (
-    <div className="min-h-screen flex flex-col pb-16 md:pb-0">
-      <Navbar />
-      <main className="flex-1 container mx-auto px-4 py-4 md:py-8">
-        <h1 className="text-xl md:text-3xl font-bold mb-6 md:mb-8">Tableau de bord Restaurant</h1>
+    <div className="min-h-screen bg-background">
+      {/* Header simplifié du portail */}
+      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <ChefHat className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <h1 className="font-bold text-lg">{restaurantName || "Mon Restaurant"}</h1>
+              <p className="text-xs text-muted-foreground">Espace Restaurateur</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <NotificationBell />
+            <RefreshButton onClick={() => window.location.reload()} />
+            <Button variant="ghost" size="icon" onClick={signOut}>
+              <LogOut className="w-5 h-5" />
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      <main className="container mx-auto px-4 py-6">
         
         <Tabs defaultValue="orders" className="w-full">
           <TabsList className="flex w-full max-w-5xl overflow-x-auto mb-4 h-auto flex-wrap gap-1 bg-muted/50 p-1">
@@ -86,8 +109,6 @@ export default function RestaurantDashboard() {
           </TabsContent>
         </Tabs>
       </main>
-      <Footer />
-      <BottomNav />
     </div>
   );
 }

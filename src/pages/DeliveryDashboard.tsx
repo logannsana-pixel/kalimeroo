@@ -1,6 +1,3 @@
-import { Navbar } from "@/components/Navbar";
-import { BottomNav } from "@/components/BottomNav";
-import { Footer } from "@/components/Footer";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -14,8 +11,10 @@ import { RefreshButton } from "@/components/RefreshButton";
 import { OrderCardSkeleton } from "@/components/ui/skeleton-card";
 import { NotificationBell } from "@/components/NotificationBell";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
-import { Package, Truck, History, User } from "lucide-react";
+import { Package, Truck, History, User, LogOut, Bike } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
 
 type OrderStatus = Database["public"]["Enums"]["order_status"];
 
@@ -39,15 +38,32 @@ interface Order {
 }
 
 export default function DeliveryDashboard() {
+  const { signOut } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [driverName, setDriverName] = useState<string>("");
   const [confirmDialog, setConfirmDialog] = useState<{
     open: boolean;
     orderId: string;
     action: 'accept' | 'pickup' | 'complete';
   }>({ open: false, orderId: '', action: 'accept' });
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('id', user.id)
+          .single();
+        if (data?.full_name) setDriverName(data.full_name);
+      }
+    };
+    fetchProfile();
+  }, []);
 
   const fetchOrders = useCallback(async (showRefresh = false) => {
     try {
@@ -201,35 +217,56 @@ export default function DeliveryDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col pb-16 md:pb-0">
-        <Navbar />
-        <main className="flex-1 container mx-auto px-4 py-4 md:py-8">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-xl md:text-3xl font-bold">Tableau de bord Livreur</h1>
+      <div className="min-h-screen bg-background">
+        <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b">
+          <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Bike className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h1 className="font-bold text-lg">Espace Livreur</h1>
+                <p className="text-xs text-muted-foreground">Chargement...</p>
+              </div>
+            </div>
           </div>
+        </header>
+        <main className="container mx-auto px-4 py-6">
           <div className="space-y-4">
             {Array.from({ length: 3 }).map((_, i) => (
               <OrderCardSkeleton key={i} />
             ))}
           </div>
         </main>
-        <Footer />
-        <BottomNav />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col pb-16 md:pb-0">
-      <Navbar />
-      <main className="flex-1 container mx-auto px-4 py-4 md:py-8">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-xl md:text-3xl font-bold">Tableau de bord Livreur</h1>
+    <div className="min-h-screen bg-background">
+      {/* Header simplifié du portail */}
+      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <Bike className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <h1 className="font-bold text-lg">{driverName || "Livreur"}</h1>
+              <p className="text-xs text-muted-foreground">Espace Livreur</p>
+            </div>
+          </div>
           <div className="flex items-center gap-2">
             <NotificationBell />
             <RefreshButton onClick={() => fetchOrders(true)} loading={refreshing} />
+            <Button variant="ghost" size="icon" onClick={signOut}>
+              <LogOut className="w-5 h-5" />
+            </Button>
           </div>
         </div>
+      </header>
+
+      <main className="container mx-auto px-4 py-6">
         
         <Tabs defaultValue="active" className="w-full">
           <TabsList className="grid w-full max-w-2xl grid-cols-4 mb-4">
@@ -287,8 +324,6 @@ export default function DeliveryDashboard() {
           </TabsContent>
         </Tabs>
       </main>
-      <Footer />
-      <BottomNav />
 
       <ConfirmDialog
         open={confirmDialog.open}
