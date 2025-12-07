@@ -1,18 +1,19 @@
 import { useEffect, useState } from "react";
-import { Navbar } from "@/components/Navbar";
-import { BottomNav } from "@/components/BottomNav";
-import { Footer } from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Users, Store, Package, TrendingUp, Clock, CheckCircle, 
-  XCircle, Eye, BarChart3, ArrowUp, ArrowDown 
+  BarChart3, LogOut, Shield
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { useAuth } from "@/hooks/useAuth";
+import { NotificationBell } from "@/components/NotificationBell";
+import { RefreshButton } from "@/components/RefreshButton";
+import { OrderCardSkeleton } from "@/components/ui/skeleton-card";
 
 interface Stats {
   totalUsers: number;
@@ -44,6 +45,7 @@ interface Restaurant {
 }
 
 export default function AdminDashboard() {
+  const { signOut } = useAuth();
   const [stats, setStats] = useState<Stats>({
     totalUsers: 0,
     totalRestaurants: 0,
@@ -162,28 +164,56 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col pb-16 md:pb-0">
-        <Navbar />
-        <main className="flex-1 container mx-auto px-4 py-4 md:py-8">
-          <h1 className="text-xl md:text-3xl font-bold mb-6">Tableau de bord Admin</h1>
-          <p>Chargement...</p>
+      <div className="min-h-screen bg-background">
+        <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b">
+          <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center">
+                <Shield className="w-5 h-5 text-destructive" />
+              </div>
+              <div>
+                <h1 className="font-bold text-lg">Administration</h1>
+                <p className="text-xs text-muted-foreground">Chargement...</p>
+              </div>
+            </div>
+          </div>
+        </header>
+        <main className="container mx-auto px-4 py-6">
+          <div className="grid gap-4 grid-cols-2 lg:grid-cols-4 mb-6">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <OrderCardSkeleton key={i} />
+            ))}
+          </div>
         </main>
-        <Footer />
-        <BottomNav />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col pb-16 md:pb-0">
-      <Navbar />
-      <main className="flex-1 container mx-auto px-4 py-4 md:py-8">
-        <div className="flex items-center justify-between mb-6 md:mb-8">
-          <h1 className="text-xl md:text-3xl font-bold">Tableau de bord Admin</h1>
-          <Button variant="outline" onClick={fetchAllData}>
-            Actualiser
-          </Button>
+    <div className="min-h-screen bg-background">
+      {/* Header simplifié du portail Admin */}
+      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center">
+              <Shield className="w-5 h-5 text-destructive" />
+            </div>
+            <div>
+              <h1 className="font-bold text-lg">Administration</h1>
+              <p className="text-xs text-muted-foreground">Panneau de contrôle</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <NotificationBell />
+            <RefreshButton onClick={fetchAllData} />
+            <Button variant="ghost" size="icon" onClick={signOut}>
+              <LogOut className="w-5 h-5" />
+            </Button>
+          </div>
         </div>
+      </header>
+
+      <main className="container mx-auto px-4 py-6">
         
         {/* Stats Cards */}
         <div className="grid gap-4 grid-cols-2 lg:grid-cols-4 mb-6 md:mb-8">
@@ -352,8 +382,6 @@ export default function AdminDashboard() {
           </TabsContent>
         </Tabs>
       </main>
-      <Footer />
-      <BottomNav />
     </div>
   );
 }
