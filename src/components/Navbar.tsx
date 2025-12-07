@@ -1,9 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
-import { ShoppingCart, User, Utensils, LayoutDashboard, Menu, X, Home, Search } from "lucide-react";
+import { ShoppingCart, User, Utensils, LayoutDashboard, Home, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
-import { useState } from "react";
 import { NotificationBell } from "@/components/NotificationBell";
 import {
   DropdownMenu,
@@ -77,13 +76,16 @@ export const Navbar = () => {
         </div>
 
         {/* Right Section */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 md:gap-2">
           {user ? (
             <>
-              {/* Cart - Always visible for customers */}
+              {/* Notifications - Visible for all authenticated users */}
+              <NotificationBell />
+
+              {/* Cart - Only for customers */}
               {userRole === "customer" && (
                 <Link to="/cart" className="relative">
-                  <Button variant="ghost" size="icon" className="h-10 w-10">
+                  <Button variant="ghost" size="icon" className="h-9 w-9 md:h-10 md:w-10">
                     <ShoppingCart className="h-5 w-5" />
                     {cartCount > 0 && (
                       <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center font-medium">
@@ -97,7 +99,7 @@ export const Navbar = () => {
               {/* User Menu */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-10 w-10">
+                  <Button variant="ghost" size="icon" className="h-9 w-9 md:h-10 md:w-10">
                     <User className="h-5 w-5" />
                   </Button>
                 </DropdownMenuTrigger>
