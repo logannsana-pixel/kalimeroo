@@ -1,0 +1,70 @@
+import { Bell, LogOut, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { NotificationBell } from "@/components/NotificationBell";
+
+interface DriverHeaderProps {
+  driverName: string;
+  isOnline: boolean;
+  onToggleOnline: () => void;
+  onLogout: () => void;
+  onRefresh: () => void;
+  refreshing: boolean;
+}
+
+export function DriverHeader({ 
+  driverName, 
+  isOnline, 
+  onToggleOnline, 
+  onLogout, 
+  onRefresh, 
+  refreshing 
+}: DriverHeaderProps) {
+  return (
+    <header className="sticky top-0 z-50 bg-background border-b safe-area-top">
+      <div className="px-4 h-16 flex items-center justify-between">
+        {/* Left - Status Toggle */}
+        <div className="flex items-center gap-3">
+          <div 
+            className={`w-3 h-3 rounded-full ${isOnline ? 'bg-primary animate-pulse-soft' : 'bg-muted-foreground'}`} 
+          />
+          <div>
+            <p className="font-semibold text-sm">{driverName}</p>
+            <div className="flex items-center gap-2">
+              <span className={`text-xs ${isOnline ? 'text-primary' : 'text-muted-foreground'}`}>
+                {isOnline ? 'En ligne' : 'Hors ligne'}
+              </span>
+              <Switch 
+                checked={isOnline} 
+                onCheckedChange={onToggleOnline}
+                className="data-[state=checked]:bg-primary h-5 w-9"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Right - Actions */}
+        <div className="flex items-center gap-1">
+          <NotificationBell />
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={onRefresh}
+            disabled={refreshing}
+            className="touch-target"
+          >
+            <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={onLogout}
+            className="touch-target"
+          >
+            <LogOut className="h-5 w-5" />
+          </Button>
+        </div>
+      </div>
+    </header>
+  );
+}
