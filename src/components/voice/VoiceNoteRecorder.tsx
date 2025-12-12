@@ -55,9 +55,23 @@ export const VoiceNoteRecorder: React.FC<VoiceNoteRecorderProps> = ({
         }
       });
 
-      const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: 'audio/webm;codecs=opus'
-      });
+      // Check for supported MIME types
+      let mimeType = 'audio/webm;codecs=opus';
+      if (!MediaRecorder.isTypeSupported(mimeType)) {
+        mimeType = 'audio/webm';
+        if (!MediaRecorder.isTypeSupported(mimeType)) {
+          mimeType = 'audio/mp4';
+          if (!MediaRecorder.isTypeSupported(mimeType)) {
+            mimeType = ''; // Let browser choose
+          }
+        }
+      }
+
+      console.log('Using MIME type:', mimeType || 'browser default');
+
+      const mediaRecorder = mimeType 
+        ? new MediaRecorder(stream, { mimeType })
+        : new MediaRecorder(stream);
 
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
@@ -69,7 +83,9 @@ export const VoiceNoteRecorder: React.FC<VoiceNoteRecorderProps> = ({
       };
 
       mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        const audioBlob = new Blob(audioChunksRef.current, { 
+          type: mediaRecorder.mimeType || 'audio/webm' 
+        });
         setAudioBlob(audioBlob);
         stream.getTracks().forEach(track => track.stop());
       };
@@ -85,7 +101,7 @@ export const VoiceNoteRecorder: React.FC<VoiceNoteRecorderProps> = ({
 
     } catch (error) {
       console.error('Error starting recording:', error);
-      toast.error('Impossible d\'accéder au microphone');
+      toast.error('Impossible d\'accéder au microphone. Vérifiez les permissions.');
     }
   }, []);
 

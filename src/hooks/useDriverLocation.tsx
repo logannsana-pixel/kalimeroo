@@ -1,6 +1,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useAuth } from '@/hooks/useAuth';
 
 interface UseDriverLocationOptions {
   orderId: string | null;
@@ -13,12 +14,13 @@ export const useDriverLocation = ({
   enabled, 
   updateInterval = 5000 
 }: UseDriverLocationOptions) => {
+  const { user } = useAuth();
   const watchIdRef = useRef<number | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const lastLocationRef = useRef<{ lat: number; lng: number } | null>(null);
 
   const updateDriverLocation = useCallback(async (position: GeolocationPosition) => {
-    if (!orderId) return;
+    if (!user) return;
 
     const lat = position.coords.latitude;
     const lng = position.coords.longitude;
@@ -34,18 +36,18 @@ export const useDriverLocation = ({
     }
 
     lastLocationRef.current = { lat, lng };
-    console.log('Updating driver location:', { lat, lng, orderId });
+    console.log('Updating driver location:', { lat, lng, userId: user.id });
 
     try {
-      // Use raw update to bypass type checking (new columns not in generated types yet)
+      // Update driver location in profiles table (not orders)
       const { error } = await supabase
-        .from('orders')
+        .from('profiles')
         .update({
-          driver_latitude: lat,
-          driver_longitude: lng,
-          driver_location_updated_at: new Date().toISOString()
-        } as any)
-        .eq('id', orderId);
+          latitude: lat,
+          longitude: lng,
+          location_updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id);
 
       if (error) {
         console.error('Error updating driver location:', error);
@@ -55,7 +57,7 @@ export const useDriverLocation = ({
     } catch (error) {
       console.error('Failed to update driver location:', error);
     }
-  }, [orderId]);
+  }, [user]);
 
   const handleError = useCallback((error: GeolocationPositionError) => {
     console.error('Geolocation error:', error);
@@ -121,7 +123,7 @@ export const useDriverLocation = ({
   }, []);
 
   useEffect(() => {
-    if (enabled && orderId) {
+    if (enabled && user) {
       startTracking();
     } else {
       stopTracking();
@@ -130,7 +132,7 @@ export const useDriverLocation = ({
     return () => {
       stopTracking();
     };
-  }, [enabled, orderId, startTracking, stopTracking]);
+  }, [enabled, user, startTracking, stopTracking]);
 
   return {
     startTracking,

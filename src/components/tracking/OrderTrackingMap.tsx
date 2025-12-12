@@ -80,11 +80,22 @@ export const OrderTrackingMap: React.FC<OrderTrackingMapProps> = ({
   const [driverLocation, setDriverLocation] = useState(initialDriverLocation);
   const [previousDriverLocation, setPreviousDriverLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [route, setRoute] = useState<[number, number][]>([]);
+  const [mapReady, setMapReady] = useState(false);
 
-  // Subscribe to real-time driver location updates
+  // Update driver location when props change
   useEffect(() => {
+    if (initialDriverLocation) {
+      setDriverLocation(initialDriverLocation);
+    }
+  }, [initialDriverLocation]);
+
+  // Subscribe to real-time driver location updates via profiles table
+  useEffect(() => {
+    if (!orderId) return;
+    
     console.log('Setting up real-time tracking for order:', orderId);
     
+    // Subscribe to profiles table for driver location updates
     const channel = supabase
       .channel(`order-tracking-${orderId}`)
       .on(
@@ -92,17 +103,16 @@ export const OrderTrackingMap: React.FC<OrderTrackingMapProps> = ({
         {
           event: 'UPDATE',
           schema: 'public',
-          table: 'orders',
-          filter: `id=eq.${orderId}`
+          table: 'profiles'
         },
         (payload) => {
-          console.log('Order update received:', payload);
+          console.log('Profile update received:', payload);
           const newData = payload.new as any;
-          if (newData.driver_latitude && newData.driver_longitude) {
+          if (newData.latitude && newData.longitude) {
             setPreviousDriverLocation(driverLocation);
             setDriverLocation({
-              lat: newData.driver_latitude,
-              lng: newData.driver_longitude
+              lat: newData.latitude,
+              lng: newData.longitude
             });
           }
         }
@@ -225,6 +235,7 @@ export const OrderTrackingMap: React.FC<OrderTrackingMapProps> = ({
           zoom={14}
           style={{ height: '100%', width: '100%' }}
           zoomControl={false}
+          whenReady={() => setMapReady(true)}
         >
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'

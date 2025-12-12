@@ -93,7 +93,8 @@ export default function Orders() {
     if (showRefresh) setRefreshing(true);
 
     try {
-      const { data, error } = await supabase
+      // Fetch orders
+      const { data: ordersData, error } = await supabase
         .from("orders")
         .select(`
           id,
@@ -110,7 +111,9 @@ export default function Orders() {
             id,
             name,
             owner_id,
-            image_url
+            image_url,
+            latitude,
+            longitude
           ),
           order_items (
             id,
@@ -126,9 +129,33 @@ export default function Orders() {
         `)
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
-
+      
       if (error) throw error;
-      setOrders(data || []);
+      
+      // Fetch driver profiles for orders with drivers
+      let data = ordersData || [];
+      if (data.length > 0) {
+        const driverIds = [...new Set(data.filter(o => o.delivery_driver_id).map(o => o.delivery_driver_id!))];
+        if (driverIds.length > 0) {
+          const { data: driversData } = await supabase
+            .from("profiles")
+            .select("id, full_name, phone, latitude, longitude")
+            .in("id", driverIds);
+          
+          const driversMap = new Map(driversData?.map(d => [d.id, d]) || []);
+          data = data.map(order => ({
+            ...order,
+            driver_latitude: order.delivery_driver_id ? driversMap.get(order.delivery_driver_id)?.latitude : null,
+            driver_longitude: order.delivery_driver_id ? driversMap.get(order.delivery_driver_id)?.longitude : null,
+            driver_profile: order.delivery_driver_id ? {
+              full_name: driversMap.get(order.delivery_driver_id)?.full_name || null,
+              phone: driversMap.get(order.delivery_driver_id)?.phone || null
+            } : null
+          }));
+        }
+      }
+
+      setOrders(data);
     } catch (error) {
       console.error("Error fetching orders:", error);
     } finally {
