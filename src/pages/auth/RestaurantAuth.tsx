@@ -107,22 +107,33 @@ const RestaurantAuth = () => {
 
       let logoUrl = "";
       if (restaurantData.logo) {
-        const fileExt = restaurantData.logo.name.split('.').pop();
-        const fileName = `${Math.random()}.${fileExt}`;
-        
-        const { error: uploadError, data: uploadData } = await supabase.storage
-          .from('restaurant-images')
-          .upload(fileName, restaurantData.logo);
-
-        if (!uploadError && uploadData) {
-          const { data: { publicUrl } } = supabase.storage
+        try {
+          const fileExt = restaurantData.logo.name.split('.').pop();
+          const fileName = `signup-${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+          
+          const { error: uploadError, data: uploadData } = await supabase.storage
             .from('restaurant-images')
-            .getPublicUrl(uploadData.path);
-          logoUrl = publicUrl;
+            .upload(fileName, restaurantData.logo, {
+              cacheControl: '3600',
+              upsert: false
+            });
+
+          if (uploadError) {
+            console.error("Logo upload error:", uploadError);
+            toast.error("Erreur lors de l'upload du logo, mais le compte sera créé");
+          } else if (uploadData) {
+            const { data: { publicUrl } } = supabase.storage
+              .from('restaurant-images')
+              .getPublicUrl(uploadData.path);
+            logoUrl = publicUrl;
+            console.log("Logo uploaded successfully:", logoUrl);
+          }
+        } catch (uploadErr) {
+          console.error("Logo upload exception:", uploadErr);
         }
       }
 
-      const { error } = await supabase.auth.signUp({
+      const { error, data } = await supabase.auth.signUp({
         email,
         password: restaurantData.password,
         options: {
@@ -149,6 +160,20 @@ const RestaurantAuth = () => {
           toast.error(error.message);
         }
       } else {
+        // If logo was uploaded but trigger didn't get it, update the restaurant directly
+        if (logoUrl && data.user) {
+          setTimeout(async () => {
+            try {
+              await supabase
+                .from('restaurants')
+                .update({ image_url: logoUrl })
+                .eq('owner_id', data.user!.id);
+            } catch (e) {
+              console.error("Failed to update restaurant logo:", e);
+            }
+          }, 1000);
+        }
+        
         toast.success("Restaurant créé avec succès ! 🎉");
         navigate("/restaurant-dashboard");
       }
