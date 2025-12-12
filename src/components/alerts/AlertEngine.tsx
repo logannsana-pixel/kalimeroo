@@ -121,6 +121,55 @@ export function AlertEngine() {
       channels.push(customerOrderChannel);
     }
 
+    // Admin: Listen for cancelled orders and system events
+    if (userRole === 'admin') {
+      const adminOrderChannel = supabase
+        .channel(`admin-orders-${user.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'orders',
+          },
+          (payload) => {
+            const newStatus = payload.new.status;
+            
+            // Alert on cancelled orders
+            if (newStatus === 'cancelled') {
+              alertService.adminUrgent(
+                'Commande annulée',
+                `La commande #${payload.new.id.slice(0, 8)} a été annulée`
+              );
+            }
+          }
+        )
+        .subscribe();
+      channels.push(adminOrderChannel);
+
+      // Listen for new restaurants
+      const adminRestaurantChannel = supabase
+        .channel(`admin-restaurants-${user.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'restaurants',
+          },
+          (payload) => {
+            alertService.trigger({
+              type: 'admin_urgent',
+              role: 'admin',
+              title: 'Nouveau restaurant',
+              message: `${payload.new.name} vient de s'inscrire`,
+            });
+          }
+        )
+        .subscribe();
+      channels.push(adminRestaurantChannel);
+    }
+
     // All roles: Listen for messages
     const messageChannel = supabase
       .channel(`messages-${user.id}`)

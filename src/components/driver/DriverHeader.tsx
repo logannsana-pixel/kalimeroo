@@ -1,7 +1,13 @@
-import { Bell, LogOut, RefreshCw } from "lucide-react";
+import { Bell, LogOut, RefreshCw, Volume2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { NotificationBell } from "@/components/NotificationBell";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface DriverHeaderProps {
   driverName: string;
@@ -20,6 +26,8 @@ export function DriverHeader({
   onRefresh, 
   refreshing 
 }: DriverHeaderProps) {
+  const navigate = useNavigate();
+
   return (
     <header className="sticky top-0 z-50 bg-background border-b safe-area-top">
       <div className="px-4 h-16 flex items-center justify-between">
@@ -45,6 +53,19 @@ export function DriverHeader({
 
         {/* Right - Actions */}
         <div className="flex items-center gap-1">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => navigate('/enable-alerts')}
+                className="touch-target"
+              >
+                <Volume2 className="h-5 w-5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Alertes & Sons</TooltipContent>
+          </Tooltip>
           <NotificationBell />
           <Button 
             variant="ghost" 
