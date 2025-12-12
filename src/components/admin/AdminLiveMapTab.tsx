@@ -14,9 +14,11 @@ interface ActiveOrder {
   status: string;
   delivery_address: string;
   restaurant_id: string;
+  user_id: string;
   delivery_driver_id: string | null;
   restaurant?: { name: string; address: string; latitude?: number; longitude?: number };
   driver?: { full_name: string | null; latitude?: number; longitude?: number; location_updated_at?: string };
+  customer?: { full_name: string | null; latitude?: number; longitude?: number; phone?: string | null };
   created_at: string;
 }
 
@@ -46,7 +48,7 @@ export function AdminLiveMapTab() {
       const { data: orders, error: ordersError } = await supabase
         .from("orders")
         .select(`
-          id, status, delivery_address, created_at, delivery_driver_id, restaurant_id,
+          id, status, delivery_address, created_at, delivery_driver_id, restaurant_id, user_id,
           restaurant:restaurants(name, address, latitude, longitude)
         `)
         .not("status", "in", "(delivered,cancelled)")
@@ -54,19 +56,27 @@ export function AdminLiveMapTab() {
 
       if (ordersError) throw ordersError;
 
-      const ordersWithDrivers = await Promise.all((orders || []).map(async (order: any) => {
+      const ordersWithDetails = await Promise.all((orders || []).map(async (order: any) => {
+        let driver = null;
         if (order.delivery_driver_id) {
-          const { data: driver } = await supabase
+          const { data } = await supabase
             .from("profiles")
             .select("full_name, latitude, longitude, location_updated_at")
             .eq("id", order.delivery_driver_id)
             .maybeSingle();
-          return { ...order, driver };
+          driver = data;
         }
-        return order;
+
+        const { data: customer } = await supabase
+          .from("profiles")
+          .select("full_name, phone, latitude, longitude")
+          .eq("id", order.user_id)
+          .maybeSingle();
+
+        return { ...order, driver, customer };
       }));
 
-      setActiveOrders(ordersWithDrivers);
+      setActiveOrders(ordersWithDetails);
 
       const { data: driverRoles } = await supabase
         .from("user_roles")
@@ -94,6 +104,20 @@ export function AdminLiveMapTab() {
     }
   }, []);
 
+  const recenterMap = useCallback(async () => {
+    if (!mapInstanceRef.current || markersRef.current.length === 0) return;
+
+    const L = await import("leaflet");
+    const latlngs = markersRef.current
+      .map((marker) => (typeof marker.getLatLng === "function" ? marker.getLatLng() : null))
+      .filter(Boolean);
+
+    if (!latlngs.length) return;
+
+    const bounds = L.latLngBounds(latlngs as any);
+    mapInstanceRef.current.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 });
+  }, []);
+
   // Initialize Leaflet map
   useEffect(() => {
     const initMap = async () => {
@@ -111,7 +135,7 @@ export function AdminLiveMapTab() {
       });
 
       const map = L.map(mapRef.current).setView([mapCenter.lat, mapCenter.lng], 13);
-      
+
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       }).addTo(map);
@@ -322,13 +346,19 @@ export function AdminLiveMapTab() {
         <div>
           <h2 className="text-2xl font-bold">Carte Live</h2>
           <p className="text-muted-foreground">
-            {activeOrders.length} commandes actives • {activeDrivers.filter(d => d.is_available).length} livreurs disponibles
+            {activeOrders.length} commandes actives • {activeDrivers.filter((d) => d.is_available).length} livreurs disponibles
           </p>
         </div>
-        <Button variant="outline" onClick={fetchLiveData} disabled={loading}>
-          <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-          Actualiser
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={recenterMap}>
+            <MapPin className="w-4 h-4 mr-2" />
+            Centrer la carte
+          </Button>
+          <Button variant="outline" onClick={fetchLiveData} disabled={loading}>
+            <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} />
+            Actualiser
+          </Button>
+        </div>
       </div>
 
       {/* Stats */}
