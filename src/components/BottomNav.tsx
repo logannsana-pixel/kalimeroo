@@ -67,7 +67,7 @@ export const BottomNav = () => {
     );
   }
 
-  // Customer nav
+  // Customer nav - Cart removed (already in navbar)
   if (userRole === "customer") {
     return (
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-card/80 backdrop-blur-xl border-t border-border/50 z-50 safe-area-bottom rounded-t-3xl shadow-float">
@@ -75,7 +75,6 @@ export const BottomNav = () => {
           <NavItem to="/" icon={Home} label="Accueil" />
           <NavItem to="/restaurants" icon={Search} label="Explorer" />
           <NavItem to="/orders" icon={ClipboardList} label="Commandes" />
-          <NavItem to="/cart" icon={ShoppingCart} label="Panier" badge={cartCount} />
           <NavItem to="/profile" icon={User} label="Profil" />
         </div>
       </nav>
