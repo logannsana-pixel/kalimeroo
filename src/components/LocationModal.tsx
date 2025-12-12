@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { MapPin } from "lucide-react";
+import { MapPin, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,39 +12,51 @@ import { DistrictSelector } from "@/components/DistrictSelector";
 import { useLocation } from "@/contexts/LocationContext";
 
 export const LocationModal = () => {
-  const { district, city, setLocation } = useLocation();
-  const [open, setOpen] = useState(false);
+  const { district, city, isModalOpen, setLocation, closeModal, openModal } = useLocation();
   const [selectedDistrict, setSelectedDistrict] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
 
   useEffect(() => {
     // Show modal if no location is set
     if (!district || !city) {
-      setOpen(true);
+      openModal();
     }
-  }, [district, city]);
+  }, []);
 
   const handleConfirm = () => {
     if (selectedDistrict && selectedCity) {
       setLocation(selectedDistrict, selectedCity);
-      setOpen(false);
+      closeModal();
+    }
+  };
+
+  const handleOpenChange = (open: boolean) => {
+    if (open) {
+      openModal();
+    } else {
+      // Only close if location is set
+      if (district && city) {
+        closeModal();
+      }
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-xl">
-            <MapPin className="w-6 h-6 text-primary" />
-            Où voulez-vous vous faire livrer ?
+    <Dialog open={isModalOpen} onOpenChange={handleOpenChange}>
+      <DialogContent className="sm:max-w-md rounded-3xl border-none shadow-float">
+        <DialogHeader className="text-center">
+          <div className="mx-auto w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mb-4 shadow-glow">
+            <MapPin className="w-8 h-8 text-primary-foreground" />
+          </div>
+          <DialogTitle className="text-2xl font-bold">
+            Où vous livrer ? 📍
           </DialogTitle>
-          <DialogDescription>
-            Sélectionnez votre quartier pour découvrir les restaurants disponibles dans votre zone
+          <DialogDescription className="text-base">
+            Choisissez votre quartier pour voir les restaurants près de chez vous
           </DialogDescription>
         </DialogHeader>
         
-        <div className="space-y-4 py-4">
+        <div className="space-y-6 py-4">
           <DistrictSelector
             onSelect={(district, city) => {
               setSelectedDistrict(district);
@@ -54,11 +66,12 @@ export const LocationModal = () => {
           />
           
           <Button 
-            className="w-full" 
+            className="w-full rounded-full h-14 text-base btn-playful" 
             onClick={handleConfirm}
             disabled={!selectedDistrict}
           >
-            Confirmer ma localisation
+            <Sparkles className="w-5 h-5 mr-2" />
+            C'est parti !
           </Button>
         </div>
       </DialogContent>

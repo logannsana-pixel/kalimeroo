@@ -1,52 +1,85 @@
-import { Facebook, Instagram, Twitter } from "lucide-react";
+import { Facebook, Instagram, Twitter, Heart, Sparkles } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export const Footer = () => {
   return (
-    <footer className="bg-muted py-12">
+    <footer className="bg-card border-t border-border/50 py-12 mt-8">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-          <div>
-            <h3 className="text-2xl font-bold text-primary mb-4">DeliverEat</h3>
-            <p className="text-muted-foreground">
-              Manger comme au restaurant sans sortir de chez soi
+          {/* Brand */}
+          <div className="space-y-4">
+            <Link to="/" className="flex items-center gap-2">
+              <div className="w-10 h-10 bg-gradient-primary rounded-2xl flex items-center justify-center shadow-glow">
+                <span className="text-primary-foreground font-bold text-xl">K</span>
+              </div>
+              <div>
+                <span className="font-bold text-xl">
+                  <span className="text-gradient-primary">KALI</span>
+                  <span className="text-foreground">MERO</span>
+                </span>
+              </div>
+            </Link>
+            <p className="text-muted-foreground text-sm">
+              Mangez comme au restaurant, sans sortir de chez vous 🍕
             </p>
-          </div>
-          
-          <div>
-            <h4 className="font-semibold mb-4">Pour vous</h4>
-            <ul className="space-y-2 text-muted-foreground">
-              <li><a href="#" className="hover:text-primary transition-colors">Commander</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Créer un compte</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Aide</a></li>
-            </ul>
-          </div>
-          
-          <div>
-            <h4 className="font-semibold mb-4">Partenaires</h4>
-            <ul className="space-y-2 text-muted-foreground">
-              <li><a href="#" className="hover:text-primary transition-colors">Devenir restaurant partenaire</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Devenir livreur</a></li>
-            </ul>
-          </div>
-          
-          <div>
-            <h4 className="font-semibold mb-4">Suivez-nous</h4>
-            <div className="flex gap-4">
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                <Facebook className="w-6 h-6" />
+            <div className="flex gap-3">
+              <a href="#" className="w-10 h-10 rounded-full bg-muted hover:bg-primary/10 hover:text-primary flex items-center justify-center transition-all">
+                <Facebook className="w-5 h-5" />
               </a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                <Instagram className="w-6 h-6" />
+              <a href="#" className="w-10 h-10 rounded-full bg-muted hover:bg-primary/10 hover:text-primary flex items-center justify-center transition-all">
+                <Instagram className="w-5 h-5" />
               </a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                <Twitter className="w-6 h-6" />
+              <a href="#" className="w-10 h-10 rounded-full bg-muted hover:bg-primary/10 hover:text-primary flex items-center justify-center transition-all">
+                <Twitter className="w-5 h-5" />
               </a>
             </div>
           </div>
+          
+          {/* For Customers */}
+          <div>
+            <h4 className="font-semibold mb-4 flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-primary" />
+              Pour vous
+            </h4>
+            <ul className="space-y-3 text-muted-foreground text-sm">
+              <li><Link to="/restaurants" className="hover:text-primary transition-colors">Commander</Link></li>
+              <li><Link to="/auth" className="hover:text-primary transition-colors">Créer un compte</Link></li>
+              <li><a href="#" className="hover:text-primary transition-colors">Aide & Contact</a></li>
+            </ul>
+          </div>
+          
+          {/* For Partners */}
+          <div>
+            <h4 className="font-semibold mb-4 flex items-center gap-2">
+              <Heart className="w-4 h-4 text-primary" />
+              Partenaires
+            </h4>
+            <ul className="space-y-3 text-muted-foreground text-sm">
+              <li><Link to="/auth" className="hover:text-primary transition-colors">Devenir restaurant partenaire</Link></li>
+              <li><Link to="/auth" className="hover:text-primary transition-colors">Devenir livreur</Link></li>
+              <li><a href="#" className="hover:text-primary transition-colors">Conditions</a></li>
+            </ul>
+          </div>
+          
+          {/* Info */}
+          <div>
+            <h4 className="font-semibold mb-4">Informations</h4>
+            <ul className="space-y-3 text-muted-foreground text-sm">
+              <li><a href="#" className="hover:text-primary transition-colors">À propos</a></li>
+              <li><a href="#" className="hover:text-primary transition-colors">Confidentialité</a></li>
+              <li><a href="#" className="hover:text-primary transition-colors">CGU</a></li>
+            </ul>
+          </div>
         </div>
         
-        <div className="border-t border-border pt-8 text-center text-muted-foreground">
-          <p>&copy; 2025 DeliverEat. Tous droits réservés.</p>
+        {/* Bottom bar */}
+        <div className="border-t border-border/50 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-muted-foreground text-sm">
+          <p className="flex items-center gap-1">
+            &copy; 2025 KALIMERO. Fait avec <Heart className="w-4 h-4 text-primary fill-primary" /> au Congo
+          </p>
+          <p className="text-xs">
+            🇨🇬 Brazzaville • Pointe-Noire
+          </p>
         </div>
       </div>
     </footer>
