@@ -8,6 +8,7 @@ import { CartProvider } from "@/hooks/useCart";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AlertEngine } from "@/components/alerts/AlertEngine";
 import { FloatingCart } from "@/components/FloatingCart";
+import { NetworkStatus } from "@/components/NetworkStatus";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Restaurants from "./pages/Restaurants";
@@ -21,6 +22,7 @@ import RestaurantDashboard from "./pages/RestaurantDashboard";
 import DeliveryDashboard from "./pages/DeliveryDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import EnableAlerts from "./pages/EnableAlerts";
+import AlertPlayground from "./pages/AlertPlayground";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +35,7 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <CartProvider>
+            <NetworkStatus />
             <AlertEngine />
             <FloatingCart />
             <Routes>
@@ -41,6 +44,7 @@ const App = () => (
               <Route path="/restaurants" element={<Restaurants />} />
               <Route path="/restaurant/:id" element={<RestaurantDetail />} />
               <Route path="/enable-alerts" element={<EnableAlerts />} />
+              <Route path="/dev/alerts" element={<AlertPlayground />} />
               <Route 
                 path="/cart" 
                 element={

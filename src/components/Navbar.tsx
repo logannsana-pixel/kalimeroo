@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { ShoppingCart, User, Utensils, LayoutDashboard, Home, Search, MapPin, Menu } from "lucide-react";
+import { ShoppingCart, User, Utensils, LayoutDashboard, Home, Search, MapPin, Menu, Bell, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
@@ -164,6 +164,13 @@ export const Navbar = () => {
                       Mes Commandes
                     </DropdownMenuItem>
                   )}
+                  <DropdownMenuItem 
+                    onClick={() => navigate("/enable-alerts")}
+                    className="rounded-xl py-3 cursor-pointer"
+                  >
+                    <Bell className="h-4 w-4 mr-3 text-primary" />
+                    Alertes & Sons
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator className="my-2" />
                   <DropdownMenuItem 
                     onClick={signOut} 
