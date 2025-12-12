@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { CartProvider } from "@/hooks/useCart";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { AlertEngine } from "@/components/alerts/AlertEngine";
+import { FloatingCart } from "@/components/FloatingCart";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Restaurants from "./pages/Restaurants";
@@ -18,6 +20,7 @@ import CustomerDashboard from "./pages/CustomerDashboard";
 import RestaurantDashboard from "./pages/RestaurantDashboard";
 import DeliveryDashboard from "./pages/DeliveryDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
+import EnableAlerts from "./pages/EnableAlerts";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,11 +33,12 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <CartProvider>
+            <AlertEngine />
+            <FloatingCart />
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
-              <Route path="/restaurants" element={<Restaurants />} />
-              <Route path="/restaurant/:id" element={<RestaurantDetail />} />
+              <Route path="/enable-alerts" element={<EnableAlerts />} />
               <Route 
                 path="/cart" 
                 element={
