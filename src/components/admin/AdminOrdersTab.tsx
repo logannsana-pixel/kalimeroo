@@ -81,28 +81,42 @@ export function AdminOrdersTab() {
         .from("orders")
         .select(`
           *,
-          restaurant:restaurants(name, address),
-          customer:profiles!orders_user_id_fkey(full_name, phone)
+          restaurant:restaurants(name, address)
         `)
         .order("created_at", { ascending: false })
         .limit(100);
 
       if (error) throw error;
       
-      // Fetch driver info separately if needed
-      const ordersWithDrivers = await Promise.all((data || []).map(async (order) => {
+      // Fetch customer and driver info separately (no FK between orders and profiles)
+      const ordersWithDetails = await Promise.all((data || []).map(async (order) => {
+        let customer = null;
+        let driver = null;
+
+        // Fetch customer info
+        if (order.user_id) {
+          const { data: customerData } = await supabase
+            .from("profiles")
+            .select("full_name, phone")
+            .eq("id", order.user_id)
+            .maybeSingle();
+          customer = customerData;
+        }
+
+        // Fetch driver info
         if (order.delivery_driver_id) {
           const { data: driverData } = await supabase
             .from("profiles")
             .select("full_name, phone")
             .eq("id", order.delivery_driver_id)
-            .single();
-          return { ...order, driver: driverData };
+            .maybeSingle();
+          driver = driverData;
         }
-        return order;
+
+        return { ...order, customer, driver } as Order;
       }));
 
-      setOrders(ordersWithDrivers);
+      setOrders(ordersWithDetails);
     } catch (error) {
       console.error("Error fetching orders:", error);
       toast.error("Erreur lors du chargement des commandes");
