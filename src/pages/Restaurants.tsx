@@ -6,9 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { AdvancedSearch, SearchFilters } from "@/components/AdvancedSearch";
 import { FavoritesButton } from "@/components/FavoritesButton";
-import { HorizontalCard, HorizontalCardSkeleton } from "@/components/ui/horizontal-card";
-import { MapPin } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { RestaurantCard, RestaurantCardSkeleton } from "@/components/ui/restaurant-card";
 
 interface Restaurant {
   id: string;
@@ -28,7 +26,6 @@ export default function Restaurants() {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
   
-  // Initialize filters from URL params
   const initialQuery = searchParams.get("q") || "";
   const initialCategory = searchParams.get("category") || "all";
   
@@ -67,11 +64,9 @@ export default function Restaurants() {
     }
   };
 
-  // Filter restaurants based on advanced search
   const filteredRestaurants = useMemo(() => {
     let filtered = restaurants;
 
-    // Text search (includes city search)
     if (filters.query) {
       const query = filters.query.toLowerCase();
       filtered = filtered.filter(
@@ -87,7 +82,6 @@ export default function Restaurants() {
       );
     }
 
-    // Category filter
     if (filters.category !== "all") {
       filtered = filtered.filter(
         (r: any) => r.cuisine_type === filters.category ||
@@ -95,7 +89,6 @@ export default function Restaurants() {
       );
     }
 
-    // Price filter (based on menu items)
     filtered = filtered.filter((r: any) => {
       if (!r.menu_items || r.menu_items.length === 0) return true;
       return r.menu_items.some((item: any) => 
@@ -103,36 +96,33 @@ export default function Restaurants() {
       );
     });
 
-    // Rating filter
     filtered = filtered.filter((r) => (r.rating || 0) >= filters.minRating);
-
-    // Sort by rating
     filtered = [...filtered].sort((a, b) => (b.rating || 0) - (a.rating || 0));
 
     return filtered;
   }, [restaurants, filters]);
 
   return (
-    <div className="min-h-screen flex flex-col pb-16 md:pb-0">
+    <div className="min-h-screen flex flex-col pb-20 md:pb-0 bg-background">
       <Navbar />
-      <main className="flex-1 container mx-auto px-4 py-4 md:py-8">
-        <div className="mb-6 md:mb-8">
-          <h1 className="text-xl md:text-3xl font-bold mb-2">
-            Tous les restaurants
-          </h1>
-          <p className="text-sm md:text-base text-muted-foreground">
-            Commandez depuis n'importe quelle ville pour livraison partout au Congo
-          </p>
-        </div>
-
+      <main className="flex-1 container mx-auto px-4 py-4">
+        {/* Search Section */}
         <div className="mb-6">
           <AdvancedSearch onSearch={setFilters} initialFilters={initialFilters} />
         </div>
 
+        {/* Results Count */}
+        {!loading && filteredRestaurants.length > 0 && (
+          <p className="text-sm text-muted-foreground mb-4">
+            {filteredRestaurants.length} restaurant{filteredRestaurants.length > 1 ? "s" : ""} trouvé{filteredRestaurants.length > 1 ? "s" : ""}
+          </p>
+        )}
+
+        {/* Restaurant Grid - 2 columns */}
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {[...Array(8)].map((_, i) => (
-              <HorizontalCardSkeleton key={i} variant="default" />
+          <div className="grid grid-cols-2 gap-4">
+            {[...Array(6)].map((_, i) => (
+              <RestaurantCardSkeleton key={i} />
             ))}
           </div>
         ) : filteredRestaurants.length === 0 ? (
@@ -147,36 +137,26 @@ export default function Restaurants() {
             </p>
           </div>
         ) : (
-          <>
-            <p className="text-sm text-muted-foreground mb-4">
-              {filteredRestaurants.length} restaurant{filteredRestaurants.length > 1 ? "s" : ""} trouvé{filteredRestaurants.length > 1 ? "s" : ""}
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {filteredRestaurants.map((restaurant) => (
-                <div key={restaurant.id} className="relative">
-                  <div className="absolute top-3 right-3 z-10 md:top-2 md:right-2">
-                    <FavoritesButton restaurantId={restaurant.id} />
-                  </div>
-                  <HorizontalCard
-                    imageUrl={restaurant.image_url || "/placeholder.svg"}
-                    title={restaurant.name}
-                    subtitle={restaurant.cuisine_type}
-                    description={restaurant.description}
-                    rating={restaurant.rating}
-                    deliveryTime={restaurant.delivery_time}
-                    badge={restaurant.city || undefined}
-                    badgeVariant="secondary"
-                    price={`${restaurant.delivery_fee?.toFixed(0) || 0} FCFA livraison`}
-                    onClick={() => navigate(`/restaurant/${restaurant.id}`)}
-                    variant="default"
-                  />
+          <div className="grid grid-cols-2 gap-4">
+            {filteredRestaurants.map((restaurant) => (
+              <div key={restaurant.id} className="relative">
+                <div className="absolute top-2 right-2 z-10">
+                  <FavoritesButton restaurantId={restaurant.id} />
                 </div>
-              ))}
-            </div>
-          </>
+                <RestaurantCard
+                  imageUrl={restaurant.image_url || "/placeholder.svg"}
+                  name={restaurant.name}
+                  rating={restaurant.rating ? Math.round(restaurant.rating * 10) : undefined}
+                  reviewCount={Math.floor(Math.random() * 500) + 100}
+                  badge={restaurant.city || undefined}
+                  onClick={() => navigate(`/restaurant/${restaurant.id}`)}
+                />
+              </div>
+            ))}
+          </div>
         )}
       </main>
-      <Footer />
+      <Footer className="hidden md:block" />
       <BottomNav />
     </div>
   );

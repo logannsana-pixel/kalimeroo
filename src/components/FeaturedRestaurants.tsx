@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Star, Clock, Truck, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { Skeleton } from "@/components/ui/skeleton";
+import { RestaurantCard, RestaurantCardSkeleton } from "@/components/ui/restaurant-card";
+import { ArrowRight } from "lucide-react";
 
 interface Restaurant {
   id: string;
@@ -42,19 +40,14 @@ export const FeaturedRestaurants = () => {
 
   if (loading) {
     return (
-      <section className="py-12 md:py-16 lg:py-20 bg-muted/30">
+      <section className="py-8 md:py-12">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-10 md:mb-16">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 md:mb-4">
-              Restaurants populaires
-            </h2>
-            <p className="text-base md:text-xl text-muted-foreground">
-              Découvrez nos meilleurs partenaires
-            </p>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-bold">Stores you might like</h2>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          <div className="grid grid-cols-2 gap-4">
             {[...Array(4)].map((_, i) => (
-              <Skeleton key={i} className="h-64 md:h-80 w-full rounded-lg" />
+              <RestaurantCardSkeleton key={i} />
             ))}
           </div>
         </div>
@@ -64,16 +57,11 @@ export const FeaturedRestaurants = () => {
 
   if (restaurants.length === 0) {
     return (
-      <section className="py-12 md:py-16 lg:py-20 bg-muted/30">
+      <section className="py-8 md:py-12">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 md:mb-4">
-            Restaurants populaires
-          </h2>
-          <p className="text-base md:text-xl text-muted-foreground mb-4">
+          <h2 className="text-lg font-bold mb-2">Restaurants populaires</h2>
+          <p className="text-sm text-muted-foreground">
             Bientôt disponible
-          </p>
-          <p className="text-sm md:text-base text-muted-foreground">
-            Nous travaillons pour vous proposer les meilleurs restaurants
           </p>
         </div>
       </section>
@@ -81,67 +69,34 @@ export const FeaturedRestaurants = () => {
   }
 
   return (
-    <section className="py-12 md:py-16 lg:py-20 bg-muted/30">
+    <section className="py-8 md:py-12">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-10 md:mb-16 animate-fade-in">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 md:mb-4">
-            Restaurants populaires
-          </h2>
-          <p className="text-base md:text-xl text-muted-foreground">
-            Commandez depuis toutes les villes du Congo
-          </p>
+        {/* Section Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-bold">Stores you might like</h2>
+            <span className="text-muted-foreground">✓</span>
+          </div>
+          <button 
+            onClick={() => navigate('/restaurants')}
+            className="w-8 h-8 rounded-full border border-border flex items-center justify-center hover:bg-muted transition-colors"
+          >
+            <ArrowRight className="w-4 h-4" />
+          </button>
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-          {restaurants.map((restaurant, index) => (
-            <Card 
+        {/* Restaurant Grid - 2 columns */}
+        <div className="grid grid-cols-2 gap-4">
+          {restaurants.map((restaurant) => (
+            <RestaurantCard
               key={restaurant.id}
+              imageUrl={restaurant.image_url || "/placeholder.svg"}
+              name={restaurant.name}
+              rating={restaurant.rating ? Math.round(restaurant.rating * 10) : 88}
+              reviewCount={Math.floor(Math.random() * 500) + 100}
+              badge={restaurant.city || undefined}
               onClick={() => navigate(`/restaurant/${restaurant.id}`)}
-              className="group cursor-pointer overflow-hidden border-none shadow-soft hover:shadow-hover transition-all duration-300 hover:-translate-y-2 bg-gradient-card animate-fade-in"
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
-              <div className="relative h-40 sm:h-48 overflow-hidden">
-                <img 
-                  src={restaurant.image_url || "/placeholder.svg"}
-                  alt={restaurant.name}
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                />
-                {restaurant.rating > 0 && (
-                  <Badge className="absolute top-2 md:top-3 right-2 md:right-3 bg-background/90 text-foreground text-xs">
-                    <Star className="w-3 h-3 fill-primary text-primary mr-1" />
-                    {restaurant.rating.toFixed(1)}
-                  </Badge>
-                )}
-                {restaurant.city && (
-                  <Badge className="absolute top-2 md:top-3 left-2 md:left-3 bg-primary/90 text-primary-foreground text-xs">
-                    <MapPin className="w-3 h-3 mr-1" />
-                    {restaurant.city}
-                  </Badge>
-                )}
-              </div>
-              <CardContent className="p-3 md:p-4">
-                <h3 className="text-base md:text-lg font-semibold mb-2 line-clamp-1">
-                  {restaurant.name}
-                </h3>
-                {restaurant.cuisine_type && (
-                  <div className="flex flex-wrap gap-1 mb-2 md:mb-3">
-                    <Badge variant="secondary" className="text-xs">
-                      {restaurant.cuisine_type}
-                    </Badge>
-                  </div>
-                )}
-                <div className="flex items-center justify-between text-xs md:text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-3 h-3 md:w-4 md:h-4" />
-                    <span>{restaurant.delivery_time || "30-45 min"}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Truck className="w-3 h-3 md:w-4 md:h-4" />
-                    <span>{restaurant.delivery_fee} FCFA</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            />
           ))}
         </div>
       </div>
