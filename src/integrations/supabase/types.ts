@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_permissions: {
+        Row: {
+          can_manage_admins: boolean | null
+          can_manage_drivers: boolean | null
+          can_manage_marketing: boolean | null
+          can_manage_orders: boolean | null
+          can_manage_payments: boolean | null
+          can_manage_restaurants: boolean | null
+          can_manage_settings: boolean | null
+          can_manage_support: boolean | null
+          can_manage_users: boolean | null
+          created_at: string | null
+          id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          can_manage_admins?: boolean | null
+          can_manage_drivers?: boolean | null
+          can_manage_marketing?: boolean | null
+          can_manage_orders?: boolean | null
+          can_manage_payments?: boolean | null
+          can_manage_restaurants?: boolean | null
+          can_manage_settings?: boolean | null
+          can_manage_support?: boolean | null
+          can_manage_users?: boolean | null
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          can_manage_admins?: boolean | null
+          can_manage_drivers?: boolean | null
+          can_manage_marketing?: boolean | null
+          can_manage_orders?: boolean | null
+          can_manage_payments?: boolean | null
+          can_manage_restaurants?: boolean | null
+          can_manage_settings?: boolean | null
+          can_manage_support?: boolean | null
+          can_manage_users?: boolean | null
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       bundles: {
         Row: {
           category: string
@@ -490,6 +538,84 @@ export type Database = {
           },
         ]
       }
+      payouts: {
+        Row: {
+          amount: number
+          created_at: string | null
+          id: string
+          notes: string | null
+          payment_method: string | null
+          period_end: string | null
+          period_start: string | null
+          processed_at: string | null
+          processed_by: string | null
+          recipient_id: string
+          recipient_type: string
+          reference: string | null
+          status: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          payment_method?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          processed_at?: string | null
+          processed_by?: string | null
+          recipient_id: string
+          recipient_type: string
+          reference?: string | null
+          status?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          payment_method?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          processed_at?: string | null
+          processed_by?: string | null
+          recipient_id?: string
+          recipient_type?: string
+          reference?: string | null
+          status?: string | null
+        }
+        Relationships: []
+      }
+      platform_settings: {
+        Row: {
+          category: string | null
+          description: string | null
+          id: string
+          key: string
+          updated_at: string | null
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          category?: string | null
+          description?: string | null
+          id?: string
+          key: string
+          updated_at?: string | null
+          updated_by?: string | null
+          value: Json
+        }
+        Update: {
+          category?: string | null
+          description?: string | null
+          id?: string
+          key?: string
+          updated_at?: string | null
+          updated_by?: string | null
+          value?: Json
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           address: string | null
@@ -500,8 +626,15 @@ export type Database = {
           full_name: string | null
           id: string
           is_available: boolean | null
+          is_validated: boolean | null
+          license_number: string | null
           phone: string | null
           updated_at: string
+          validated_at: string | null
+          validated_by: string | null
+          validation_documents: Json | null
+          validation_notes: string | null
+          vehicle_type: string | null
         }
         Insert: {
           address?: string | null
@@ -512,8 +645,15 @@ export type Database = {
           full_name?: string | null
           id: string
           is_available?: boolean | null
+          is_validated?: boolean | null
+          license_number?: string | null
           phone?: string | null
           updated_at?: string
+          validated_at?: string | null
+          validated_by?: string | null
+          validation_documents?: Json | null
+          validation_notes?: string | null
+          vehicle_type?: string | null
         }
         Update: {
           address?: string | null
@@ -524,8 +664,15 @@ export type Database = {
           full_name?: string | null
           id?: string
           is_available?: boolean | null
+          is_validated?: boolean | null
+          license_number?: string | null
           phone?: string | null
           updated_at?: string
+          validated_at?: string | null
+          validated_by?: string | null
+          validation_documents?: Json | null
+          validation_notes?: string | null
+          vehicle_type?: string | null
         }
         Relationships: []
       }
@@ -601,12 +748,17 @@ export type Database = {
           id: string
           image_url: string | null
           is_active: boolean | null
+          is_validated: boolean | null
           min_order: number | null
           name: string
           owner_id: string | null
           phone: string | null
           rating: number | null
           updated_at: string
+          validated_at: string | null
+          validated_by: string | null
+          validation_documents: Json | null
+          validation_notes: string | null
         }
         Insert: {
           address: string
@@ -620,12 +772,17 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean | null
+          is_validated?: boolean | null
           min_order?: number | null
           name: string
           owner_id?: string | null
           phone?: string | null
           rating?: number | null
           updated_at?: string
+          validated_at?: string | null
+          validated_by?: string | null
+          validation_documents?: Json | null
+          validation_notes?: string | null
         }
         Update: {
           address?: string
@@ -639,12 +796,17 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean | null
+          is_validated?: boolean | null
           min_order?: number | null
           name?: string
           owner_id?: string | null
           phone?: string | null
           rating?: number | null
           updated_at?: string
+          validated_at?: string | null
+          validated_by?: string | null
+          validation_documents?: Json | null
+          validation_notes?: string | null
         }
         Relationships: []
       }
@@ -699,6 +861,98 @@ export type Database = {
             columns: ["restaurant_id"]
             isOneToOne: false
             referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_tickets: {
+        Row: {
+          assigned_to: string | null
+          category: string | null
+          created_at: string | null
+          description: string
+          id: string
+          order_id: string | null
+          priority: string | null
+          status: string | null
+          subject: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          category?: string | null
+          created_at?: string | null
+          description: string
+          id?: string
+          order_id?: string | null
+          priority?: string | null
+          status?: string | null
+          subject: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          category?: string | null
+          created_at?: string | null
+          description?: string
+          id?: string
+          order_id?: string | null
+          priority?: string | null
+          status?: string | null
+          subject?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_tickets_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "restaurant_orders_masked"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ticket_messages: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          is_internal: boolean | null
+          sender_id: string
+          ticket_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          is_internal?: boolean | null
+          sender_id: string
+          ticket_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          is_internal?: boolean | null
+          sender_id?: string
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_messages_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
             referencedColumns: ["id"]
           },
         ]
