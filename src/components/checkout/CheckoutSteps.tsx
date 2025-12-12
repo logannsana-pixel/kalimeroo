@@ -97,21 +97,20 @@ export function CheckoutSteps({ cartItems, subtotal, deliveryFee, discount = 0, 
   const progress = (step / totalSteps) * 100;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Checkout Form */}
-      <div className="lg:col-span-2 space-y-6">
-        <div className="space-y-2">
-          <Progress value={progress} className="h-2" />
-          <p className="text-sm text-muted-foreground text-center">
-            Étape {step} sur {totalSteps}
-          </p>
-        </div>
+    <div className="space-y-4">
+      {/* Progress */}
+      <div className="space-y-2">
+        <Progress value={progress} className="h-2" />
+        <p className="text-sm text-muted-foreground text-center">
+          Étape {step} sur {totalSteps}
+        </p>
+      </div>
 
-        {step === 1 && (
-          <Card>
-            <CardContent className="pt-6 space-y-4">
-              <div className="p-4 bg-muted/50 rounded-lg">
-                <h3 className="font-semibold mb-2">Adresse de livraison</h3>
+      {step === 1 && (
+        <Card className="rounded-3xl border-none shadow-soft">
+          <CardContent className="p-4 sm:p-6 space-y-4">
+            <div className="p-4 bg-muted/50 rounded-2xl">
+              <h3 className="font-semibold mb-2">Adresse de livraison</h3>
                 <p className="text-sm text-muted-foreground">
                   Où souhaitez-vous recevoir votre commande ?
                 </p>
@@ -190,54 +189,55 @@ export function CheckoutSteps({ cartItems, subtotal, deliveryFee, discount = 0, 
                 />
               </div>
 
-              <Button type="button" onClick={handleNext} className="w-full">
-                Suivant
-                <ChevronRight className="w-4 h-4 ml-2" />
-              </Button>
-            </CardContent>
-          </Card>
-        )}
+            <Button type="button" onClick={handleNext} className="w-full rounded-2xl h-12">
+              Suivant
+              <ChevronRight className="w-4 h-4 ml-2" />
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
-        {step === 2 && (
-          <Card>
-            <CardContent className="pt-6 space-y-4">
-              <div className="p-4 bg-muted/50 rounded-lg">
+      {step === 2 && (
+        <Card className="rounded-3xl border-none shadow-soft">
+          <CardContent className="p-4 sm:p-6 space-y-4">
+            <div className="p-4 bg-muted/50 rounded-2xl">
                 <h3 className="font-semibold mb-2">Mode de paiement</h3>
                 <p className="text-sm text-muted-foreground">
                   Choisissez comment vous souhaitez payer
                 </p>
               </div>
 
-              <RadioGroup
-                value={formData.paymentMethod}
-                onValueChange={(value: "mobile_money" | "cod") => setFormData({ ...formData, paymentMethod: value })}
-              >
-                <div className="flex items-start space-x-3 p-4 border rounded-lg cursor-pointer hover:bg-accent">
-                  <RadioGroupItem value="cod" id="cod" className="mt-1" />
-                  <Label htmlFor="cod" className="flex-1 cursor-pointer">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Banknote className="w-5 h-5" />
-                      <span className="font-semibold">Paiement à la livraison</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Payez en espèces lors de la réception de votre commande
-                    </p>
-                  </Label>
-                </div>
+            <RadioGroup
+              value={formData.paymentMethod}
+              onValueChange={(value: "mobile_money" | "cod") => setFormData({ ...formData, paymentMethod: value })}
+              className="space-y-3"
+            >
+              <div className="flex items-start space-x-3 p-4 border rounded-2xl cursor-pointer hover:bg-accent transition-colors">
+                <RadioGroupItem value="cod" id="cod" className="mt-1" />
+                <Label htmlFor="cod" className="flex-1 cursor-pointer">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Banknote className="w-5 h-5" />
+                    <span className="font-semibold">Paiement à la livraison</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Payez en espèces lors de la réception
+                  </p>
+                </Label>
+              </div>
 
-                <div className="flex items-start space-x-3 p-4 border rounded-lg cursor-pointer hover:bg-accent">
-                  <RadioGroupItem value="mobile_money" id="mobile_money" className="mt-1" />
-                  <Label htmlFor="mobile_money" className="flex-1 cursor-pointer">
-                    <div className="flex items-center gap-2 mb-1">
-                      <CreditCard className="w-5 h-5" />
-                      <span className="font-semibold">Mobile Money</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Orange Money, Airtel Money, etc.
-                    </p>
-                  </Label>
-                </div>
-              </RadioGroup>
+              <div className="flex items-start space-x-3 p-4 border rounded-2xl cursor-pointer hover:bg-accent transition-colors">
+                <RadioGroupItem value="mobile_money" id="mobile_money" className="mt-1" />
+                <Label htmlFor="mobile_money" className="flex-1 cursor-pointer">
+                  <div className="flex items-center gap-2 mb-1">
+                    <CreditCard className="w-5 h-5" />
+                    <span className="font-semibold">Mobile Money</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Orange Money, Airtel Money, etc.
+                  </p>
+                </Label>
+              </div>
+            </RadioGroup>
 
               {formData.paymentMethod === "mobile_money" && (
                 <div className="space-y-4 pt-4 border-t">
@@ -279,64 +279,86 @@ export function CheckoutSteps({ cartItems, subtotal, deliveryFee, discount = 0, 
                 </div>
               )}
 
-              <div className="flex gap-3">
-                <Button type="button" variant="outline" onClick={() => setStep(1)} className="flex-1">
-                  <ChevronLeft className="w-4 h-4 mr-2" />
-                  Retour
-                </Button>
-                <Button type="button" onClick={handleNext} className="flex-1">
-                  Suivant
-                  <ChevronRight className="w-4 h-4 ml-2" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button type="button" variant="outline" onClick={() => setStep(1)} className="flex-1 rounded-2xl h-12">
+                <ChevronLeft className="w-4 h-4 mr-2" />
+                Retour
+              </Button>
+              <Button type="button" onClick={handleNext} className="flex-1 rounded-2xl h-12">
+                Suivant
+                <ChevronRight className="w-4 h-4 ml-2" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
-        {step === 3 && (
-          <Card>
-            <CardContent className="pt-6 space-y-4">
-              <div className="p-4 bg-muted/50 rounded-lg">
-                <h3 className="font-semibold mb-2">Récapitulatif</h3>
+      {step === 3 && (
+        <Card className="rounded-3xl border-none shadow-soft">
+          <CardContent className="p-4 sm:p-6 space-y-4">
+            <div className="p-4 bg-muted/50 rounded-2xl">
+              <h3 className="font-semibold mb-2">Récapitulatif</h3>
                 <p className="text-sm text-muted-foreground">
                   Vérifiez votre commande avant de confirmer
                 </p>
               </div>
 
-              <div className="space-y-3 p-4 bg-muted/30 rounded-lg">
-                <h4 className="font-semibold">Livraison</h4>
-                <div className="text-sm space-y-1">
-                  <p>{formData.city} - {formData.district}</p>
-                  {formData.addressComplement && <p>{formData.addressComplement}</p>}
-                  <p className="font-medium">{formData.phone}</p>
-                  {formData.notes && (
-                    <p className="text-muted-foreground italic">Note: {formData.notes}</p>
-                  )}
-                </div>
-              </div>
-
-              <div className="space-y-3 p-4 bg-muted/30 rounded-lg">
-                <h4 className="font-semibold">Paiement</h4>
-                <div className="flex items-center gap-2">
-                  {formData.paymentMethod === "cod" ? (
-                    <>
-                      <Banknote className="w-5 h-5" />
-                      <span>Paiement à la livraison</span>
-                    </>
-                  ) : (
-                    <>
-                      <CreditCard className="w-5 h-5" />
-                      <span>Mobile Money ({formData.mobileMoneyProvider})</span>
-                    </>
-                  )}
-                </div>
-                {formData.paymentMethod === "mobile_money" && (
-                  <p className="text-sm text-muted-foreground">{formData.mobileMoneyNumber}</p>
+            <div className="space-y-3 p-4 bg-muted/30 rounded-2xl">
+              <h4 className="font-semibold">Livraison</h4>
+              <div className="text-sm space-y-1">
+                <p>{formData.city} - {formData.district}</p>
+                {formData.addressComplement && <p>{formData.addressComplement}</p>}
+                <p className="font-medium">{formData.phone}</p>
+                {formData.notes && (
+                  <p className="text-muted-foreground italic">Note: {formData.notes}</p>
                 )}
               </div>
+            </div>
 
-              <div className="flex gap-3">
-                <Button type="button" variant="outline" onClick={() => setStep(2)} className="flex-1">
+            <div className="space-y-3 p-4 bg-muted/30 rounded-2xl">
+              <h4 className="font-semibold">Paiement</h4>
+              <div className="flex items-center gap-2">
+                {formData.paymentMethod === "cod" ? (
+                  <>
+                    <Banknote className="w-5 h-5" />
+                    <span>Paiement à la livraison</span>
+                  </>
+                ) : (
+                  <>
+                    <CreditCard className="w-5 h-5" />
+                    <span>Mobile Money ({formData.mobileMoneyProvider})</span>
+                  </>
+                )}
+              </div>
+              {formData.paymentMethod === "mobile_money" && (
+                <p className="text-sm text-muted-foreground">{formData.mobileMoneyNumber}</p>
+              )}
+            </div>
+
+            {/* Order Summary for Mobile */}
+            <div className="space-y-2 p-4 bg-primary/5 rounded-2xl">
+              <div className="flex justify-between text-sm">
+                <span>Sous-total</span>
+                <span>{subtotal.toFixed(0)} FCFA</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span>Livraison</span>
+                <span>{deliveryFee.toFixed(0)} FCFA</span>
+              </div>
+              {discount > 0 && (
+                <div className="flex justify-between text-sm text-success">
+                  <span>Réduction</span>
+                  <span>-{discount.toFixed(0)} FCFA</span>
+                </div>
+              )}
+              <div className="flex justify-between font-bold text-lg pt-2 border-t border-border/50">
+                <span>Total</span>
+                <span className="text-primary">{calculatedTotal.toFixed(0)} FCFA</span>
+              </div>
+            </div>
+
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button type="button" variant="outline" onClick={() => setStep(2)} className="flex-1 rounded-2xl h-12">
                   <ChevronLeft className="w-4 h-4 mr-2" />
                   Retour
                 </Button>
@@ -344,14 +366,14 @@ export function CheckoutSteps({ cartItems, subtotal, deliveryFee, discount = 0, 
                   type="button" 
                   onClick={handleSubmit} 
                   disabled={loading}
-                  className="flex-1"
+                  className="flex-1 rounded-2xl h-12 text-sm sm:text-base"
                 >
                   {loading ? (
                     "Traitement..."
                   ) : (
                     <>
-                      <Check className="w-4 h-4 mr-2" />
-                      Confirmer la commande
+                      <Check className="w-4 h-4 mr-2 shrink-0" />
+                      <span className="truncate">Confirmer</span>
                     </>
                   )}
                 </Button>
