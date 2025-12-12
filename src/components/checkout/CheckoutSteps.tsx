@@ -16,7 +16,9 @@ import {
   User,
   Phone,
   Edit2,
-  Package
+  Package,
+  Check,
+  Navigation
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLocation } from "@/contexts/LocationContext";
@@ -24,9 +26,7 @@ import { toast } from "sonner";
 
 interface CheckoutData {
   phone: string;
-  city: string;
-  district: string;
-  addressComplement: string;
+  address: string;
   notes: string;
   paymentMethod: "mobile_money" | "cod";
   mobileMoneyProvider?: string;
@@ -47,16 +47,20 @@ interface CheckoutStepsProps {
 }
 
 export function CheckoutSteps({ cartItems, subtotal, deliveryFee, discount = 0, total: propTotal, onSubmit }: CheckoutStepsProps) {
-  const { district, city, address, addressComplement: savedComplement, openModal } = useLocation();
+  const { district, city, address, addressComplement, coordinates, hasGPS, openModal } = useLocation();
   const calculatedTotal = propTotal ?? (subtotal + deliveryFee - discount);
   const [loading, setLoading] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  
+  // Build full address from location context
+  const fullAddress = [address, addressComplement].filter(Boolean).join(" - ");
+  const hasAddress = !!(address || (coordinates && (district || city)));
   
   const [formData, setFormData] = useState<CheckoutData>({
     phone: "",
-    city: city || "",
-    district: district || "",
-    addressComplement: savedComplement || address || "",
+    address: fullAddress,
     notes: "",
     paymentMethod: "cod",
     mobileMoneyProvider: "",
@@ -72,9 +76,8 @@ export function CheckoutSteps({ cartItems, subtotal, deliveryFee, discount = 0, 
   const validate = () => {
     const newErrors: Partial<Record<keyof CheckoutData, string>> = {};
     
-    if (formData.deliveryMode === "delivery") {
-      if (!formData.city && !city) newErrors.city = "La ville est requise";
-      if (!formData.district && !district) newErrors.district = "Le quartier est requis";
+    if (formData.deliveryMode === "delivery" && !hasAddress) {
+      newErrors.address = "L'adresse de livraison est requise";
     }
     
     if (formData.orderForSomeoneElse) {
@@ -103,8 +106,7 @@ export function CheckoutSteps({ cartItems, subtotal, deliveryFee, discount = 0, 
     try {
       await onSubmit({
         ...formData,
-        city: formData.city || city,
-        district: formData.district || district,
+        address: fullAddress,
         phone: formData.orderForSomeoneElse ? formData.recipientPhone! : formData.phone,
       });
     } finally {
@@ -112,35 +114,33 @@ export function CheckoutSteps({ cartItems, subtotal, deliveryFee, discount = 0, 
     }
   };
 
-  const toggleRecording = () => {
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      toast.error("La reconnaissance vocale n'est pas supportée");
-      return;
-    }
-
-    if (isRecording) {
+  // Voice recording (audio note, not speech-to-text)
+  const toggleRecording = async () => {
+    if (isRecording && mediaRecorder) {
+      mediaRecorder.stop();
       setIsRecording(false);
       return;
     }
 
-    setIsRecording(true);
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    const recognition = new SpeechRecognition();
-    recognition.lang = 'fr-FR';
-    recognition.continuous = false;
-
-    recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript;
-      setFormData(prev => ({ ...prev, notes: transcript }));
-      setIsRecording(false);
-    };
-
-    recognition.onerror = () => {
-      setIsRecording(false);
-    };
-
-    recognition.onend = () => setIsRecording(false);
-    recognition.start();
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      const chunks: BlobPart[] = [];
+      
+      recorder.ondataavailable = (e) => chunks.push(e.data);
+      recorder.onstop = () => {
+        const blob = new Blob(chunks, { type: 'audio/webm' });
+        setAudioBlob(blob);
+        stream.getTracks().forEach(track => track.stop());
+        toast.success("Note vocale enregistrée !");
+      };
+      
+      recorder.start();
+      setMediaRecorder(recorder);
+      setIsRecording(true);
+    } catch (error) {
+      toast.error("Impossible d'accéder au microphone");
+    }
   };
 
   const effectiveDeliveryFee = formData.deliveryMode === "pickup" ? 0 : deliveryFee;
@@ -148,26 +148,52 @@ export function CheckoutSteps({ cartItems, subtotal, deliveryFee, discount = 0, 
 
   return (
     <div className="space-y-4">
-      {/* SECTION A: Adresse de livraison */}
+      {/* SECTION A: Adresse de livraison - Pre-filled from GPS/Manual */}
       {formData.deliveryMode === "delivery" && (
         <Card className="rounded-3xl border-none shadow-soft overflow-hidden">
-          <div className="bg-primary/5 p-4 border-b flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <MapPin className="w-5 h-5 text-primary" />
+          <div className="bg-primary/5 p-4 border-b">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  {hasGPS ? (
+                    <Navigation className="w-5 h-5 text-primary" />
+                  ) : (
+                    <MapPin className="w-5 h-5 text-primary" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold flex items-center gap-2">
+                    Adresse de livraison
+                    {hasAddress && <Check className="w-4 h-4 text-green-500" />}
+                  </h3>
+                  {hasAddress ? (
+                    <p className="text-sm text-muted-foreground truncate">
+                      {hasGPS && "📍 GPS • "}{city || district} {address && `• ${address.substring(0, 30)}...`}
+                    </p>
+                  ) : (
+                    <p className="text-sm text-destructive">Aucune adresse définie</p>
+                  )}
+                </div>
               </div>
-              <div>
-                <h3 className="font-semibold">Adresse de livraison</h3>
-                {(district || city) && (
-                  <p className="text-sm text-muted-foreground">{district}, {city}</p>
+              <Button variant="ghost" size="sm" onClick={openModal} className="rounded-full shrink-0">
+                <Edit2 className="w-4 h-4 mr-1" />
+                {hasAddress ? "Modifier" : "Définir"}
+              </Button>
+            </div>
+            
+            {/* Show full address details if available */}
+            {hasAddress && fullAddress && (
+              <div className="mt-3 p-3 bg-muted/50 rounded-xl text-sm">
+                <p className="text-foreground">{fullAddress}</p>
+                {coordinates && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Coords: {coordinates.latitude.toFixed(4)}, {coordinates.longitude.toFixed(4)}
+                  </p>
                 )}
               </div>
-            </div>
-            <Button variant="ghost" size="sm" onClick={openModal} className="rounded-full">
-              <Edit2 className="w-4 h-4 mr-1" />
-              Modifier
-            </Button>
+            )}
           </div>
+          
           <CardContent className="p-4 space-y-4">
             {/* Order for someone else toggle */}
             <div className="flex items-center justify-between p-3 bg-muted/50 rounded-xl">
@@ -207,7 +233,7 @@ export function CheckoutSteps({ cartItems, subtotal, deliveryFee, discount = 0, 
                       type="tel"
                       value={formData.recipientPhone}
                       onChange={(e) => setFormData({ ...formData, recipientPhone: e.target.value })}
-                      placeholder="+242 06 123 45 67"
+                      placeholder="06 XXX XX XX"
                       className="pl-10 h-12 rounded-xl"
                     />
                   </div>
@@ -224,7 +250,7 @@ export function CheckoutSteps({ cartItems, subtotal, deliveryFee, discount = 0, 
                     type="tel"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    placeholder="+242 06 123 45 67"
+                    placeholder="06 XXX XX XX"
                     className="pl-10 h-12 rounded-xl"
                   />
                 </div>
@@ -279,12 +305,12 @@ export function CheckoutSteps({ cartItems, subtotal, deliveryFee, discount = 0, 
         </CardContent>
       </Card>
 
-      {/* SECTION C: Notes / Instructions */}
+      {/* SECTION C: Notes / Instructions avec audio */}
       <Card className="rounded-3xl border-none shadow-soft">
         <CardContent className="p-4 space-y-3">
           <h3 className="font-semibold">Instructions (optionnel)</h3>
           <p className="text-xs text-muted-foreground">
-            Pour le livreur ou le restaurant
+            Pour le livreur ou le restaurant • Texte ou note vocale
           </p>
           
           <div className="relative">
@@ -293,24 +319,34 @@ export function CheckoutSteps({ cartItems, subtotal, deliveryFee, discount = 0, 
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               placeholder="Ex: Sonner 2 fois, sans sauce, allergie aux arachides..."
               rows={3}
-              className="pr-12 rounded-xl resize-none"
+              className="pr-14 rounded-xl resize-none"
             />
             <Button
               type="button"
-              variant="ghost"
+              variant={isRecording ? "destructive" : "secondary"}
               size="icon"
-              className="absolute right-2 top-2 rounded-full"
+              className="absolute right-2 bottom-2 rounded-full h-10 w-10"
               onClick={toggleRecording}
             >
               {isRecording ? (
-                <MicOff className="h-5 w-5 text-destructive animate-pulse" />
+                <MicOff className="h-5 w-5 animate-pulse" />
               ) : (
-                <Mic className="h-5 w-5 text-muted-foreground" />
+                <Mic className="h-5 w-5" />
               )}
             </Button>
           </div>
+          
           {isRecording && (
-            <p className="text-xs text-primary animate-pulse">🎤 Parlez maintenant...</p>
+            <p className="text-sm text-destructive animate-pulse flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
+              Enregistrement... Appuyez pour arrêter
+            </p>
+          )}
+          {audioBlob && !isRecording && (
+            <p className="text-sm text-green-600 flex items-center gap-2">
+              <Check className="w-4 h-4" />
+              Note vocale enregistrée
+            </p>
           )}
         </CardContent>
       </Card>
@@ -410,7 +446,7 @@ export function CheckoutSteps({ cartItems, subtotal, deliveryFee, discount = 0, 
 
           <Button 
             onClick={handleSubmit} 
-            disabled={loading}
+            disabled={loading || (formData.deliveryMode === "delivery" && !hasAddress)}
             className="w-full h-14 rounded-2xl text-lg font-semibold btn-playful"
           >
             {loading ? (
@@ -419,6 +455,12 @@ export function CheckoutSteps({ cartItems, subtotal, deliveryFee, discount = 0, 
               `Payer ${effectiveTotal.toFixed(0)} FCFA`
             )}
           </Button>
+          
+          {formData.deliveryMode === "delivery" && !hasAddress && (
+            <p className="text-center text-sm text-destructive">
+              Définissez une adresse de livraison pour continuer
+            </p>
+          )}
         </CardContent>
       </Card>
     </div>
