@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { CartProvider } from "@/hooks/useCart";
+import { LocationProvider } from "@/contexts/LocationContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AlertEngine } from "@/components/alerts/AlertEngine";
 import { FloatingCart } from "@/components/FloatingCart";
@@ -34,11 +35,12 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <CartProvider>
-            <NetworkStatus />
-            <AlertEngine />
-            <FloatingCart />
-            <Routes>
+          <LocationProvider>
+            <CartProvider>
+              <NetworkStatus />
+              <AlertEngine />
+              <FloatingCart />
+              <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/restaurants" element={<Restaurants />} />
@@ -112,7 +114,8 @@ const App = () => (
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
-          </CartProvider>
+            </CartProvider>
+          </LocationProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

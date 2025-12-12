@@ -19,10 +19,16 @@ import { allDistricts } from "@/data/congoDistricts";
 interface DistrictSelectorProps {
   onSelect: (district: string, city: string) => void;
   selectedDistrict?: string;
+  defaultCity?: string;
 }
 
-export const DistrictSelector = ({ onSelect, selectedDistrict }: DistrictSelectorProps) => {
+export const DistrictSelector = ({ onSelect, selectedDistrict, defaultCity }: DistrictSelectorProps) => {
   const [open, setOpen] = useState(false);
+
+  // Filter districts by default city if provided
+  const filteredDistricts = defaultCity 
+    ? allDistricts.filter(d => d.city === defaultCity)
+    : allDistricts;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
