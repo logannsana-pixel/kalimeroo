@@ -12,6 +12,12 @@ import { BusinessHoursTab } from "@/components/restaurant/BusinessHoursTab";
 import { MenuOptionsTab } from "@/components/restaurant/MenuOptionsTab";
 import { BundlesTab } from "@/components/restaurant/BundlesTab";
 import { PromoCodesTab } from "@/components/restaurant/PromoCodesTab";
+import { RestaurantDocumentsTab } from "@/components/restaurant/RestaurantDocumentsTab";
+import { RestaurantChatTab } from "@/components/restaurant/RestaurantChatTab";
+import { RestaurantPrepTimeTab } from "@/components/restaurant/RestaurantPrepTimeTab";
+import { RestaurantPaymentsTab } from "@/components/restaurant/RestaurantPaymentsTab";
+import { RestaurantFeedbackTab } from "@/components/restaurant/RestaurantFeedbackTab";
+import { RestaurantMarketingTab } from "@/components/restaurant/RestaurantMarketingTab";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { ValidationLockScreen } from "@/components/validation/ValidationLockScreen";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
@@ -126,6 +132,18 @@ export default function RestaurantDashboard() {
         return <AdvancedStatsTab />;
       case 'profile':
         return <RestaurantProfileTab />;
+      case 'documents':
+        return <RestaurantDocumentsTab />;
+      case 'chat':
+        return <RestaurantChatTab />;
+      case 'preptime':
+        return <RestaurantPrepTimeTab />;
+      case 'payments':
+        return <RestaurantPaymentsTab />;
+      case 'feedback':
+        return <RestaurantFeedbackTab />;
+      case 'marketing':
+        return <RestaurantMarketingTab />;
       default:
         return <RestaurantOverview restaurantId={restaurant.id} />;
     }
