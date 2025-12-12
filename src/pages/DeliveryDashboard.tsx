@@ -285,13 +285,23 @@ export default function DeliveryDashboard() {
   // Show active order full-screen view
   if (activeOrderView) {
     return (
-      <DriverActiveOrder
-        order={activeOrderView}
-        onBack={() => setActiveOrderView(null)}
-        onPickup={() => openConfirmDialog(activeOrderView.id, 'pickup')}
-        onComplete={() => openConfirmDialog(activeOrderView.id, 'complete')}
-        actionLoading={actionLoading}
-      />
+      <>
+        <DriverActiveOrder
+          order={activeOrderView}
+          onBack={() => setActiveOrderView(null)}
+          onPickup={() => openConfirmDialog(activeOrderView.id, 'pickup')}
+          onComplete={() => openConfirmDialog(activeOrderView.id, 'complete')}
+          actionLoading={actionLoading}
+        />
+        <ConfirmDialog
+          open={confirmDialog.open}
+          onOpenChange={(open) => setConfirmDialog({ ...confirmDialog, open })}
+          title={getConfirmContent().title}
+          description={getConfirmContent().desc}
+          onConfirm={handleAction}
+          loading={!!actionLoading}
+        />
+      </>
     );
   }
 
