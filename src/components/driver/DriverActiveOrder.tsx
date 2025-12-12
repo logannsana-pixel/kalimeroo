@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useState, useEffect } from "react";
 import { ArrowLeft, Phone, MapPin, MessageCircle, Navigation, CheckCircle, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -8,6 +8,8 @@ import { ChatInterface } from "@/components/ChatInterface";
 import { DriverOrder } from "@/pages/DeliveryDashboard";
 import { ButtonLoader } from "@/components/ui/loading-spinner";
 import { useDriverLocation } from "@/hooks/useDriverLocation";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 // Lazy load map for performance
 const OrderTrackingMap = lazy(() => import("@/components/tracking/OrderTrackingMap"));
@@ -34,8 +36,11 @@ export function DriverActiveOrder({
   onComplete,
   actionLoading 
 }: DriverActiveOrderProps) {
+  const { user } = useAuth();
   const currentStep = statusSteps.find(s => s.status === order.status) || statusSteps[0];
   const isLoading = actionLoading === order.id;
+  const [driverLocation, setDriverLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [restaurantLocation, setRestaurantLocation] = useState<{ lat: number; lng: number } | null>(null);
 
   // Enable GPS tracking for active deliveries
   useDriverLocation({
@@ -43,6 +48,59 @@ export function DriverActiveOrder({
     enabled: ['pickup_accepted', 'picked_up', 'delivering'].includes(order.status),
     updateInterval: 5000 // Update every 5 seconds
   });
+
+  // Fetch current driver location from profile
+  useEffect(() => {
+    const fetchLocations = async () => {
+      if (!user) return;
+      
+      // Get driver's current location
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('latitude, longitude')
+        .eq('id', user.id)
+        .single();
+      
+      if (profile?.latitude && profile?.longitude) {
+        setDriverLocation({ lat: profile.latitude, lng: profile.longitude });
+      }
+
+      // Get restaurant location - need to fetch from restaurants table
+      if (order.restaurants) {
+        const { data: restaurant } = await supabase
+          .from('restaurants')
+          .select('latitude, longitude')
+          .eq('name', order.restaurants.name)
+          .single();
+        
+        if (restaurant?.latitude && restaurant?.longitude) {
+          setRestaurantLocation({ lat: restaurant.latitude, lng: restaurant.longitude });
+        }
+      }
+    };
+    
+    fetchLocations();
+
+    // Subscribe to profile updates for real-time location
+    const channel = supabase
+      .channel(`driver-location-${user?.id}`)
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'profiles',
+        filter: `id=eq.${user?.id}`
+      }, (payload) => {
+        const data = payload.new as any;
+        if (data.latitude && data.longitude) {
+          setDriverLocation({ lat: data.latitude, lng: data.longitude });
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, order.restaurants]);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -73,11 +131,11 @@ export function DriverActiveOrder({
       <main className="flex-1 p-4 space-y-4 pb-32">
         {/* Live Map */}
         <div className="rounded-2xl overflow-hidden">
-          <Suspense fallback={<Skeleton className="h-48 w-full" />}>
+          <Suspense fallback={<Skeleton className="h-48 w-full rounded-2xl" />}>
             <OrderTrackingMap
               orderId={order.id}
-              driverLocation={null} // Will be updated via realtime
-              restaurantLocation={null}
+              driverLocation={driverLocation}
+              restaurantLocation={restaurantLocation}
               customerLocation={null}
               status={order.status}
               estimatedTime="15-20 min"
