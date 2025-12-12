@@ -627,7 +627,10 @@ export type Database = {
           id: string
           is_available: boolean | null
           is_validated: boolean | null
+          latitude: number | null
           license_number: string | null
+          location_updated_at: string | null
+          longitude: number | null
           phone: string | null
           updated_at: string
           validated_at: string | null
@@ -646,7 +649,10 @@ export type Database = {
           id: string
           is_available?: boolean | null
           is_validated?: boolean | null
+          latitude?: number | null
           license_number?: string | null
+          location_updated_at?: string | null
+          longitude?: number | null
           phone?: string | null
           updated_at?: string
           validated_at?: string | null
@@ -665,7 +671,10 @@ export type Database = {
           id?: string
           is_available?: boolean | null
           is_validated?: boolean | null
+          latitude?: number | null
           license_number?: string | null
+          location_updated_at?: string | null
+          longitude?: number | null
           phone?: string | null
           updated_at?: string
           validated_at?: string | null
@@ -749,6 +758,8 @@ export type Database = {
           image_url: string | null
           is_active: boolean | null
           is_validated: boolean | null
+          latitude: number | null
+          longitude: number | null
           min_order: number | null
           name: string
           owner_id: string | null
@@ -773,6 +784,8 @@ export type Database = {
           image_url?: string | null
           is_active?: boolean | null
           is_validated?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
           min_order?: number | null
           name: string
           owner_id?: string | null
@@ -797,6 +810,8 @@ export type Database = {
           image_url?: string | null
           is_active?: boolean | null
           is_validated?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
           min_order?: number | null
           name?: string
           owner_id?: string | null
