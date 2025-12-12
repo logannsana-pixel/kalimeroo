@@ -2,14 +2,13 @@ import { useEffect, useState, useMemo } from "react";
 import { Navbar } from "@/components/Navbar";
 import { BottomNav } from "@/components/BottomNav";
 import { Footer } from "@/components/Footer";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
-import { Star, Clock, DollarSign, MapPin } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { AdvancedSearch, SearchFilters } from "@/components/AdvancedSearch";
 import { FavoritesButton } from "@/components/FavoritesButton";
+import { HorizontalCard, HorizontalCardSkeleton } from "@/components/ui/horizontal-card";
+import { MapPin } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface Restaurant {
   id: string;
@@ -131,15 +130,9 @@ export default function Restaurants() {
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-            {[...Array(6)].map((_, i) => (
-              <Card key={i}>
-                <Skeleton className="h-48 w-full rounded-t-lg" />
-                <CardHeader>
-                  <Skeleton className="h-6 w-3/4" />
-                  <Skeleton className="h-4 w-1/2" />
-                </CardHeader>
-              </Card>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {[...Array(8)].map((_, i) => (
+              <HorizontalCardSkeleton key={i} variant="default" />
             ))}
           </div>
         ) : filteredRestaurants.length === 0 ? (
@@ -158,57 +151,26 @@ export default function Restaurants() {
             <p className="text-sm text-muted-foreground mb-4">
               {filteredRestaurants.length} restaurant{filteredRestaurants.length > 1 ? "s" : ""} trouvé{filteredRestaurants.length > 1 ? "s" : ""}
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {filteredRestaurants.map((restaurant) => (
-                <Card
-                  key={restaurant.id}
-                  className="cursor-pointer hover:shadow-hover transition-all duration-300 overflow-hidden group hover:-translate-y-1"
-                  onClick={() => navigate(`/restaurant/${restaurant.id}`)}
-                >
-                  <div className="relative h-40 sm:h-48 overflow-hidden">
-                    <img
-                      src={restaurant.image_url || "/placeholder.svg"}
-                      alt={restaurant.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                    <div className="absolute top-2 right-2" onClick={(e) => e.stopPropagation()}>
-                      <FavoritesButton restaurantId={restaurant.id} />
-                    </div>
-                    {restaurant.city && (
-                      <Badge className="absolute top-2 left-2 bg-background/90 text-foreground text-xs">
-                        <MapPin className="w-3 h-3 mr-1" />
-                        {restaurant.city}
-                      </Badge>
-                    )}
+                <div key={restaurant.id} className="relative">
+                  <div className="absolute top-3 right-3 z-10 md:top-2 md:right-2">
+                    <FavoritesButton restaurantId={restaurant.id} />
                   </div>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="flex items-start justify-between gap-2">
-                      <span className="text-base md:text-lg line-clamp-1">{restaurant.name}</span>
-                      <div className="flex items-center text-sm whitespace-nowrap">
-                        <Star className="w-4 h-4 fill-primary text-primary mr-1" />
-                        <span>{restaurant.rating || "Nouveau"}</span>
-                      </div>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                      {restaurant.description}
-                    </p>
-                    <div className="flex items-center justify-between text-xs md:text-sm mb-2">
-                      <div className="flex items-center text-muted-foreground">
-                        <Clock className="w-4 h-4 mr-1" />
-                        <span>{restaurant.delivery_time}</span>
-                      </div>
-                      <div className="flex items-center text-muted-foreground">
-                        <DollarSign className="w-4 h-4" />
-                        <span>{restaurant.delivery_fee?.toFixed(0) || 0} FCFA</span>
-                      </div>
-                    </div>
-                    <span className="inline-block text-xs bg-gradient-secondary text-secondary-foreground px-3 py-1 rounded-full">
-                      {restaurant.cuisine_type}
-                    </span>
-                  </CardContent>
-                </Card>
+                  <HorizontalCard
+                    imageUrl={restaurant.image_url || "/placeholder.svg"}
+                    title={restaurant.name}
+                    subtitle={restaurant.cuisine_type}
+                    description={restaurant.description}
+                    rating={restaurant.rating}
+                    deliveryTime={restaurant.delivery_time}
+                    badge={restaurant.city || undefined}
+                    badgeVariant="secondary"
+                    price={`${restaurant.delivery_fee?.toFixed(0) || 0} FCFA livraison`}
+                    onClick={() => navigate(`/restaurant/${restaurant.id}`)}
+                    variant="default"
+                  />
+                </div>
               ))}
             </div>
           </>

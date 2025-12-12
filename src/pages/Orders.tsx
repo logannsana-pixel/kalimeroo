@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { BottomNav } from "@/components/BottomNav";
 import { Footer } from "@/components/Footer";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -13,9 +13,9 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { ReviewForm } from "@/components/ReviewForm";
 import { ChatInterface } from "@/components/ChatInterface";
-import { OrderCardSkeleton } from "@/components/ui/skeleton-card";
 import { RefreshButton } from "@/components/RefreshButton";
 import { Database } from "@/integrations/supabase/types";
+import { HorizontalCard, HorizontalCardSkeleton } from "@/components/ui/horizontal-card";
 
 type OrderStatus = Database["public"]["Enums"]["order_status"];
 
@@ -43,23 +43,24 @@ interface Order {
     id: string;
     name: string;
     owner_id: string | null;
+    image_url: string | null;
   };
   order_items: OrderItem[];
   reviews: { id: string }[];
 }
 
-const statusConfig: Record<OrderStatus, { label: string; color: string; icon: React.ReactNode }> = {
-  pending: { label: "En attente", color: "bg-yellow-100 text-yellow-800", icon: <Clock className="w-4 h-4" /> },
-  accepted: { label: "Acceptée", color: "bg-blue-100 text-blue-800", icon: <CheckCircle className="w-4 h-4" /> },
-  confirmed: { label: "Confirmée", color: "bg-blue-100 text-blue-800", icon: <CheckCircle className="w-4 h-4" /> },
-  preparing: { label: "En préparation", color: "bg-purple-100 text-purple-800", icon: <Package className="w-4 h-4" /> },
-  ready: { label: "Prête", color: "bg-green-100 text-green-800", icon: <CheckCircle className="w-4 h-4" /> },
-  pickup_pending: { label: "En attente livreur", color: "bg-teal-100 text-teal-800", icon: <Truck className="w-4 h-4" /> },
-  pickup_accepted: { label: "Livreur en route", color: "bg-cyan-100 text-cyan-800", icon: <Truck className="w-4 h-4" /> },
-  picked_up: { label: "Récupérée", color: "bg-indigo-100 text-indigo-800", icon: <Truck className="w-4 h-4" /> },
-  delivering: { label: "En livraison", color: "bg-orange-100 text-orange-800", icon: <Truck className="w-4 h-4" /> },
-  delivered: { label: "Livrée", color: "bg-green-100 text-green-800", icon: <CheckCircle className="w-4 h-4" /> },
-  cancelled: { label: "Annulée", color: "bg-red-100 text-red-800", icon: <XCircle className="w-4 h-4" /> },
+const statusConfig: Record<OrderStatus, { label: string; variant: "default" | "secondary" | "destructive" | "outline" | "success"; icon: React.ReactNode }> = {
+  pending: { label: "En attente", variant: "secondary", icon: <Clock className="w-3 h-3" /> },
+  accepted: { label: "Acceptée", variant: "default", icon: <CheckCircle className="w-3 h-3" /> },
+  confirmed: { label: "Confirmée", variant: "default", icon: <CheckCircle className="w-3 h-3" /> },
+  preparing: { label: "En préparation", variant: "default", icon: <Package className="w-3 h-3" /> },
+  ready: { label: "Prête", variant: "success", icon: <CheckCircle className="w-3 h-3" /> },
+  pickup_pending: { label: "En attente livreur", variant: "secondary", icon: <Truck className="w-3 h-3" /> },
+  pickup_accepted: { label: "Livreur en route", variant: "default", icon: <Truck className="w-3 h-3" /> },
+  picked_up: { label: "Récupérée", variant: "default", icon: <Truck className="w-3 h-3" /> },
+  delivering: { label: "En livraison", variant: "default", icon: <Truck className="w-3 h-3" /> },
+  delivered: { label: "Livrée", variant: "success", icon: <CheckCircle className="w-3 h-3" /> },
+  cancelled: { label: "Annulée", variant: "destructive", icon: <XCircle className="w-3 h-3" /> },
 };
 
 export default function Orders() {
@@ -91,7 +92,8 @@ export default function Orders() {
           restaurants (
             id,
             name,
-            owner_id
+            owner_id,
+            image_url
           ),
           order_items (
             id,
@@ -155,7 +157,7 @@ export default function Orders() {
           </div>
           <div className="max-w-4xl mx-auto space-y-4">
             {Array.from({ length: 3 }).map((_, i) => (
-              <OrderCardSkeleton key={i} />
+              <HorizontalCardSkeleton key={i} variant="default" />
             ))}
           </div>
         </main>
@@ -175,13 +177,13 @@ export default function Orders() {
             <RefreshButton onClick={() => fetchOrders(true)} loading={refreshing} />
           </div>
           <div className="max-w-4xl mx-auto">
-            <Card>
-              <CardContent className="text-center py-12 md:py-16">
-                <Package className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-                <p className="text-base md:text-lg font-medium text-muted-foreground">
-                  Aucune commande pour le moment
-                </p>
-                <p className="text-sm text-muted-foreground mt-1">
+            <Card className="text-center">
+              <CardContent className="py-12 md:py-16">
+                <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
+                  <Package className="w-10 h-10 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">Aucune commande</h3>
+                <p className="text-sm text-muted-foreground">
                   Vos commandes apparaîtront ici
                 </p>
               </CardContent>
@@ -206,126 +208,104 @@ export default function Orders() {
         <div className="max-w-4xl mx-auto space-y-4">
           {orders.map((order) => {
             const status = statusConfig[order.status];
+            const isExpanded = expandedOrder === order.id;
+            
             return (
               <Card key={order.id} className="overflow-hidden">
-                <CardHeader className="p-4 md:p-6">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="min-w-0 flex-1">
-                      <CardTitle className="text-base md:text-lg truncate">
-                        {order.restaurants.name}
-                      </CardTitle>
-                      <p className="text-xs md:text-sm text-muted-foreground mt-1">
-                        {format(new Date(order.created_at), "PPP 'à' HH:mm", { locale: fr })}
-                      </p>
-                    </div>
-                    <Badge className={`${status.color} shrink-0 gap-1`}>
-                      {status.icon}
-                      <span className="hidden sm:inline">{status.label}</span>
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-4 md:p-6 pt-0 md:pt-0 space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground text-sm">Total</span>
-                    <span className="font-bold text-lg">{Number(order.total).toFixed(0)} FCFA</span>
-                  </div>
+                <div
+                  className="cursor-pointer"
+                  onClick={() => toggleOrderDetails(order.id)}
+                >
+                  <HorizontalCard
+                    imageUrl={order.restaurants.image_url || "/placeholder.svg"}
+                    title={order.restaurants.name}
+                    subtitle={format(new Date(order.created_at), "PPP 'à' HH:mm", { locale: fr })}
+                    description={`${order.order_items.length} article${order.order_items.length > 1 ? 's' : ''}`}
+                    price={Number(order.total)}
+                    badge={status.label}
+                    badgeVariant={status.variant}
+                    ctaText={isExpanded ? "Masquer" : "Détails"}
+                    variant="default"
+                    className="border-0 shadow-none"
+                  />
+                </div>
 
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full"
-                    onClick={() => toggleOrderDetails(order.id)}
-                  >
-                    {expandedOrder === order.id ? (
-                      <>
-                        <ChevronUp className="w-4 h-4 mr-2" />
-                        Masquer
-                      </>
-                    ) : (
-                      <>
-                        <ChevronDown className="w-4 h-4 mr-2" />
-                        Détails
-                      </>
-                    )}
-                  </Button>
-
-                  {expandedOrder === order.id && (
-                    <div className="space-y-4 pt-4 border-t">
-                      <div>
-                        <h4 className="font-semibold mb-2 text-sm">Articles</h4>
-                        <div className="space-y-1">
-                          {order.order_items.map((item) => (
-                            <div key={item.id} className="flex justify-between text-sm">
-                              <span className="text-muted-foreground">
-                                {item.quantity}x {item.menu_items.name}
-                              </span>
-                              <span>{Number(item.price).toFixed(0)} FCFA</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="space-y-1 text-sm border-t pt-3">
-                        <div className="flex justify-between text-muted-foreground">
-                          <span>Sous-total</span>
-                          <span>{Number(order.subtotal).toFixed(0)} FCFA</span>
-                        </div>
-                        <div className="flex justify-between text-muted-foreground">
-                          <span>Livraison</span>
-                          <span>{Number(order.delivery_fee).toFixed(0)} FCFA</span>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2 text-sm border-t pt-3">
-                        <div>
-                          <span className="text-muted-foreground">Adresse:</span>
-                          <p className="mt-0.5">{order.delivery_address}</p>
-                        </div>
-                        {order.notes && (
-                          <div>
-                            <span className="text-muted-foreground">Notes:</span>
-                            <p className="mt-0.5">{order.notes}</p>
+                {isExpanded && (
+                  <CardContent className="pt-0 space-y-4 border-t mx-4 pb-4">
+                    <div className="pt-4">
+                      <h4 className="font-semibold mb-2 text-sm">Articles</h4>
+                      <div className="space-y-1">
+                        {order.order_items.map((item) => (
+                          <div key={item.id} className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">
+                              {item.quantity}x {item.menu_items.name}
+                            </span>
+                            <span>{Number(item.price).toFixed(0)} FCFA</span>
                           </div>
-                        )}
+                        ))}
                       </div>
+                    </div>
 
-                      {/* Chat buttons */}
-                      <div className="flex flex-wrap gap-2 pt-2">
-                        {order.restaurants.owner_id && (
-                          <ChatInterface
-                            orderId={order.id}
-                            receiverId={order.restaurants.owner_id}
-                            receiverName={order.restaurants.name}
-                          />
-                        )}
-                        {order.delivery_driver_id && ['pickup_accepted', 'picked_up', 'delivering'].includes(order.status) && (
-                          <ChatInterface
-                            orderId={order.id}
-                            receiverId={order.delivery_driver_id}
-                            receiverName="Livreur"
-                          />
-                        )}
+                    <div className="space-y-1 text-sm border-t pt-3">
+                      <div className="flex justify-between text-muted-foreground">
+                        <span>Sous-total</span>
+                        <span>{Number(order.subtotal).toFixed(0)} FCFA</span>
                       </div>
+                      <div className="flex justify-between text-muted-foreground">
+                        <span>Livraison</span>
+                        <span>{Number(order.delivery_fee).toFixed(0)} FCFA</span>
+                      </div>
+                    </div>
 
-                      {canReview(order) && (
-                        <Button
-                          onClick={() => setReviewingOrder(order)}
-                          className="w-full"
-                        >
-                          <Star className="w-4 h-4 mr-2" />
-                          Laisser un avis
-                        </Button>
+                    <div className="space-y-2 text-sm border-t pt-3">
+                      <div>
+                        <span className="text-muted-foreground">Adresse:</span>
+                        <p className="mt-0.5">{order.delivery_address}</p>
+                      </div>
+                      {order.notes && (
+                        <div>
+                          <span className="text-muted-foreground">Notes:</span>
+                          <p className="mt-0.5">{order.notes}</p>
+                        </div>
                       )}
                     </div>
-                  )}
-                </CardContent>
+
+                    {/* Chat buttons */}
+                    <div className="flex flex-wrap gap-2 pt-2">
+                      {order.restaurants.owner_id && (
+                        <ChatInterface
+                          orderId={order.id}
+                          receiverId={order.restaurants.owner_id}
+                          receiverName={order.restaurants.name}
+                        />
+                      )}
+                      {order.delivery_driver_id && ['pickup_accepted', 'picked_up', 'delivering'].includes(order.status) && (
+                        <ChatInterface
+                          orderId={order.id}
+                          receiverId={order.delivery_driver_id}
+                          receiverName="Livreur"
+                        />
+                      )}
+                    </div>
+
+                    {canReview(order) && (
+                      <Button
+                        onClick={() => setReviewingOrder(order)}
+                        className="w-full rounded-full"
+                      >
+                        <Star className="w-4 h-4 mr-2" />
+                        Laisser un avis
+                      </Button>
+                    )}
+                  </CardContent>
+                )}
               </Card>
             );
           })}
         </div>
 
         <Dialog open={!!reviewingOrder} onOpenChange={(open) => !open && setReviewingOrder(null)}>
-          <DialogContent className="mx-4 max-w-md">
+          <DialogContent className="mx-4 max-w-md rounded-3xl">
             <DialogHeader>
               <DialogTitle>Avis pour {reviewingOrder?.restaurants.name}</DialogTitle>
             </DialogHeader>
