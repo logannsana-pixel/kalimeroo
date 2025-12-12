@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Search, Star, Clock, MapPin, ArrowRight, Truck, Sparkles, Zap } from "lucide-react";
 import { useLocation } from "@/contexts/LocationContext";
 import { FavoritesButton } from "@/components/FavoritesButton";
+import { LazyImage } from "@/components/LazyImage";
 import heroFood from "@/assets/hero-food.jpg";
 
 interface Restaurant {
@@ -252,12 +253,12 @@ const Index = () => {
                     style={{ animationDelay: `${index * 50}ms` }}
                     onClick={() => hasAddress ? navigate(`/restaurant/${restaurant.id}`) : openModal()}
                   >
-                    {/* Image */}
+                    {/* Image with LazyLoading */}
                     <div className="relative h-32 sm:h-40 overflow-hidden">
-                      <img
+                      <LazyImage
                         src={restaurant.image_url || "/placeholder.svg"}
                         alt={restaurant.name}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        className="w-full h-full transition-transform duration-500 group-hover:scale-110"
                       />
                       {/* Promo Badge */}
                       <Badge className="absolute top-3 left-3 bg-primary text-primary-foreground rounded-full px-2.5 py-0.5 text-xs font-semibold">

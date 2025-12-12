@@ -119,34 +119,36 @@ export default function Profile() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col pb-16 md:pb-0">
+    <div className="min-h-screen flex flex-col pb-20 md:pb-0 bg-background">
       <Navbar />
       <main className="flex-1 container mx-auto px-4 py-4 md:py-8">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 md:mb-8">
-          <h1 className="text-xl md:text-3xl font-bold">Mon profil</h1>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <h1 className="text-xl md:text-2xl font-bold">Mon profil</h1>
           <Button 
             variant="outline" 
             onClick={signOut}
-            className="w-full sm:w-auto"
+            className="w-full sm:w-auto rounded-full"
           >
             <LogOut className="h-4 w-4 mr-2" />
             Déconnexion
           </Button>
         </div>
         
-        <div className="max-w-4xl mx-auto space-y-6">
+        <div className="max-w-2xl mx-auto space-y-6">
           {/* User Info Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Informations personnelles</CardTitle>
+          <Card className="border-none shadow-soft rounded-3xl overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-primary/10 to-accent/10 pb-4">
+              <CardTitle className="text-lg">Informations personnelles</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4 md:p-6">
               <div className="space-y-4">
-                <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
-                  <Mail className="h-5 w-5 text-muted-foreground" />
+                <div className="flex items-center gap-3 p-4 bg-muted/50 rounded-2xl">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Mail className="h-5 w-5 text-primary" />
+                  </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Email</p>
-                    <p className="font-medium">{user?.email}</p>
+                    <p className="text-xs text-muted-foreground">Email / Téléphone</p>
+                    <p className="font-medium text-sm">{user?.email}</p>
                   </div>
                 </div>
 
@@ -157,59 +159,72 @@ export default function Profile() {
                     currentImage={formData.avatar_url}
                   />
 
-                  <div>
-                    <Label htmlFor="full_name">Nom complet</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="full_name" className="text-sm font-medium">Nom complet</Label>
                     <Input
                       id="full_name"
                       value={formData.full_name}
                       onChange={(e) => setFormData({...formData, full_name: e.target.value})}
                       placeholder="Votre nom complet"
+                      className="h-12 rounded-xl"
                     />
                   </div>
 
-                  <div>
-                    <Label htmlFor="phone">Téléphone</Label>
-                    <Input
-                      id="phone"
-                      type="tel"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                      placeholder="+242 06 123 4567"
-                    />
+                  <div className="space-y-2">
+                    <Label htmlFor="phone" className="text-sm font-medium">Téléphone</Label>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="phone"
+                        type="tel"
+                        value={formData.phone}
+                        onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                        placeholder="06 XXX XX XX"
+                        className="h-12 pl-10 rounded-xl"
+                      />
+                    </div>
                   </div>
 
-                  <div>
-                    <Label htmlFor="city">Ville</Label>
-                    <Input
-                      id="city"
-                      value={formData.city}
-                      onChange={(e) => setFormData({...formData, city: e.target.value})}
-                      placeholder="Brazzaville"
-                    />
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="city" className="text-sm font-medium">Ville</Label>
+                      <Input
+                        id="city"
+                        value={formData.city}
+                        onChange={(e) => setFormData({...formData, city: e.target.value})}
+                        placeholder="Brazzaville"
+                        className="h-12 rounded-xl"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="district" className="text-sm font-medium">Quartier</Label>
+                      <Input
+                        id="district"
+                        value={formData.district}
+                        onChange={(e) => setFormData({...formData, district: e.target.value})}
+                        placeholder="Moungali"
+                        className="h-12 rounded-xl"
+                      />
+                    </div>
                   </div>
 
-                  <div>
-                    <Label htmlFor="district">Quartier</Label>
-                    <Input
-                      id="district"
-                      value={formData.district}
-                      onChange={(e) => setFormData({...formData, district: e.target.value})}
-                      placeholder="Moungali"
-                    />
+                  <div className="space-y-2">
+                    <Label htmlFor="address" className="text-sm font-medium">Adresse complète</Label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Textarea
+                        id="address"
+                        value={formData.address}
+                        onChange={(e) => setFormData({...formData, address: e.target.value})}
+                        placeholder="Numéro, rue, repères..."
+                        rows={3}
+                        className="pl-10 rounded-xl resize-none"
+                      />
+                    </div>
                   </div>
 
-                  <div>
-                    <Label htmlFor="address">Adresse complète</Label>
-                    <Textarea
-                      id="address"
-                      value={formData.address}
-                      onChange={(e) => setFormData({...formData, address: e.target.value})}
-                      placeholder="Numéro, rue, repères..."
-                      rows={3}
-                    />
-                  </div>
-
-                  <Button type="submit" className="w-full">
+                  <Button type="submit" className="w-full h-12 rounded-2xl btn-playful">
                     Enregistrer les modifications
                   </Button>
                 </form>
@@ -222,7 +237,7 @@ export default function Profile() {
           {userRole === "delivery_driver" && <DeliveryProfileTab />}
         </div>
       </main>
-      <Footer />
+      <Footer className="hidden md:block" />
       <BottomNav />
     </div>
   );

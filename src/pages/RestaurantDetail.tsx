@@ -15,6 +15,7 @@ import { MenuItemDetailModal } from "@/components/MenuItemDetailModal";
 import { ReviewsList } from "@/components/ReviewsList";
 import { GuestCheckoutModal } from "@/components/checkout/GuestCheckoutModal";
 import { MenuItemCard, MenuItemCardSkeleton } from "@/components/ui/menu-item-card";
+import { LazyImage } from "@/components/LazyImage";
 import { cn } from "@/lib/utils";
 
 interface Restaurant {
@@ -156,10 +157,10 @@ export default function RestaurantDetail() {
     <div className="min-h-screen flex flex-col pb-20 md:pb-0 bg-background">
       {/* Hero Image with Back Button */}
       <div className="relative h-48 sm:h-56">
-        <img
+        <LazyImage
           src={restaurant.image_url || "/placeholder.svg"}
           alt={restaurant.name}
-          className="w-full h-full object-cover"
+          className="w-full h-full"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/30 to-transparent" />
         

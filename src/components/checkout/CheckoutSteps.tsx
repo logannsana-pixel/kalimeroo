@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -11,8 +10,6 @@ import {
   Banknote, 
   Bike, 
   MapPin, 
-  Mic, 
-  MicOff,
   User,
   Phone,
   Edit2,
@@ -23,6 +20,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLocation } from "@/contexts/LocationContext";
 import { toast } from "sonner";
+import { VoiceNoteInput } from "@/components/voice/VoiceNoteInput";
 
 interface CheckoutData {
   phone: string;
@@ -50,9 +48,8 @@ export function CheckoutSteps({ cartItems, subtotal, deliveryFee, discount = 0, 
   const { district, city, address, addressComplement, coordinates, hasGPS, openModal } = useLocation();
   const calculatedTotal = propTotal ?? (subtotal + deliveryFee - discount);
   const [loading, setLoading] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
-  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  const [audioDuration, setAudioDuration] = useState(0);
   
   // Build full address from location context
   const fullAddress = [address, addressComplement].filter(Boolean).join(" - ");
@@ -114,32 +111,12 @@ export function CheckoutSteps({ cartItems, subtotal, deliveryFee, discount = 0, 
     }
   };
 
-  // Voice recording (audio note, not speech-to-text)
-  const toggleRecording = async () => {
-    if (isRecording && mediaRecorder) {
-      mediaRecorder.stop();
-      setIsRecording(false);
-      return;
-    }
-
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
-      const chunks: BlobPart[] = [];
-      
-      recorder.ondataavailable = (e) => chunks.push(e.data);
-      recorder.onstop = () => {
-        const blob = new Blob(chunks, { type: 'audio/webm' });
-        setAudioBlob(blob);
-        stream.getTracks().forEach(track => track.stop());
-        toast.success("Note vocale enregistrée !");
-      };
-      
-      recorder.start();
-      setMediaRecorder(recorder);
-      setIsRecording(true);
-    } catch (error) {
-      toast.error("Impossible d'accéder au microphone");
+  // Handle audio recording
+  const handleAudioChange = (blob: Blob | null, duration: number) => {
+    setAudioBlob(blob);
+    setAudioDuration(duration);
+    if (blob) {
+      toast.success("Note vocale enregistrée !");
     }
   };
 
@@ -305,49 +282,22 @@ export function CheckoutSteps({ cartItems, subtotal, deliveryFee, discount = 0, 
         </CardContent>
       </Card>
 
-      {/* SECTION C: Notes / Instructions avec audio */}
+      {/* SECTION C: Notes / Instructions avec VoiceNoteInput */}
       <Card className="rounded-3xl border-none shadow-soft">
         <CardContent className="p-4 space-y-3">
           <h3 className="font-semibold">Instructions (optionnel)</h3>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground mb-2">
             Pour le livreur ou le restaurant • Texte ou note vocale
           </p>
           
-          <div className="relative">
-            <Textarea
-              value={formData.notes}
-              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              placeholder="Ex: Sonner 2 fois, sans sauce, allergie aux arachides..."
-              rows={3}
-              className="pr-14 rounded-xl resize-none"
-            />
-            <Button
-              type="button"
-              variant={isRecording ? "destructive" : "secondary"}
-              size="icon"
-              className="absolute right-2 bottom-2 rounded-full h-10 w-10"
-              onClick={toggleRecording}
-            >
-              {isRecording ? (
-                <MicOff className="h-5 w-5 animate-pulse" />
-              ) : (
-                <Mic className="h-5 w-5" />
-              )}
-            </Button>
-          </div>
-          
-          {isRecording && (
-            <p className="text-sm text-destructive animate-pulse flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
-              Enregistrement... Appuyez pour arrêter
-            </p>
-          )}
-          {audioBlob && !isRecording && (
-            <p className="text-sm text-green-600 flex items-center gap-2">
-              <Check className="w-4 h-4" />
-              Note vocale enregistrée
-            </p>
-          )}
+          <VoiceNoteInput
+            value={formData.notes}
+            onChange={(notes) => setFormData({ ...formData, notes })}
+            audioBlob={audioBlob}
+            audioDuration={audioDuration}
+            onAudioChange={handleAudioChange}
+            placeholder="Ex: Sonner 2 fois, sans sauce, allergie aux arachides..."
+          />
         </CardContent>
       </Card>
 

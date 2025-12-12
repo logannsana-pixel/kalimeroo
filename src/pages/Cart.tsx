@@ -8,6 +8,7 @@ import { ShoppingCart, Trash2, Plus, Minus, ArrowRight, Store, ChevronLeft } fro
 import { useCart } from "@/hooks/useCart";
 import { useNavigate } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
+import { LazyImage } from "@/components/LazyImage";
 
 export default function Cart() {
   const navigate = useNavigate();
@@ -126,10 +127,10 @@ export default function Cart() {
                 <div className="flex gap-4">
                   {/* Image */}
                   <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden flex-shrink-0">
-                    <img
+                    <LazyImage
                       src={item.menu_items?.image_url || "/placeholder.svg"}
-                      alt={item.menu_items?.name}
-                      className="w-full h-full object-cover"
+                      alt={item.menu_items?.name || "Item"}
+                      className="w-full h-full"
                     />
                   </div>
                   
