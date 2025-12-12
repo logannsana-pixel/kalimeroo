@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, Star, Clock, MapPin, ArrowRight, Truck, Sparkles, Zap, Heart } from "lucide-react";
+import { Search, Star, Clock, MapPin, ArrowRight, Truck, Sparkles, Zap } from "lucide-react";
 import { useLocation } from "@/contexts/LocationContext";
 import { FavoritesButton } from "@/components/FavoritesButton";
 import heroFood from "@/assets/hero-food.jpg";
@@ -31,19 +31,28 @@ interface Restaurant {
 
 const Index = () => {
   const navigate = useNavigate();
-  const { district, city } = useLocation();
+  const { district, city, openModal } = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  const hasAddress = district && city;
 
   useEffect(() => {
     const fetchData = async () => {
-      const { data: restaurantsData } = await supabase
+      let query = supabase
         .from("restaurants")
         .select("id, name, image_url, rating, cuisine_type, delivery_time, delivery_fee, city")
         .eq("is_active", true)
         .order("rating", { ascending: false })
         .limit(8);
+
+      // Filter by city if address is set
+      if (city) {
+        query = query.eq("city", city);
+      }
+
+      const { data: restaurantsData } = await query;
 
       if (restaurantsData) {
         setRestaurants(restaurantsData);
@@ -52,10 +61,14 @@ const Index = () => {
     };
 
     fetchData();
-  }, []);
+  }, [city]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!hasAddress) {
+      openModal();
+      return;
+    }
     navigate(`/restaurants?q=${encodeURIComponent(searchQuery)}`);
   };
 
@@ -96,29 +109,55 @@ const Index = () => {
                 Des centaines de restaurants à portée de main. Commandez en quelques clics !
               </p>
               
+              {/* Address Button - More prominent when no address */}
+              {!hasAddress && (
+                <Button
+                  onClick={openModal}
+                  size="lg"
+                  className="w-full sm:w-auto mb-4 h-14 rounded-2xl btn-playful gap-3 text-base"
+                >
+                  <MapPin className="h-5 w-5" />
+                  Définir mon adresse
+                </Button>
+              )}
+              
               {/* Search Bar */}
               <form onSubmit={handleSearch} className="flex gap-3 mb-5">
                 <div className="relative flex-1">
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                   <Input
                     type="text"
-                    placeholder="Rechercher un restaurant, un plat..."
+                    placeholder={hasAddress ? "Rechercher un restaurant, un plat..." : "Définissez d'abord votre adresse"}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-12 h-14 rounded-2xl bg-card/80 backdrop-blur-sm border-2 border-border/50 focus:border-primary text-base"
+                    onClick={() => !hasAddress && openModal()}
+                    className={`pl-12 h-14 rounded-2xl bg-card/80 backdrop-blur-sm border-2 text-base ${
+                      hasAddress ? "border-border/50 focus:border-primary" : "border-muted cursor-pointer"
+                    }`}
+                    readOnly={!hasAddress}
                   />
                 </div>
-                <Button type="submit" size="lg" className="h-14 px-8 rounded-2xl btn-playful">
+                <Button 
+                  type="submit" 
+                  size="lg" 
+                  className="h-14 px-8 rounded-2xl btn-playful"
+                  disabled={!hasAddress}
+                >
                   <Search className="h-5 w-5 md:mr-2" />
                   <span className="hidden md:inline">Rechercher</span>
                 </Button>
               </form>
 
-              {district && (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground bg-card/50 backdrop-blur-sm rounded-full px-4 py-2 w-fit">
+              {/* Current Address Display */}
+              {hasAddress && (
+                <button 
+                  onClick={openModal}
+                  className="flex items-center gap-2 text-sm text-muted-foreground bg-card/50 backdrop-blur-sm rounded-full px-4 py-2 w-fit hover:bg-card/80 transition-colors"
+                >
                   <MapPin className="h-4 w-4 text-primary" />
                   <span>Livraison vers <strong className="text-foreground">{district}, {city}</strong></span>
-                </div>
+                  <span className="text-xs text-primary">Modifier</span>
+                </button>
               )}
             </div>
           </div>
@@ -137,24 +176,40 @@ const Index = () => {
                 <Sparkles className="w-5 h-5 text-primary" />
                 Catégories
               </h2>
-              <Button variant="ghost" size="sm" onClick={() => navigate("/restaurants")} className="rounded-full text-primary">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => hasAddress ? navigate("/restaurants") : openModal()} 
+                className="rounded-full text-primary"
+              >
                 Voir tout <ArrowRight className="ml-1 h-4 w-4" />
               </Button>
             </div>
-            <BlobCategories />
+            <BlobCategories disabled={!hasAddress} onDisabledClick={openModal} />
           </section>
 
-          {/* Order Again Section */}
-          <OrderAgainSection />
+          {/* Order Again Section - Only show if address is set */}
+          {hasAddress && <OrderAgainSection />}
 
           {/* Popular Restaurants */}
           <section className="py-6 md:py-10">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-2xl md:text-3xl font-bold">Restaurants populaires 🔥</h2>
-                <p className="text-sm text-muted-foreground mt-1">Les mieux notés près de chez vous</p>
+                <h2 className="text-2xl md:text-3xl font-bold">
+                  {hasAddress ? "Restaurants populaires 🔥" : "Restaurants disponibles"}
+                </h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {hasAddress 
+                    ? "Les mieux notés près de chez vous" 
+                    : "Définissez votre adresse pour voir les restaurants à proximité"
+                  }
+                </p>
               </div>
-              <Button variant="outline" onClick={() => navigate("/restaurants")} className="rounded-full hidden sm:flex">
+              <Button 
+                variant="outline" 
+                onClick={() => hasAddress ? navigate("/restaurants") : openModal()} 
+                className="rounded-full hidden sm:flex"
+              >
                 Tous les restaurants <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
@@ -170,22 +225,32 @@ const Index = () => {
                 <div className="w-20 h-20 mx-auto bg-primary/10 rounded-full flex items-center justify-center mb-4">
                   <Truck className="h-10 w-10 text-primary" />
                 </div>
-                <h3 className="text-xl font-bold mb-2">Bientôt disponible</h3>
+                <h3 className="text-xl font-bold mb-2">
+                  {hasAddress ? "Bientôt disponible" : "Définissez votre adresse"}
+                </h3>
                 <p className="text-muted-foreground mb-6">
-                  Nous préparons les meilleurs restaurants pour vous
+                  {hasAddress 
+                    ? "Nous préparons les meilleurs restaurants pour vous"
+                    : "Pour découvrir les restaurants disponibles dans votre zone"
+                  }
                 </p>
-                <Button variant="outline" onClick={() => navigate("/auth")} className="rounded-full">
-                  Devenir restaurant partenaire
-                </Button>
+                {!hasAddress && (
+                  <Button onClick={openModal} className="rounded-full">
+                    <MapPin className="mr-2 h-4 w-4" />
+                    Définir mon adresse
+                  </Button>
+                )}
               </div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
                 {restaurants.map((restaurant, index) => (
                   <Card
                     key={restaurant.id}
-                    className="group cursor-pointer overflow-hidden border-none shadow-soft hover:shadow-hover transition-all duration-300 hover:-translate-y-2 animate-fade-in rounded-3xl"
+                    className={`group cursor-pointer overflow-hidden border-none shadow-soft hover:shadow-hover transition-all duration-300 hover:-translate-y-2 animate-fade-in rounded-3xl ${
+                      !hasAddress ? "opacity-75" : ""
+                    }`}
                     style={{ animationDelay: `${index * 50}ms` }}
-                    onClick={() => navigate(`/restaurant/${restaurant.id}`)}
+                    onClick={() => hasAddress ? navigate(`/restaurant/${restaurant.id}`) : openModal()}
                   >
                     {/* Image */}
                     <div className="relative h-32 sm:h-40 overflow-hidden">
@@ -199,12 +264,14 @@ const Index = () => {
                         15% off
                       </Badge>
                       {/* Favorite Button */}
-                      <div 
-                        className="absolute top-3 right-3"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <FavoritesButton restaurantId={restaurant.id} />
-                      </div>
+                      {hasAddress && (
+                        <div 
+                          className="absolute top-3 right-3"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <FavoritesButton restaurantId={restaurant.id} />
+                        </div>
+                      )}
                       {/* City Badge */}
                       {restaurant.city && (
                         <Badge className="absolute bottom-3 right-3 bg-card/90 backdrop-blur-sm text-foreground rounded-full px-2.5 py-0.5 text-xs">
@@ -237,7 +304,11 @@ const Index = () => {
 
             {restaurants.length > 0 && (
               <div className="text-center mt-8">
-                <Button size="lg" onClick={() => navigate("/restaurants")} className="rounded-full px-10 btn-playful">
+                <Button 
+                  size="lg" 
+                  onClick={() => hasAddress ? navigate("/restaurants") : openModal()} 
+                  className="rounded-full px-10 btn-playful"
+                >
                   Voir tous les restaurants
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>

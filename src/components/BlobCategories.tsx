@@ -30,7 +30,12 @@ const blobColors = [
   "bg-gradient-to-br from-teal-400 to-teal-500",
 ];
 
-export const BlobCategories = () => {
+interface BlobCategoriesProps {
+  disabled?: boolean;
+  onDisabledClick?: () => void;
+}
+
+export const BlobCategories = ({ disabled, onDisabledClick }: BlobCategoriesProps) => {
   const navigate = useNavigate();
   const [categories, setCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -53,6 +58,10 @@ export const BlobCategories = () => {
   }, []);
 
   const handleClick = (category: string) => {
+    if (disabled) {
+      onDisabledClick?.();
+      return;
+    }
     navigate(`/restaurants?category=${encodeURIComponent(category)}`);
   };
 
@@ -75,7 +84,9 @@ export const BlobCategories = () => {
         <button
           key={category}
           onClick={() => handleClick(category)}
-          className="flex flex-col items-center gap-2 flex-shrink-0 group animate-fade-in"
+          className={`flex flex-col items-center gap-2 flex-shrink-0 group animate-fade-in ${
+            disabled ? "opacity-60" : ""
+          }`}
           style={{ animationDelay: `${index * 50}ms` }}
         >
           <div 
