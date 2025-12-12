@@ -1,4 +1,4 @@
-import { Bell, LogOut, RefreshCw, Volume2 } from "lucide-react";
+import { Bell, LogOut, RefreshCw, Volume2, Settings } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -16,6 +16,7 @@ interface DriverHeaderProps {
   onLogout: () => void;
   onRefresh: () => void;
   refreshing: boolean;
+  onSettings?: () => void;
 }
 
 export function DriverHeader({ 
@@ -24,7 +25,8 @@ export function DriverHeader({
   onToggleOnline, 
   onLogout, 
   onRefresh, 
-  refreshing 
+  refreshing,
+  onSettings
 }: DriverHeaderProps) {
   const navigate = useNavigate();
 
@@ -67,6 +69,16 @@ export function DriverHeader({
             <TooltipContent>Alertes & Sons</TooltipContent>
           </Tooltip>
           <NotificationBell />
+          {onSettings && (
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={onSettings}
+              className="touch-target"
+            >
+              <Settings className="h-5 w-5" />
+            </Button>
+          )}
           <Button 
             variant="ghost" 
             size="icon" 

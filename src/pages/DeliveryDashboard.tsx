@@ -1,14 +1,17 @@
-import { useEffect, useState, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Database } from "@/integrations/supabase/types";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { DriverHeader } from "@/components/driver/DriverHeader";
-import { DriverBottomNav } from "@/components/driver/DriverBottomNav";
+import { DriverBottomNav, DriverTabType } from "@/components/driver/DriverBottomNav";
 import { DriverHomeTab } from "@/components/driver/DriverHomeTab";
 import { DriverOrdersTab } from "@/components/driver/DriverOrdersTab";
 import { DriverEarningsTab } from "@/components/driver/DriverEarningsTab";
 import { DriverProfileTab } from "@/components/driver/DriverProfileTab";
+import { DriverSettingsTab } from "@/components/driver/DriverSettingsTab";
+import { DriverDocumentsTab } from "@/components/driver/DriverDocumentsTab";
+import { DriverCashHandlingTab } from "@/components/driver/DriverCashHandlingTab";
 import { DriverActiveOrder } from "@/components/driver/DriverActiveOrder";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { OrderCardSkeleton } from "@/components/ui/skeleton-card";
@@ -46,7 +49,7 @@ interface DriverProfile {
 
 export default function DeliveryDashboard() {
   const { user, signOut } = useAuth();
-  const [activeTab, setActiveTab] = useState<'home' | 'orders' | 'earnings' | 'profile'>('home');
+  const [activeTab, setActiveTab] = useState<DriverTabType>('home');
   const [orders, setOrders] = useState<DriverOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [profileLoading, setProfileLoading] = useState(true);
@@ -227,7 +230,7 @@ export default function DeliveryDashboard() {
     
     if (!error) {
       setDriverProfile(prev => ({ ...prev, is_available: newStatus }));
-      toast.success(newStatus ? "Vous êtes maintenant en ligne" : "Vous êtes hors ligne");
+      toast.success(newStatus ? "Vous êtes maintenant EN LIGNE" : "Vous êtes HORS LIGNE");
     }
   };
 
@@ -238,8 +241,8 @@ export default function DeliveryDashboard() {
   const getConfirmContent = () => {
     switch (confirmDialog.action) {
       case 'accept': return { title: "Accepter cette livraison ?", desc: "Vous vous engagez à récupérer et livrer cette commande." };
-      case 'pickup': return { title: "Confirmer la récupération ?", desc: "Confirmez que vous avez récupéré la commande." };
-      case 'complete': return { title: "Confirmer la livraison ?", desc: "Confirmez que vous avez remis la commande." };
+      case 'pickup': return { title: "Confirmer la récupération ?", desc: "Confirmez que vous avez récupéré la commande au restaurant." };
+      case 'complete': return { title: "Confirmer la livraison ?", desc: "Confirmez que vous avez remis la commande au client." };
     }
   };
 
@@ -250,7 +253,6 @@ export default function DeliveryDashboard() {
   const handleRequestRevalidation = async () => {
     if (!user) return;
     
-    // Clear rejection notes to mark as pending again
     await supabase
       .from("profiles")
       .update({ validation_notes: null })
@@ -324,6 +326,40 @@ export default function DeliveryDashboard() {
     );
   }
 
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'home':
+        return (
+          <DriverHomeTab
+            availableOrders={availableOrders}
+            activeOrders={activeOrders}
+            onAccept={(id) => openConfirmDialog(id, 'accept')}
+            onViewActive={setActiveOrderView}
+            actionLoading={actionLoading}
+          />
+        );
+      case 'orders':
+        return <DriverOrdersTab orders={completedOrders} />;
+      case 'earnings':
+        return <DriverEarningsTab orders={completedOrders} />;
+      case 'cash':
+        return <DriverCashHandlingTab orders={completedOrders} />;
+      case 'profile':
+        return (
+          <div className="pb-24">
+            <DriverProfileTab />
+            <div className="px-4">
+              <DriverDocumentsTab />
+            </div>
+          </div>
+        );
+      case 'settings':
+        return <DriverSettingsTab onLogout={signOut} />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <DriverHeader 
@@ -333,29 +369,11 @@ export default function DeliveryDashboard() {
         onLogout={signOut}
         onRefresh={() => fetchOrders(true)}
         refreshing={refreshing}
+        onSettings={() => setActiveTab('settings')}
       />
       
-      <main className="flex-1 overflow-auto pb-24">
-        {activeTab === 'home' && (
-          <DriverHomeTab
-            availableOrders={availableOrders}
-            activeOrders={activeOrders}
-            onAccept={(id) => openConfirmDialog(id, 'accept')}
-            onViewActive={setActiveOrderView}
-            actionLoading={actionLoading}
-          />
-        )}
-        {activeTab === 'orders' && (
-          <DriverOrdersTab
-            orders={completedOrders}
-          />
-        )}
-        {activeTab === 'earnings' && (
-          <DriverEarningsTab orders={completedOrders} />
-        )}
-        {activeTab === 'profile' && (
-          <DriverProfileTab />
-        )}
+      <main className="flex-1 overflow-auto">
+        {renderContent()}
       </main>
 
       <DriverBottomNav activeTab={activeTab} onTabChange={setActiveTab} />
