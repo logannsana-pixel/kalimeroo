@@ -5,13 +5,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { congoDistricts, cities } from "@/data/congoLocations";
-import { ChevronLeft, ChevronRight, Upload } from "lucide-react";
+import { ChevronLeft, ChevronRight, Upload, Phone, Store, User, MapPin, Image } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { Card } from "@/components/ui/card";
 
 interface RestaurantData {
   // Gérant
   fullName: string;
-  email: string;
   phone: string;
   password: string;
   confirmPassword: string;
@@ -43,11 +43,38 @@ const cuisineTypes = [
   "Autre",
 ];
 
+// Validate Congolese phone number format
+const validateCongoPhone = (phone: string): boolean => {
+  // Remove spaces and special characters
+  const cleanPhone = phone.replace(/[\s\-\(\)]/g, '');
+  
+  // Accept formats: 06XXXXXXXX, 05XXXXXXXX, 04XXXXXXXX, +24206XXXXXXXX, 24206XXXXXXXX
+  const patterns = [
+    /^0[456]\d{7}$/, // Local format: 06XXXXXXXX
+    /^\+242[0456]\d{7}$/, // International with +: +24206XXXXXXXX
+    /^242[0456]\d{7}$/, // International without +: 24206XXXXXXXX
+  ];
+  
+  return patterns.some(pattern => pattern.test(cleanPhone));
+};
+
+// Format phone for display
+const formatPhoneDisplay = (phone: string): string => {
+  const clean = phone.replace(/[\s\-\(\)]/g, '');
+  if (clean.startsWith('+242')) {
+    return clean;
+  } else if (clean.startsWith('242')) {
+    return '+' + clean;
+  } else if (clean.startsWith('0')) {
+    return '+242' + clean.slice(1);
+  }
+  return phone;
+};
+
 export function RestaurantSignupForm({ onSubmit, onBack }: RestaurantSignupFormProps) {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<RestaurantData>({
     fullName: "",
-    email: "",
     phone: "",
     password: "",
     confirmPassword: "",
@@ -66,9 +93,11 @@ export function RestaurantSignupForm({ onSubmit, onBack }: RestaurantSignupFormP
     const newErrors: Partial<Record<keyof RestaurantData, string>> = {};
     
     if (!formData.fullName.trim()) newErrors.fullName = "Le nom est requis";
-    if (!formData.email.trim()) newErrors.email = "L'email est requis";
-    else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Email invalide";
-    if (!formData.phone.trim()) newErrors.phone = "Le téléphone est requis";
+    if (!formData.phone.trim()) {
+      newErrors.phone = "Le téléphone est requis";
+    } else if (!validateCongoPhone(formData.phone)) {
+      newErrors.phone = "Numéro congolais invalide (ex: 06 123 45 67)";
+    }
     if (formData.password.length < 6) newErrors.password = "Minimum 6 caractères";
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Les mots de passe ne correspondent pas";
@@ -100,7 +129,12 @@ export function RestaurantSignupForm({ onSubmit, onBack }: RestaurantSignupFormP
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validateStep2()) {
-      onSubmit(formData);
+      // Format phone before submission
+      const formattedData = {
+        ...formData,
+        phone: formatPhoneDisplay(formData.phone),
+      };
+      onSubmit(formattedData);
     }
   };
 
@@ -122,25 +156,37 @@ export function RestaurantSignupForm({ onSubmit, onBack }: RestaurantSignupFormP
 
   return (
     <div className="space-y-6">
-      <div className="space-y-2">
-        <Button variant="ghost" onClick={onBack} className="mb-2">
-          <ChevronLeft className="w-4 h-4 mr-2" />
-          Retour
-        </Button>
-        <h2 className="text-2xl md:text-3xl font-bold">Inscription Restaurant</h2>
+      {/* Progress Header */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between text-sm text-muted-foreground">
+          <span className="flex items-center gap-2">
+            {step === 1 ? (
+              <><User className="w-4 h-4" /> Informations du gérant</>
+            ) : (
+              <><Store className="w-4 h-4" /> Informations du restaurant</>
+            )}
+          </span>
+          <span>Étape {step}/2</span>
+        </div>
         <Progress value={step * 50} className="h-2" />
-        <p className="text-sm text-muted-foreground">Étape {step} sur 2</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-5">
         {step === 1 && (
           <div className="space-y-4">
-            <div className="p-4 bg-muted/50 rounded-lg">
-              <h3 className="font-semibold mb-2">Informations du gérant</h3>
-              <p className="text-sm text-muted-foreground">
-                Ces informations seront utilisées pour vous connecter et gérer votre restaurant.
-              </p>
-            </div>
+            <Card className="p-4 bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center shrink-0">
+                  <User className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-emerald-900 dark:text-emerald-300">Vos informations</h3>
+                  <p className="text-sm text-emerald-700 dark:text-emerald-400/80">
+                    Ces informations seront utilisées pour vous connecter.
+                  </p>
+                </div>
+              </div>
+            </Card>
 
             <div className="space-y-2">
               <Label htmlFor="fullName">Nom complet du gérant *</Label>
@@ -148,32 +194,33 @@ export function RestaurantSignupForm({ onSubmit, onBack }: RestaurantSignupFormP
                 id="fullName"
                 value={formData.fullName}
                 onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                placeholder="Jean Dupont"
+                placeholder="Jean-Claude Makaya"
+                className="h-12 rounded-xl"
               />
               {errors.fullName && <p className="text-sm text-destructive">{errors.fullName}</p>}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email professionnel *</Label>
-              <Input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                placeholder="restaurant@example.com"
-              />
-              {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="phone">Téléphone *</Label>
-              <Input
-                id="phone"
-                type="tel"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                placeholder="+242 06 123 45 67"
-              />
+              <Label htmlFor="phone" className="flex items-center gap-2">
+                <Phone className="w-4 h-4" />
+                Numéro de téléphone congolais *
+              </Label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">
+                  🇨🇬
+                </span>
+                <Input
+                  id="phone"
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  placeholder="06 123 45 67"
+                  className="h-12 rounded-xl pl-12"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Format: 06 XXX XX XX ou +242 6 XXX XX XX
+              </p>
               {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
             </div>
 
@@ -185,6 +232,7 @@ export function RestaurantSignupForm({ onSubmit, onBack }: RestaurantSignupFormP
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 placeholder="Minimum 6 caractères"
+                className="h-12 rounded-xl"
               />
               {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
             </div>
@@ -197,11 +245,16 @@ export function RestaurantSignupForm({ onSubmit, onBack }: RestaurantSignupFormP
                 value={formData.confirmPassword}
                 onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                 placeholder="Retapez votre mot de passe"
+                className="h-12 rounded-xl"
               />
               {errors.confirmPassword && <p className="text-sm text-destructive">{errors.confirmPassword}</p>}
             </div>
 
-            <Button type="button" onClick={handleNext} className="w-full">
+            <Button 
+              type="button" 
+              onClick={handleNext} 
+              className="w-full h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
+            >
               Suivant
               <ChevronRight className="w-4 h-4 ml-2" />
             </Button>
@@ -210,12 +263,19 @@ export function RestaurantSignupForm({ onSubmit, onBack }: RestaurantSignupFormP
 
         {step === 2 && (
           <div className="space-y-4">
-            <div className="p-4 bg-muted/50 rounded-lg">
-              <h3 className="font-semibold mb-2">Informations du restaurant</h3>
-              <p className="text-sm text-muted-foreground">
-                Ces informations seront visibles par les clients sur la plateforme.
-              </p>
-            </div>
+            <Card className="p-4 bg-blue-50 dark:bg-blue-500/10 border-blue-200 dark:border-blue-500/20">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center shrink-0">
+                  <Store className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-blue-900 dark:text-blue-300">Votre restaurant</h3>
+                  <p className="text-sm text-blue-700 dark:text-blue-400/80">
+                    Ces informations seront visibles par les clients.
+                  </p>
+                </div>
+              </div>
+            </Card>
 
             <div className="space-y-2">
               <Label htmlFor="restaurantName">Nom du restaurant *</Label>
@@ -224,6 +284,7 @@ export function RestaurantSignupForm({ onSubmit, onBack }: RestaurantSignupFormP
                 value={formData.restaurantName}
                 onChange={(e) => setFormData({ ...formData, restaurantName: e.target.value })}
                 placeholder="Le Bon Goût"
+                className="h-12 rounded-xl"
               />
               {errors.restaurantName && <p className="text-sm text-destructive">{errors.restaurantName}</p>}
             </div>
@@ -234,7 +295,7 @@ export function RestaurantSignupForm({ onSubmit, onBack }: RestaurantSignupFormP
                 value={formData.cuisineType} 
                 onValueChange={(value) => setFormData({ ...formData, cuisineType: value })}
               >
-                <SelectTrigger>
+                <SelectTrigger className="h-12 rounded-xl">
                   <SelectValue placeholder="Sélectionnez le type de cuisine" />
                 </SelectTrigger>
                 <SelectContent>
@@ -246,43 +307,47 @@ export function RestaurantSignupForm({ onSubmit, onBack }: RestaurantSignupFormP
               {errors.cuisineType && <p className="text-sm text-destructive">{errors.cuisineType}</p>}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="city">Ville *</Label>
-              <Select 
-                value={formData.city} 
-                onValueChange={(value) => setFormData({ ...formData, city: value, district: "" })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Sélectionnez la ville" />
-                </SelectTrigger>
-                <SelectContent>
-                  {cities.map(city => (
-                    <SelectItem key={city} value={city}>{city}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.city && <p className="text-sm text-destructive">{errors.city}</p>}
-            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label htmlFor="city" className="flex items-center gap-1">
+                  <MapPin className="w-3 h-3" /> Ville *
+                </Label>
+                <Select 
+                  value={formData.city} 
+                  onValueChange={(value) => setFormData({ ...formData, city: value, district: "" })}
+                >
+                  <SelectTrigger className="h-12 rounded-xl">
+                    <SelectValue placeholder="Ville" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {cities.map(city => (
+                      <SelectItem key={city} value={city}>{city}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.city && <p className="text-sm text-destructive">{errors.city}</p>}
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="district">Quartier *</Label>
-              <Select 
-                value={formData.district} 
-                onValueChange={(value) => setFormData({ ...formData, district: value })}
-                disabled={!formData.city}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Sélectionnez le quartier" />
-                </SelectTrigger>
-                <SelectContent>
-                  {filteredDistricts.map(district => (
-                    <SelectItem key={district.name} value={district.name}>
-                      {district.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.district && <p className="text-sm text-destructive">{errors.district}</p>}
+              <div className="space-y-2">
+                <Label htmlFor="district">Quartier *</Label>
+                <Select 
+                  value={formData.district} 
+                  onValueChange={(value) => setFormData({ ...formData, district: value })}
+                  disabled={!formData.city}
+                >
+                  <SelectTrigger className="h-12 rounded-xl">
+                    <SelectValue placeholder="Quartier" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {filteredDistricts.map(district => (
+                      <SelectItem key={district.name} value={district.name}>
+                        {district.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.district && <p className="text-sm text-destructive">{errors.district}</p>}
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -291,32 +356,43 @@ export function RestaurantSignupForm({ onSubmit, onBack }: RestaurantSignupFormP
                 id="address"
                 value={formData.address}
                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                placeholder="Avenue, rue, numéro..."
+                placeholder="Avenue, rue, numéro, repère..."
+                className="h-12 rounded-xl"
               />
               {errors.address && <p className="text-sm text-destructive">{errors.address}</p>}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description">Description (optionnelle)</Label>
               <Textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Décrivez votre restaurant en quelques mots..."
-                rows={3}
+                rows={2}
+                className="rounded-xl resize-none"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="logo">Logo du restaurant</Label>
+              <Label className="flex items-center gap-2">
+                <Image className="w-4 h-4" />
+                Logo du restaurant (optionnel)
+              </Label>
               <div className="flex items-center gap-4">
-                {logoPreview && (
-                  <img src={logoPreview} alt="Logo preview" className="w-20 h-20 rounded-lg object-cover" />
+                {logoPreview ? (
+                  <img src={logoPreview} alt="Logo preview" className="w-16 h-16 rounded-xl object-cover border-2 border-primary/20" />
+                ) : (
+                  <div className="w-16 h-16 rounded-xl bg-muted flex items-center justify-center border-2 border-dashed border-muted-foreground/30">
+                    <Store className="w-6 h-6 text-muted-foreground/50" />
+                  </div>
                 )}
-                <Label htmlFor="logo" className="cursor-pointer">
-                  <div className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-accent">
+                <Label htmlFor="logo" className="cursor-pointer flex-1">
+                  <div className="flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed rounded-xl hover:bg-accent hover:border-primary/50 transition-colors">
                     <Upload className="w-4 h-4" />
-                    <span className="text-sm">Choisir une image</span>
+                    <span className="text-sm font-medium">
+                      {logoPreview ? "Changer l'image" : "Ajouter une image"}
+                    </span>
                   </div>
                   <Input
                     id="logo"
@@ -329,18 +405,35 @@ export function RestaurantSignupForm({ onSubmit, onBack }: RestaurantSignupFormP
               </div>
             </div>
 
-            <div className="flex gap-3">
-              <Button type="button" variant="outline" onClick={() => setStep(1)} className="flex-1">
+            <div className="flex gap-3 pt-2">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setStep(1)} 
+                className="flex-1 h-12 rounded-xl"
+              >
                 <ChevronLeft className="w-4 h-4 mr-2" />
                 Retour
               </Button>
-              <Button type="submit" className="flex-1">
-                Créer mon restaurant
+              <Button 
+                type="submit" 
+                className="flex-1 h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
+              >
+                Créer mon restaurant 🚀
               </Button>
             </div>
           </div>
         )}
       </form>
+
+      <Button 
+        variant="ghost" 
+        onClick={onBack} 
+        className="w-full text-muted-foreground hover:text-foreground"
+      >
+        <ChevronLeft className="w-4 h-4 mr-2" />
+        Retour à la connexion
+      </Button>
     </div>
   );
 }

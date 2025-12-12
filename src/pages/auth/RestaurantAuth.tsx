@@ -3,17 +3,35 @@ import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Store, ArrowLeft, TrendingUp, Users, BarChart3, Sparkles } from "lucide-react";
+import { Store, ArrowLeft, TrendingUp, Users, BarChart3, Sparkles, Phone } from "lucide-react";
 import { RestaurantSignupForm } from "@/components/auth/RestaurantSignupForm";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+// Validate Congolese phone number format
+const validateCongoPhone = (phone: string): boolean => {
+  const cleanPhone = phone.replace(/[\s\-\(\)]/g, '');
+  const patterns = [
+    /^0[456]\d{7}$/,
+    /^\+242[0456]\d{7}$/,
+    /^242[0456]\d{7}$/,
+  ];
+  return patterns.some(pattern => pattern.test(cleanPhone));
+};
+
+// Format phone to email format for Supabase (workaround)
+const phoneToEmail = (phone: string): string => {
+  const clean = phone.replace(/[\s\-\(\)\+]/g, '');
+  return `${clean}@delivereat.cg`;
+};
+
 const RestaurantAuth = () => {
   const navigate = useNavigate();
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [isLoading, setIsLoading] = useState(false);
-  const [loginData, setLoginData] = useState({ email: "", password: "" });
+  const [loginData, setLoginData] = useState({ phone: "", password: "" });
+  const [loginError, setLoginError] = useState("");
 
   useEffect(() => {
     const checkSession = async () => {
@@ -35,19 +53,27 @@ const RestaurantAuth = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoginError("");
+    
+    if (!validateCongoPhone(loginData.phone)) {
+      setLoginError("Numéro de téléphone congolais invalide");
+      return;
+    }
+    
     setIsLoading(true);
 
     try {
+      const email = phoneToEmail(loginData.phone);
       const { error, data } = await supabase.auth.signInWithPassword({
-        email: loginData.email,
+        email,
         password: loginData.password,
       });
 
       if (error) {
         if (error.message.includes("Invalid login credentials")) {
-          toast.error("Email ou mot de passe incorrect");
+          setLoginError("Numéro ou mot de passe incorrect");
         } else {
-          toast.error(error.message);
+          setLoginError("Erreur de connexion");
         }
       } else {
         const { data: roleData } = await supabase
@@ -66,7 +92,7 @@ const RestaurantAuth = () => {
         navigate("/restaurant-dashboard");
       }
     } catch (err) {
-      toast.error("Une erreur est survenue");
+      setLoginError("Une erreur est survenue");
     } finally {
       setIsLoading(false);
     }
@@ -77,6 +103,7 @@ const RestaurantAuth = () => {
 
     try {
       const redirectUrl = `${window.location.origin}/restaurant-dashboard`;
+      const email = phoneToEmail(restaurantData.phone);
 
       let logoUrl = "";
       if (restaurantData.logo) {
@@ -96,7 +123,7 @@ const RestaurantAuth = () => {
       }
 
       const { error } = await supabase.auth.signUp({
-        email: restaurantData.email,
+        email,
         password: restaurantData.password,
         options: {
           emailRedirectTo: redirectUrl,
@@ -117,7 +144,7 @@ const RestaurantAuth = () => {
 
       if (error) {
         if (error.message.includes("already registered")) {
-          toast.error("Cet email est déjà utilisé");
+          toast.error("Ce numéro de téléphone est déjà utilisé");
         } else {
           toast.error(error.message);
         }
@@ -203,15 +230,15 @@ const RestaurantAuth = () => {
           {/* Right - Form */}
           <div className="w-full max-w-md mx-auto lg:mx-0">
             <Card className="border-0 shadow-2xl bg-card/80 backdrop-blur-sm">
-              <CardContent className="p-8">
-                <div className="text-center mb-8">
+              <CardContent className="p-6 sm:p-8">
+                <div className="text-center mb-6">
                   <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg">
                     <Store className="w-8 h-8 text-white" />
                   </div>
                   <h2 className="text-2xl font-bold">
                     {mode === "login" ? "Espace Restaurant" : "Devenir Partenaire"}
                   </h2>
-                  <p className="text-muted-foreground mt-1">
+                  <p className="text-muted-foreground mt-1 text-sm">
                     {mode === "login" 
                       ? "Accédez à votre tableau de bord" 
                       : "Inscrivez votre restaurant"}
@@ -221,16 +248,24 @@ const RestaurantAuth = () => {
                 {mode === "login" ? (
                   <form onSubmit={handleLogin} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="email">Email professionnel</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value={loginData.email}
-                        onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
-                        placeholder="restaurant@email.com"
-                        className="h-12 rounded-xl"
-                        required
-                      />
+                      <Label htmlFor="phone" className="flex items-center gap-2">
+                        <Phone className="w-4 h-4" />
+                        Numéro de téléphone
+                      </Label>
+                      <div className="relative">
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-medium text-lg">
+                          🇨🇬
+                        </span>
+                        <Input
+                          id="phone"
+                          type="tel"
+                          value={loginData.phone}
+                          onChange={(e) => setLoginData({ ...loginData, phone: e.target.value })}
+                          placeholder="06 123 45 67"
+                          className="h-12 rounded-xl pl-12"
+                          required
+                        />
+                      </div>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="password">Mot de passe</Label>
@@ -244,6 +279,13 @@ const RestaurantAuth = () => {
                         required
                       />
                     </div>
+                    
+                    {loginError && (
+                      <p className="text-sm text-destructive text-center bg-destructive/10 py-2 rounded-lg">
+                        {loginError}
+                      </p>
+                    )}
+                    
                     <Button 
                       type="submit" 
                       className="w-full h-12 rounded-xl text-base font-semibold bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700" 
@@ -259,17 +301,17 @@ const RestaurantAuth = () => {
                   />
                 )}
 
-                <div className="mt-6 text-center">
-                  <Button 
-                    variant="link" 
-                    onClick={() => setMode(mode === "login" ? "signup" : "login")}
-                    className="text-sm"
-                  >
-                    {mode === "login" 
-                      ? "Nouveau partenaire ? Inscrivez-vous" 
-                      : "Déjà partenaire ? Connectez-vous"}
-                  </Button>
-                </div>
+                {mode === "login" && (
+                  <div className="mt-6 text-center">
+                    <Button 
+                      variant="link" 
+                      onClick={() => setMode("signup")}
+                      className="text-sm"
+                    >
+                      Nouveau partenaire ? Inscrivez-vous
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>

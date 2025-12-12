@@ -2,18 +2,24 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Bike } from "lucide-react";
+import { ChevronLeft, Bike, Phone } from "lucide-react";
 import { DistrictSelector } from "@/components/DistrictSelector";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface DeliverySignupFormProps {
   onSubmit: (data: any) => void;
   onBack: () => void;
 }
 
+const validateCongoPhone = (phone: string): boolean => {
+  const cleanPhone = phone.replace(/[\s\-\(\)]/g, '');
+  const patterns = [/^0[456]\d{7}$/, /^\+242[0456]\d{7}$/, /^242[0456]\d{7}$/];
+  return patterns.some(pattern => pattern.test(cleanPhone));
+};
+
 export function DeliverySignupForm({ onSubmit, onBack }: DeliverySignupFormProps) {
   const [formData, setFormData] = useState({
     fullName: "",
-    email: "",
     phone: "",
     password: "",
     confirmPassword: "",
@@ -22,139 +28,68 @@ export function DeliverySignupForm({ onSubmit, onBack }: DeliverySignupFormProps
     vehicleType: "moto",
     licenseNumber: "",
   });
+  const [phoneError, setPhoneError] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
+    if (!validateCongoPhone(formData.phone)) {
+      setPhoneError("Numéro congolais invalide (ex: 06 123 45 67)");
       return;
     }
+    if (formData.password !== formData.confirmPassword) return;
     onSubmit(formData);
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={onBack}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <div>
-          <h2 className="text-xl font-bold">Devenir Livreur</h2>
-          <p className="text-sm text-muted-foreground">Rejoignez notre équipe de livraison</p>
-        </div>
-      </div>
-
-      <div className="flex justify-center">
-        <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
-          <Bike className="h-8 w-8 text-primary" />
-        </div>
-      </div>
-
+    <div className="space-y-5">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="fullName">Nom complet *</Label>
-          <Input
-            id="fullName"
-            value={formData.fullName}
-            onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-            placeholder="Votre nom complet"
-            required
-          />
+          <Label>Nom complet *</Label>
+          <Input value={formData.fullName} onChange={(e) => setFormData({ ...formData, fullName: e.target.value })} placeholder="Jean-Claude Makaya" className="h-12 rounded-xl" required />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="email">Email *</Label>
-          <Input
-            id="email"
-            type="email"
-            value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            placeholder="votre@email.com"
-            required
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="phone">Téléphone *</Label>
-          <Input
-            id="phone"
-            type="tel"
-            value={formData.phone}
-            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-            placeholder="+242 06 XXX XX XX"
-            required
-          />
+          <Label className="flex items-center gap-2"><Phone className="w-4 h-4" /> Numéro de téléphone *</Label>
+          <div className="relative">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg">🇨🇬</span>
+            <Input type="tel" value={formData.phone} onChange={(e) => { setFormData({ ...formData, phone: e.target.value }); setPhoneError(""); }} placeholder="06 123 45 67" className="h-12 rounded-xl pl-12" required />
+          </div>
+          <p className="text-xs text-muted-foreground">Format: 06 XXX XX XX</p>
+          {phoneError && <p className="text-sm text-destructive">{phoneError}</p>}
         </div>
 
         <div className="space-y-2">
           <Label>Quartier de résidence *</Label>
-          <DistrictSelector
-            selectedDistrict={formData.district}
-            onSelect={(district, city) => setFormData({ ...formData, district, city })}
-          />
+          <DistrictSelector selectedDistrict={formData.district} onSelect={(district, city) => setFormData({ ...formData, district, city })} />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="vehicleType">Type de véhicule *</Label>
-          <select
-            id="vehicleType"
-            value={formData.vehicleType}
-            onChange={(e) => setFormData({ ...formData, vehicleType: e.target.value })}
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            required
-          >
-            <option value="moto">Moto</option>
-            <option value="velo">Vélo</option>
-            <option value="voiture">Voiture</option>
-            <option value="pied">À pied</option>
-          </select>
+          <Label>Type de véhicule *</Label>
+          <Select value={formData.vehicleType} onValueChange={(value) => setFormData({ ...formData, vehicleType: value })}>
+            <SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="moto">🏍️ Moto</SelectItem>
+              <SelectItem value="velo">🚲 Vélo</SelectItem>
+              <SelectItem value="voiture">🚗 Voiture</SelectItem>
+              <SelectItem value="pied">🚶 À pied</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="licenseNumber">Numéro de permis (optionnel)</Label>
-          <Input
-            id="licenseNumber"
-            value={formData.licenseNumber}
-            onChange={(e) => setFormData({ ...formData, licenseNumber: e.target.value })}
-            placeholder="Numéro de permis de conduire"
-          />
+          <Label>Mot de passe *</Label>
+          <Input type="password" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} placeholder="Minimum 6 caractères" className="h-12 rounded-xl" required minLength={6} />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="password">Mot de passe *</Label>
-          <Input
-            id="password"
-            type="password"
-            value={formData.password}
-            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-            placeholder="••••••••"
-            required
-            minLength={6}
-          />
+          <Label>Confirmer le mot de passe *</Label>
+          <Input type="password" value={formData.confirmPassword} onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })} placeholder="Retapez le mot de passe" className="h-12 rounded-xl" required />
+          {formData.password !== formData.confirmPassword && formData.confirmPassword && <p className="text-sm text-destructive">Les mots de passe ne correspondent pas</p>}
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="confirmPassword">Confirmer le mot de passe *</Label>
-          <Input
-            id="confirmPassword"
-            type="password"
-            value={formData.confirmPassword}
-            onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-            placeholder="••••••••"
-            required
-          />
-          {formData.password !== formData.confirmPassword && formData.confirmPassword && (
-            <p className="text-sm text-destructive">Les mots de passe ne correspondent pas</p>
-          )}
-        </div>
-
-        <Button 
-          type="submit" 
-          className="w-full"
-          disabled={formData.password !== formData.confirmPassword}
-        >
-          S'inscrire comme Livreur
-        </Button>
+        <Button type="submit" className="w-full h-12 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600" disabled={formData.password !== formData.confirmPassword}>S'inscrire comme Livreur 🚀</Button>
       </form>
+      <Button variant="ghost" onClick={onBack} className="w-full text-muted-foreground"><ChevronLeft className="w-4 h-4 mr-2" /> Retour à la connexion</Button>
     </div>
   );
 }
