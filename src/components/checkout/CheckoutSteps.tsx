@@ -111,83 +111,83 @@ export function CheckoutSteps({ cartItems, subtotal, deliveryFee, discount = 0, 
           <CardContent className="p-4 sm:p-6 space-y-4">
             <div className="p-4 bg-muted/50 rounded-2xl">
               <h3 className="font-semibold mb-2">Adresse de livraison</h3>
-                <p className="text-sm text-muted-foreground">
-                  Où souhaitez-vous recevoir votre commande ?
-                </p>
-              </div>
+              <p className="text-sm text-muted-foreground">
+                Où souhaitez-vous recevoir votre commande ?
+              </p>
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="city">Ville *</Label>
-                <Select 
-                  value={formData.city} 
-                  onValueChange={(value) => setFormData({ ...formData, city: value, district: "" })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionnez votre ville" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {cities.map(city => (
-                      <SelectItem key={city} value={city}>{city}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.city && <p className="text-sm text-destructive">{errors.city}</p>}
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="city">Ville *</Label>
+              <Select 
+                value={formData.city} 
+                onValueChange={(value) => setFormData({ ...formData, city: value, district: "" })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionnez votre ville" />
+                </SelectTrigger>
+                <SelectContent>
+                  {cities.map(city => (
+                    <SelectItem key={city} value={city}>{city}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.city && <p className="text-sm text-destructive">{errors.city}</p>}
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="district">Quartier *</Label>
-                <Select 
-                  value={formData.district} 
-                  onValueChange={(value) => setFormData({ ...formData, district: value })}
-                  disabled={!formData.city}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionnez votre quartier" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {filteredDistricts.map(district => (
-                      <SelectItem key={district.name} value={district.name}>
-                        {district.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.district && <p className="text-sm text-destructive">{errors.district}</p>}
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="district">Quartier *</Label>
+              <Select 
+                value={formData.district} 
+                onValueChange={(value) => setFormData({ ...formData, district: value })}
+                disabled={!formData.city}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionnez votre quartier" />
+                </SelectTrigger>
+                <SelectContent>
+                  {filteredDistricts.map(district => (
+                    <SelectItem key={district.name} value={district.name}>
+                      {district.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.district && <p className="text-sm text-destructive">{errors.district}</p>}
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="addressComplement">Complément d'adresse</Label>
-                <Textarea
-                  id="addressComplement"
-                  value={formData.addressComplement}
-                  onChange={(e) => setFormData({ ...formData, addressComplement: e.target.value })}
-                  placeholder="Rue, numéro, point de repère..."
-                  rows={3}
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="addressComplement">Complément d'adresse</Label>
+              <Textarea
+                id="addressComplement"
+                value={formData.addressComplement}
+                onChange={(e) => setFormData({ ...formData, addressComplement: e.target.value })}
+                placeholder="Rue, numéro, point de repère..."
+                rows={3}
+              />
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="phone">Téléphone *</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  placeholder="+242 06 123 45 67"
-                />
-                {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="phone">Téléphone *</Label>
+              <Input
+                id="phone"
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                placeholder="+242 06 123 45 67"
+              />
+              {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="notes">Instructions spéciales (optionnel)</Label>
-                <Textarea
-                  id="notes"
-                  value={formData.notes}
-                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                  placeholder="Instructions pour le livreur..."
-                  rows={2}
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="notes">Instructions spéciales (optionnel)</Label>
+              <Textarea
+                id="notes"
+                value={formData.notes}
+                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                placeholder="Instructions pour le livreur..."
+                rows={2}
+              />
+            </div>
 
             <Button type="button" onClick={handleNext} className="w-full rounded-2xl h-12">
               Suivant
@@ -201,11 +201,11 @@ export function CheckoutSteps({ cartItems, subtotal, deliveryFee, discount = 0, 
         <Card className="rounded-3xl border-none shadow-soft">
           <CardContent className="p-4 sm:p-6 space-y-4">
             <div className="p-4 bg-muted/50 rounded-2xl">
-                <h3 className="font-semibold mb-2">Mode de paiement</h3>
-                <p className="text-sm text-muted-foreground">
-                  Choisissez comment vous souhaitez payer
-                </p>
-              </div>
+              <h3 className="font-semibold mb-2">Mode de paiement</h3>
+              <p className="text-sm text-muted-foreground">
+                Choisissez comment vous souhaitez payer
+              </p>
+            </div>
 
             <RadioGroup
               value={formData.paymentMethod}
@@ -239,45 +239,45 @@ export function CheckoutSteps({ cartItems, subtotal, deliveryFee, discount = 0, 
               </div>
             </RadioGroup>
 
-              {formData.paymentMethod === "mobile_money" && (
-                <div className="space-y-4 pt-4 border-t">
-                  <div className="space-y-2">
-                    <Label htmlFor="provider">Opérateur *</Label>
-                    <Select 
-                      value={formData.mobileMoneyProvider} 
-                      onValueChange={(value) => setFormData({ ...formData, mobileMoneyProvider: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Sélectionnez votre opérateur" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="orange">Orange Money</SelectItem>
-                        <SelectItem value="airtel">Airtel Money</SelectItem>
-                        <SelectItem value="mtn">MTN Mobile Money</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    {errors.mobileMoneyProvider && <p className="text-sm text-destructive">{errors.mobileMoneyProvider}</p>}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="mobileNumber">Numéro Mobile Money *</Label>
-                    <Input
-                      id="mobileNumber"
-                      type="tel"
-                      value={formData.mobileMoneyNumber}
-                      onChange={(e) => setFormData({ ...formData, mobileMoneyNumber: e.target.value })}
-                      placeholder="+242 06 123 45 67"
-                    />
-                    {errors.mobileMoneyNumber && <p className="text-sm text-destructive">{errors.mobileMoneyNumber}</p>}
-                  </div>
-
-                  <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                    <p className="text-sm text-blue-900">
-                      💡 Vous recevrez une notification de paiement à valider sur votre téléphone
-                    </p>
-                  </div>
+            {formData.paymentMethod === "mobile_money" && (
+              <div className="space-y-4 pt-4 border-t">
+                <div className="space-y-2">
+                  <Label htmlFor="provider">Opérateur *</Label>
+                  <Select 
+                    value={formData.mobileMoneyProvider} 
+                    onValueChange={(value) => setFormData({ ...formData, mobileMoneyProvider: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionnez votre opérateur" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="orange">Orange Money</SelectItem>
+                      <SelectItem value="airtel">Airtel Money</SelectItem>
+                      <SelectItem value="mtn">MTN Mobile Money</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {errors.mobileMoneyProvider && <p className="text-sm text-destructive">{errors.mobileMoneyProvider}</p>}
                 </div>
-              )}
+
+                <div className="space-y-2">
+                  <Label htmlFor="mobileNumber">Numéro Mobile Money *</Label>
+                  <Input
+                    id="mobileNumber"
+                    type="tel"
+                    value={formData.mobileMoneyNumber}
+                    onChange={(e) => setFormData({ ...formData, mobileMoneyNumber: e.target.value })}
+                    placeholder="+242 06 123 45 67"
+                  />
+                  {errors.mobileMoneyNumber && <p className="text-sm text-destructive">{errors.mobileMoneyNumber}</p>}
+                </div>
+
+                <div className="p-3 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg">
+                  <p className="text-sm text-blue-900 dark:text-blue-100">
+                    💡 Vous recevrez une notification de paiement à valider sur votre téléphone
+                  </p>
+                </div>
+              </div>
+            )}
 
             <div className="flex flex-col sm:flex-row gap-3">
               <Button type="button" variant="outline" onClick={() => setStep(1)} className="flex-1 rounded-2xl h-12">
@@ -298,10 +298,10 @@ export function CheckoutSteps({ cartItems, subtotal, deliveryFee, discount = 0, 
           <CardContent className="p-4 sm:p-6 space-y-4">
             <div className="p-4 bg-muted/50 rounded-2xl">
               <h3 className="font-semibold mb-2">Récapitulatif</h3>
-                <p className="text-sm text-muted-foreground">
-                  Vérifiez votre commande avant de confirmer
-                </p>
-              </div>
+              <p className="text-sm text-muted-foreground">
+                Vérifiez votre commande avant de confirmer
+              </p>
+            </div>
 
             <div className="space-y-3 p-4 bg-muted/30 rounded-2xl">
               <h4 className="font-semibold">Livraison</h4>
@@ -335,7 +335,7 @@ export function CheckoutSteps({ cartItems, subtotal, deliveryFee, discount = 0, 
               )}
             </div>
 
-            {/* Order Summary for Mobile */}
+            {/* Order Summary */}
             <div className="space-y-2 p-4 bg-primary/5 rounded-2xl">
               <div className="flex justify-between text-sm">
                 <span>Sous-total</span>
@@ -357,68 +357,30 @@ export function CheckoutSteps({ cartItems, subtotal, deliveryFee, discount = 0, 
               </div>
             </div>
 
-              <div className="flex flex-col sm:flex-row gap-3">
-                <Button type="button" variant="outline" onClick={() => setStep(2)} className="flex-1 rounded-2xl h-12">
-                  <ChevronLeft className="w-4 h-4 mr-2" />
-                  Retour
-                </Button>
-                <Button 
-                  type="button" 
-                  onClick={handleSubmit} 
-                  disabled={loading}
-                  className="flex-1 rounded-2xl h-12 text-sm sm:text-base"
-                >
-                  {loading ? (
-                    "Traitement..."
-                  ) : (
-                    <>
-                      <Check className="w-4 h-4 mr-2 shrink-0" />
-                      <span className="truncate">Confirmer</span>
-                    </>
-                  )}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-
-      {/* Order Summary Sidebar */}
-      <div className="lg:col-span-1">
-        <Card className="sticky top-4">
-          <CardContent className="pt-6 space-y-4">
-            <h3 className="font-semibold text-lg">Votre commande</h3>
-            
-            <div className="space-y-2 max-h-64 overflow-y-auto">
-              {cartItems.map((item) => (
-                <div key={item.id} className="flex justify-between text-sm py-2 border-b">
-                  <span className="flex-1">
-                    {item.menu_items?.name || "Article"} x{item.quantity}
-                  </span>
-                  <span className="font-medium">
-                    {(Number(item.menu_items?.price || 0) * item.quantity).toFixed(0)} FCFA
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            <div className="space-y-2 pt-4 border-t">
-              <div className="flex justify-between text-sm">
-                <span>Sous-total</span>
-                <span>{subtotal.toFixed(0)} FCFA</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>Frais de livraison</span>
-                <span>{deliveryFee.toFixed(0)} FCFA</span>
-              </div>
-              <div className="flex justify-between font-bold text-lg pt-2 border-t">
-                <span>Total</span>
-                <span>{calculatedTotal.toFixed(0)} FCFA</span>
-              </div>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button type="button" variant="outline" onClick={() => setStep(2)} className="flex-1 rounded-2xl h-12">
+                <ChevronLeft className="w-4 h-4 mr-2" />
+                Retour
+              </Button>
+              <Button 
+                type="button" 
+                onClick={handleSubmit} 
+                disabled={loading}
+                className="flex-1 rounded-2xl h-12"
+              >
+                {loading ? (
+                  "Traitement..."
+                ) : (
+                  <>
+                    <Check className="w-4 h-4 mr-2 shrink-0" />
+                    <span>Confirmer</span>
+                  </>
+                )}
+              </Button>
             </div>
           </CardContent>
         </Card>
-      </div>
+      )}
     </div>
   );
 }
