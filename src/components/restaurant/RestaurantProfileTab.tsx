@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { ImageUpload } from "@/components/ImageUpload";
 import { toast } from "sonner";
+import { MapPin, Loader2 } from "lucide-react";
 
 interface Restaurant {
   id: string;
@@ -21,11 +22,14 @@ interface Restaurant {
   delivery_fee: number;
   min_order: number;
   delivery_time: string;
+  latitude: number | null;
+  longitude: number | null;
 }
 
 export const RestaurantProfileTab = () => {
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [loading, setLoading] = useState(true);
+  const [capturingGPS, setCapturingGPS] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -37,7 +41,9 @@ export const RestaurantProfileTab = () => {
     is_active: true,
     delivery_fee: '',
     min_order: '',
-    delivery_time: ''
+    delivery_time: '',
+    latitude: null as number | null,
+    longitude: null as number | null
   });
 
   useEffect(() => {
@@ -66,10 +72,12 @@ export const RestaurantProfileTab = () => {
           phone: data.phone || '',
           cuisine_type: data.cuisine_type || '',
           image_url: data.image_url || '',
-          is_active: data.is_active,
-          delivery_fee: data.delivery_fee.toString(),
-          min_order: data.min_order.toString(),
-          delivery_time: data.delivery_time
+          is_active: data.is_active ?? true,
+          delivery_fee: data.delivery_fee?.toString() || '0',
+          min_order: data.min_order?.toString() || '0',
+          delivery_time: data.delivery_time || '30-45 min',
+          latitude: data.latitude,
+          longitude: data.longitude
         });
       }
     } catch (error) {
@@ -119,7 +127,9 @@ export const RestaurantProfileTab = () => {
           is_active: formData.is_active,
           delivery_fee: parseFloat(formData.delivery_fee),
           min_order: parseFloat(formData.min_order),
-          delivery_time: formData.delivery_time
+          delivery_time: formData.delivery_time,
+          latitude: formData.latitude,
+          longitude: formData.longitude
         })
         .eq('id', restaurant.id);
 
@@ -205,6 +215,57 @@ export const RestaurantProfileTab = () => {
                   onChange={(e) => setFormData({...formData, phone: e.target.value})}
                 />
               </div>
+            </div>
+
+            {/* GPS Location Capture */}
+            <div className="space-y-2">
+              <Label>Position GPS du restaurant</Label>
+              <div className="flex items-center gap-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={async () => {
+                    if (!navigator.geolocation) {
+                      toast.error("Géolocalisation non supportée");
+                      return;
+                    }
+                    setCapturingGPS(true);
+                    navigator.geolocation.getCurrentPosition(
+                      (position) => {
+                        setFormData(prev => ({
+                          ...prev,
+                          latitude: position.coords.latitude,
+                          longitude: position.coords.longitude
+                        }));
+                        toast.success("Position capturée !");
+                        setCapturingGPS(false);
+                      },
+                      (error) => {
+                        console.error('GPS error:', error);
+                        toast.error("Impossible de capturer la position");
+                        setCapturingGPS(false);
+                      },
+                      { enableHighAccuracy: true, timeout: 15000 }
+                    );
+                  }}
+                  disabled={capturingGPS}
+                  className="flex-1"
+                >
+                  {capturingGPS ? (
+                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Capture en cours...</>
+                  ) : (
+                    <><MapPin className="h-4 w-4 mr-2" /> Capturer ma position GPS</>
+                  )}
+                </Button>
+                {formData.latitude && formData.longitude && (
+                  <span className="text-sm text-muted-foreground">
+                    📍 {formData.latitude.toFixed(4)}, {formData.longitude.toFixed(4)}
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Cette position sera utilisée pour le suivi des livraisons en temps réel
+              </p>
             </div>
 
             <ImageUpload

@@ -60,18 +60,8 @@ export const useDriverLocation = ({
   }, [user]);
 
   const handleError = useCallback((error: GeolocationPositionError) => {
-    console.error('Geolocation error:', error);
-    switch (error.code) {
-      case error.PERMISSION_DENIED:
-        toast.error('Accès à la localisation refusé');
-        break;
-      case error.POSITION_UNAVAILABLE:
-        toast.error('Position non disponible');
-        break;
-      case error.TIMEOUT:
-        toast.error('Délai de localisation dépassé');
-        break;
-    }
+    // Log silently - don't spam user with toasts for repeated errors
+    console.warn('Geolocation error:', error.code, error.message);
   }, []);
 
   const startTracking = useCallback(() => {
