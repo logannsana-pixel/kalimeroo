@@ -538,13 +538,113 @@ export type Database = {
           },
         ]
       }
+      payment_reminders: {
+        Row: {
+          created_at: string | null
+          entity_id: string
+          entity_type: string
+          id: string
+          is_sent: boolean | null
+          payout_id: string | null
+          reminder_type: string
+          scheduled_for: string
+          sent_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          entity_id: string
+          entity_type: string
+          id?: string
+          is_sent?: boolean | null
+          payout_id?: string | null
+          reminder_type: string
+          scheduled_for: string
+          sent_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          is_sent?: boolean | null
+          payout_id?: string | null
+          reminder_type?: string
+          scheduled_for?: string
+          sent_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_reminders_payout_id_fkey"
+            columns: ["payout_id"]
+            isOneToOne: false
+            referencedRelation: "payouts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_settings: {
+        Row: {
+          bank_account_number: string | null
+          bank_name: string | null
+          created_at: string | null
+          custom_frequency_days: number | null
+          entity_id: string
+          entity_type: string
+          id: string
+          is_auto_payout: boolean | null
+          min_payout_amount: number | null
+          mobile_money_number: string | null
+          next_payout_date: string | null
+          payment_frequency: string | null
+          payment_method: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          bank_account_number?: string | null
+          bank_name?: string | null
+          created_at?: string | null
+          custom_frequency_days?: number | null
+          entity_id: string
+          entity_type: string
+          id?: string
+          is_auto_payout?: boolean | null
+          min_payout_amount?: number | null
+          mobile_money_number?: string | null
+          next_payout_date?: string | null
+          payment_frequency?: string | null
+          payment_method?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          bank_account_number?: string | null
+          bank_name?: string | null
+          created_at?: string | null
+          custom_frequency_days?: number | null
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          is_auto_payout?: boolean | null
+          min_payout_amount?: number | null
+          mobile_money_number?: string | null
+          next_payout_date?: string | null
+          payment_frequency?: string | null
+          payment_method?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       payouts: {
         Row: {
           amount: number
+          approved_at: string | null
+          approved_by: string | null
+          batch_id: string | null
           created_at: string | null
+          due_date: string | null
           id: string
           notes: string | null
           payment_method: string | null
+          payout_type: string | null
           period_end: string | null
           period_start: string | null
           processed_at: string | null
@@ -552,14 +652,22 @@ export type Database = {
           recipient_id: string
           recipient_type: string
           reference: string | null
+          rejected_at: string | null
+          rejected_by: string | null
+          rejection_reason: string | null
           status: string | null
         }
         Insert: {
           amount: number
+          approved_at?: string | null
+          approved_by?: string | null
+          batch_id?: string | null
           created_at?: string | null
+          due_date?: string | null
           id?: string
           notes?: string | null
           payment_method?: string | null
+          payout_type?: string | null
           period_end?: string | null
           period_start?: string | null
           processed_at?: string | null
@@ -567,14 +675,22 @@ export type Database = {
           recipient_id: string
           recipient_type: string
           reference?: string | null
+          rejected_at?: string | null
+          rejected_by?: string | null
+          rejection_reason?: string | null
           status?: string | null
         }
         Update: {
           amount?: number
+          approved_at?: string | null
+          approved_by?: string | null
+          batch_id?: string | null
           created_at?: string | null
+          due_date?: string | null
           id?: string
           notes?: string | null
           payment_method?: string | null
+          payout_type?: string | null
           period_end?: string | null
           period_start?: string | null
           processed_at?: string | null
@@ -582,6 +698,9 @@ export type Database = {
           recipient_id?: string
           recipient_type?: string
           reference?: string | null
+          rejected_at?: string | null
+          rejected_by?: string | null
+          rejection_reason?: string | null
           status?: string | null
         }
         Relationships: []
@@ -972,6 +1091,76 @@ export type Database = {
           },
         ]
       }
+      transactions: {
+        Row: {
+          amount: number
+          balance_after: number | null
+          balance_before: number | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          entity_id: string
+          entity_type: string
+          id: string
+          metadata: Json | null
+          order_id: string | null
+          payout_id: string | null
+          transaction_type: string
+        }
+        Insert: {
+          amount: number
+          balance_after?: number | null
+          balance_before?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          entity_id: string
+          entity_type: string
+          id?: string
+          metadata?: Json | null
+          order_id?: string | null
+          payout_id?: string | null
+          transaction_type: string
+        }
+        Update: {
+          amount?: number
+          balance_after?: number | null
+          balance_before?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          metadata?: Json | null
+          order_id?: string | null
+          payout_id?: string | null
+          transaction_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "restaurant_orders_masked"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_payout_id_fkey"
+            columns: ["payout_id"]
+            isOneToOne: false
+            referencedRelation: "payouts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -1101,6 +1290,11 @@ export type Database = {
       }
     }
     Functions: {
+      calculate_driver_balance: { Args: { driver_id: string }; Returns: number }
+      calculate_restaurant_balance: {
+        Args: { restaurant_owner_id: string }
+        Returns: number
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
