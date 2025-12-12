@@ -22,26 +22,34 @@ import {
   Clock, 
   Check, 
   AlertTriangle,
-  ArrowRight,
   History,
   Loader2,
-  Wallet
+  Wallet,
+  XCircle,
+  CheckCircle
 } from "lucide-react";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 interface CashDeposit {
   id: string;
   amount: number;
-  status: 'pending' | 'received' | 'validated';
+  status: string;
   created_at: string;
-  validated_at?: string;
-  notes?: string;
+  approved_at: string | null;
+  approved_by: string | null;
+  rejected_at: string | null;
+  rejection_reason: string | null;
+  notes: string | null;
 }
 
 interface DriverCashHandlingTabProps {
   orders: Array<{
     id: string;
     total: number;
+    delivery_fee?: number;
     created_at: string;
+    status: string;
   }>;
 }
 
@@ -53,15 +61,19 @@ export function DriverCashHandlingTab({ orders }: DriverCashHandlingTabProps) {
   const [depositAmount, setDepositAmount] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  // Calculate cash on hand (orders paid in cash minus validated deposits)
-  const totalCashCollected = orders.reduce((sum, o) => sum + o.total, 0);
-  const totalDeposited = deposits
-    .filter(d => d.status === 'validated')
-    .reduce((sum, d) => sum + d.amount, 0);
-  const pendingDeposits = deposits
-    .filter(d => d.status === 'pending' || d.status === 'received')
-    .reduce((sum, d) => sum + d.amount, 0);
-  const cashOnHand = totalCashCollected - totalDeposited - pendingDeposits;
+  // Filter only cash orders that are delivered (assuming all COD orders need cash handling)
+  const cashOrders = orders.filter(o => o.status === 'delivered');
+  
+  // Calculate cash on hand
+  const totalCashCollected = cashOrders.reduce((sum, o) => sum + o.total, 0);
+  
+  const approvedDeposits = deposits.filter(d => d.status === 'approved' || d.status === 'completed');
+  const pendingDeposits = deposits.filter(d => d.status === 'pending');
+  const rejectedDeposits = deposits.filter(d => d.status === 'rejected');
+  
+  const totalDeposited = approvedDeposits.reduce((sum, d) => sum + d.amount, 0);
+  const totalPending = pendingDeposits.reduce((sum, d) => sum + d.amount, 0);
+  const cashOnHand = totalCashCollected - totalDeposited - totalPending;
 
   useEffect(() => {
     fetchDeposits();
@@ -70,24 +82,16 @@ export function DriverCashHandlingTab({ orders }: DriverCashHandlingTabProps) {
   const fetchDeposits = async () => {
     if (!user) return;
     try {
-      // For now, store deposits in profile validation_documents or create a simple local state
-      // In production, this would be a separate table
       const { data } = await supabase
         .from('payouts')
         .select('*')
         .eq('recipient_id', user.id)
-        .eq('recipient_type', 'driver_cash_deposit')
+        .eq('recipient_type', 'driver')
+        .eq('payout_type', 'cash_deposit')
         .order('created_at', { ascending: false });
 
       if (data) {
-        setDeposits(data.map(d => ({
-          id: d.id,
-          amount: d.amount,
-          status: d.status as CashDeposit['status'],
-          created_at: d.created_at || '',
-          validated_at: d.processed_at || undefined,
-          notes: d.notes || undefined
-        })));
+        setDeposits(data as CashDeposit[]);
       }
     } catch (error) {
       console.error('Error fetching deposits:', error);
@@ -112,17 +116,35 @@ export function DriverCashHandlingTab({ orders }: DriverCashHandlingTabProps) {
 
     setSubmitting(true);
     try {
-      const { error } = await supabase
+      // Create deposit request
+      const { data: payout, error: payoutError } = await supabase
         .from('payouts')
         .insert({
           recipient_id: user.id,
-          recipient_type: 'driver_cash_deposit',
+          recipient_type: 'driver',
+          payout_type: 'cash_deposit',
           amount,
           status: 'pending',
-          notes: `Dépôt cash par ${user.email}`
-        });
+          notes: `Dépôt cash au bureau`
+        })
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (payoutError) throw payoutError;
+
+      // Create transaction record
+      await supabase
+        .from('transactions')
+        .insert({
+          transaction_type: 'driver_cash_deposit',
+          entity_type: 'driver',
+          entity_id: user.id,
+          payout_id: payout.id,
+          amount,
+          balance_before: cashOnHand,
+          balance_after: cashOnHand - amount,
+          description: `Dépôt cash au bureau - ${amount} FCFA`
+        });
 
       toast.success("Dépôt enregistré ! En attente de validation.");
       setShowDepositDialog(false);
@@ -136,12 +158,15 @@ export function DriverCashHandlingTab({ orders }: DriverCashHandlingTabProps) {
     }
   };
 
-  const getStatusBadge = (status: CashDeposit['status']) => {
+  const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'validated':
-        return <Badge className="bg-green-500"><Check className="h-3 w-3 mr-1" /> Validé</Badge>;
+      case 'approved':
+      case 'completed':
+        return <Badge className="bg-green-500"><CheckCircle className="h-3 w-3 mr-1" /> Validé</Badge>;
+      case 'rejected':
+        return <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" /> Rejeté</Badge>;
       case 'received':
-        return <Badge className="bg-blue-500"><Building className="h-3 w-3 mr-1" /> Reçu au bureau</Badge>;
+        return <Badge className="bg-blue-500"><Building className="h-3 w-3 mr-1" /> Reçu</Badge>;
       default:
         return <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" /> En attente</Badge>;
     }
@@ -179,14 +204,18 @@ export function DriverCashHandlingTab({ orders }: DriverCashHandlingTabProps) {
       </Card>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-2 gap-3">
-        <Card className="p-4">
-          <p className="text-sm text-muted-foreground">Collecté total</p>
-          <p className="text-xl font-bold text-green-600">{totalCashCollected.toFixed(0)} FCFA</p>
+      <div className="grid grid-cols-3 gap-3">
+        <Card className="p-4 text-center">
+          <p className="text-xs text-muted-foreground">Collecté</p>
+          <p className="text-lg font-bold text-green-600">{totalCashCollected.toFixed(0)}</p>
         </Card>
-        <Card className="p-4">
-          <p className="text-sm text-muted-foreground">Dépôts en cours</p>
-          <p className="text-xl font-bold text-orange-500">{pendingDeposits.toFixed(0)} FCFA</p>
+        <Card className="p-4 text-center">
+          <p className="text-xs text-muted-foreground">En attente</p>
+          <p className="text-lg font-bold text-orange-500">{totalPending.toFixed(0)}</p>
+        </Card>
+        <Card className="p-4 text-center">
+          <p className="text-xs text-muted-foreground">Déposé</p>
+          <p className="text-lg font-bold text-blue-500">{totalDeposited.toFixed(0)}</p>
         </Card>
       </div>
 
@@ -198,7 +227,7 @@ export function DriverCashHandlingTab({ orders }: DriverCashHandlingTabProps) {
             <div>
               <p className="font-medium text-orange-700">Cash élevé</p>
               <p className="text-sm text-orange-600">
-                Pensez à déposer votre cash au bureau
+                Pensez à déposer votre cash au bureau dès que possible
               </p>
             </div>
           </div>
@@ -218,28 +247,42 @@ export function DriverCashHandlingTab({ orders }: DriverCashHandlingTabProps) {
             <p className="text-muted-foreground">Aucun dépôt effectué</p>
           </Card>
         ) : (
-          <div className="space-y-2">
-            {deposits.map((deposit) => (
-              <Card key={deposit.id} className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-semibold">{deposit.amount.toFixed(0)} FCFA</p>
-                    <p className="text-sm text-muted-foreground">
-                      {new Date(deposit.created_at).toLocaleDateString('fr-FR', {
-                        day: 'numeric',
-                        month: 'short',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </p>
+          <ScrollArea className="h-[300px]">
+            <div className="space-y-2">
+              {deposits.map((deposit) => (
+                <Card key={deposit.id} className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-semibold">{deposit.amount.toFixed(0)} FCFA</p>
+                      <p className="text-sm text-muted-foreground">
+                        {format(new Date(deposit.created_at), "d MMM yyyy HH:mm", { locale: fr })}
+                      </p>
+                      {deposit.rejection_reason && (
+                        <p className="text-xs text-destructive mt-1">
+                          Raison: {deposit.rejection_reason}
+                        </p>
+                      )}
+                      {deposit.approved_at && (
+                        <p className="text-xs text-green-600 mt-1">
+                          Validé le {format(new Date(deposit.approved_at), "d MMM HH:mm", { locale: fr })}
+                        </p>
+                      )}
+                    </div>
+                    {getStatusBadge(deposit.status)}
                   </div>
-                  {getStatusBadge(deposit.status)}
-                </div>
-              </Card>
-            ))}
-          </div>
+                </Card>
+              ))}
+            </div>
+          </ScrollArea>
         )}
       </div>
+
+      {/* Info Card */}
+      <Card className="p-4 bg-muted/50">
+        <p className="text-sm text-muted-foreground">
+          💡 Déposez votre cash au bureau. Un agent validera la réception et votre solde sera mis à jour automatiquement.
+        </p>
+      </Card>
 
       {/* Deposit Dialog */}
       <Dialog open={showDepositDialog} onOpenChange={setShowDepositDialog}>
@@ -276,13 +319,20 @@ export function DriverCashHandlingTab({ orders }: DriverCashHandlingTabProps) {
             >
               Déposer tout ({cashOnHand.toFixed(0)} FCFA)
             </Button>
+
+            <div className="p-3 bg-blue-500/10 rounded-lg">
+              <p className="text-xs text-blue-700">
+                <Building className="h-3 w-3 inline mr-1" />
+                Rendez-vous au bureau avec ce montant exact. L'agent confirmera la réception.
+              </p>
+            </div>
           </div>
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowDepositDialog(false)}>
               Annuler
             </Button>
-            <Button onClick={handleDeposit} disabled={submitting}>
+            <Button onClick={handleDeposit} disabled={submitting || !depositAmount}>
               {submitting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
               Confirmer le dépôt
             </Button>

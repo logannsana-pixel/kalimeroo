@@ -25,6 +25,7 @@ export interface DriverOrder {
   created_at: string;
   status: OrderStatus;
   total: number;
+  delivery_fee: number;
   delivery_address: string;
   phone: string;
   user_id: string;
