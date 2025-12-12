@@ -4,16 +4,18 @@ import { Navbar } from "@/components/Navbar";
 import { BottomNav } from "@/components/BottomNav";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Star, Clock, DollarSign, ShoppingCart } from "lucide-react";
+import { Clock, ThumbsUp, Bike, Search, ArrowLeft, RotateCcw } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { MenuItemDetailModal } from "@/components/MenuItemDetailModal";
 import { ReviewsList } from "@/components/ReviewsList";
 import { GuestCheckoutModal } from "@/components/checkout/GuestCheckoutModal";
-import { HorizontalCard, HorizontalCardSkeleton } from "@/components/ui/horizontal-card";
+import { MenuItemCard, MenuItemCardSkeleton } from "@/components/ui/menu-item-card";
+import { cn } from "@/lib/utils";
 
 interface Restaurant {
   id: string;
@@ -45,11 +47,12 @@ export default function RestaurantDetail() {
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [pendingAction, setPendingAction] = useState<{ itemId: string; quantity: number; options: any[] } | null>(null);
+  const [deliveryMode, setDeliveryMode] = useState<'delivery' | 'takeaway'>('delivery');
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     fetchRestaurantData();
@@ -83,13 +86,6 @@ export default function RestaurantDetail() {
     }
   };
 
-  const handleQuantityChange = (itemId: string, delta: number) => {
-    setQuantities((prev) => ({
-      ...prev,
-      [itemId]: Math.max(0, (prev[itemId] || 0) + delta),
-    }));
-  };
-
   const handleItemClick = (item: MenuItem) => {
     setSelectedItem(item);
     setIsModalOpen(true);
@@ -102,7 +98,6 @@ export default function RestaurantDetail() {
       return;
     }
     await addToCart(itemId, quantity, selectedOptions);
-    setQuantities((prev) => ({ ...prev, [itemId]: 0 }));
   };
 
   const handleAuthSuccess = async () => {
@@ -110,17 +105,22 @@ export default function RestaurantDetail() {
     await refreshCart();
     if (pendingAction) {
       await addToCart(pendingAction.itemId, pendingAction.quantity, pendingAction.options);
-      setQuantities((prev) => ({ ...prev, [pendingAction.itemId]: 0 }));
       setPendingAction(null);
     }
   };
 
   const handleQuickAdd = async (itemId: string) => {
-    const quantity = quantities[itemId] || 1;
-    await handleAddToCart(itemId, quantity);
+    await handleAddToCart(itemId, 1);
   };
 
-  const groupedMenuItems = menuItems.reduce((acc, item) => {
+  // Filter menu items by search
+  const filteredMenuItems = menuItems.filter(item => 
+    !searchQuery || 
+    item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item.description?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const groupedMenuItems = filteredMenuItems.reduce((acc, item) => {
     const category = item.category || "Autres";
     if (!acc[category]) acc[category] = [];
     acc[category].push(item);
@@ -129,18 +129,22 @@ export default function RestaurantDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col pb-16 md:pb-0">
-        <Navbar />
-        <main className="flex-1 container mx-auto px-4 py-4 md:py-8">
-          <Skeleton className="h-48 md:h-64 w-full rounded-3xl mb-6 md:mb-8" />
-          <Skeleton className="h-6 md:h-8 w-1/3 mb-4" />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {[...Array(8)].map((_, i) => (
-              <HorizontalCardSkeleton key={i} variant="default" />
-            ))}
+      <div className="min-h-screen flex flex-col pb-20 md:pb-0 bg-background">
+        <div className="relative h-48">
+          <Skeleton className="w-full h-full" />
+          <div className="absolute top-4 left-4">
+            <Skeleton className="w-10 h-10 rounded-full" />
           </div>
-        </main>
-        <Footer />
+        </div>
+        <div className="relative -mt-16 mx-4">
+          <Skeleton className="h-40 rounded-3xl" />
+        </div>
+        <div className="px-4 mt-6">
+          <Skeleton className="h-12 rounded-full mb-6" />
+          {[...Array(4)].map((_, i) => (
+            <MenuItemCardSkeleton key={i} />
+          ))}
+        </div>
         <BottomNav />
       </div>
     );
@@ -149,94 +153,133 @@ export default function RestaurantDetail() {
   if (!restaurant) return null;
 
   return (
-    <div className="min-h-screen flex flex-col pb-16 md:pb-0">
-      <Navbar />
-      <main className="flex-1">
-        {/* Restaurant Header */}
-        <div className="relative h-48 sm:h-64 md:h-80">
-          <img
-            src={restaurant.image_url || "/placeholder.svg"}
-            alt={restaurant.name}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6 text-white">
-            <div className="container mx-auto">
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">{restaurant.name}</h1>
-              <p className="text-sm sm:text-base md:text-lg mb-3 md:mb-4 line-clamp-2 opacity-90">
-                {restaurant.description}
-              </p>
-              <div className="flex flex-wrap gap-2 sm:gap-3 text-xs sm:text-sm">
-                <div className="flex items-center bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full">
-                  <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-yellow-400 text-yellow-400 mr-1" />
-                  <span>{restaurant.rating}</span>
-                </div>
-                <div className="flex items-center bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full">
-                  <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                  <span>{restaurant.delivery_time}</span>
-                </div>
-                <div className="flex items-center bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full">
-                  <DollarSign className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                  <span>{restaurant.delivery_fee.toFixed(0)} FCFA</span>
-                </div>
-                <div className="bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full">
-                  <span>Min: {restaurant.min_order.toFixed(0)} FCFA</span>
-                </div>
-                <div className="bg-primary px-3 py-1.5 rounded-full font-medium">
-                  {restaurant.cuisine_type}
-                </div>
-              </div>
+    <div className="min-h-screen flex flex-col pb-20 md:pb-0 bg-background">
+      {/* Hero Image with Back Button */}
+      <div className="relative h-48 sm:h-56">
+        <img
+          src={restaurant.image_url || "/placeholder.svg"}
+          alt={restaurant.name}
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 to-transparent" />
+        
+        {/* Back Button */}
+        <button
+          onClick={() => navigate(-1)}
+          className="absolute top-4 left-4 w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center text-foreground hover:bg-background transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </button>
+      </div>
+
+      {/* Restaurant Info Card - Floating */}
+      <div className="relative -mt-20 mx-4 z-10">
+        <div className="bg-card rounded-3xl shadow-lg p-6">
+          {/* Restaurant Name */}
+          <h1 className="text-xl font-bold text-center mb-4">{restaurant.name}</h1>
+
+          {/* Delivery/Takeaway Toggle */}
+          <div className="flex justify-center mb-4">
+            <div className="inline-flex bg-muted rounded-full p-1">
+              <button
+                onClick={() => setDeliveryMode('delivery')}
+                className={cn(
+                  "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors",
+                  deliveryMode === 'delivery' 
+                    ? "bg-primary text-primary-foreground" 
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <Bike className="w-4 h-4" />
+                Livraison
+              </button>
+              <button
+                onClick={() => setDeliveryMode('takeaway')}
+                className={cn(
+                  "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors",
+                  deliveryMode === 'takeaway' 
+                    ? "bg-primary text-primary-foreground" 
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <RotateCcw className="w-4 h-4" />
+                À emporter
+              </button>
+            </div>
+          </div>
+
+          {/* Stats Row */}
+          <div className="flex justify-center items-center gap-6 text-sm">
+            <div className="flex flex-col items-center">
+              <Clock className="w-5 h-5 mb-1 text-muted-foreground" />
+              <span className="font-medium">{restaurant.delivery_time || "20-30'"}</span>
+            </div>
+            <div className="flex flex-col items-center">
+              <ThumbsUp className="w-5 h-5 mb-1 text-muted-foreground" />
+              <span className="font-medium">{restaurant.rating ? `${Math.round(restaurant.rating * 10)}%` : "90%"}</span>
+            </div>
+            <div className="flex flex-col items-center">
+              <Bike className="w-5 h-5 mb-1 text-muted-foreground" />
+              <span className="font-medium">{restaurant.delivery_fee?.toLocaleString('fr-FR')} FCFA</span>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Menu Items */}
-        <div className="container mx-auto px-4 py-6 md:py-8">
-          {Object.keys(groupedMenuItems).length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">Aucun plat disponible pour le moment</p>
-            </div>
-          ) : (
-            Object.entries(groupedMenuItems).map(([category, items]) => (
-              <div key={category} className="mb-8 md:mb-12">
-                <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6 sticky top-0 bg-background/95 backdrop-blur py-2 z-10">
-                  {category}
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {items.map((item) => (
-                    <HorizontalCard
-                      key={item.id}
-                      imageUrl={item.image_url}
-                      title={item.name}
-                      description={item.description}
-                      price={Number(item.price)}
-                      onClick={() => handleItemClick(item)}
-                      showQuantity={quantities[item.id] > 0}
-                      quantity={quantities[item.id] || 0}
-                      onIncrement={() => handleQuantityChange(item.id, 1)}
-                      onDecrement={() => handleQuantityChange(item.id, -1)}
-                      onCtaClick={
-                        quantities[item.id] > 0
-                          ? () => handleQuickAdd(item.id)
-                          : () => handleQuantityChange(item.id, 1)
-                      }
-                      ctaText={quantities[item.id] > 0 ? "Ajouter" : "Ajouter"}
-                      variant="default"
-                    />
-                  ))}
-                </div>
+      {/* Search Bar */}
+      <div className="px-4 mt-6">
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="Que cherchez-vous ?"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-12 pr-4 h-12 rounded-full bg-muted/50 border-0 focus-visible:ring-1"
+          />
+        </div>
+      </div>
+
+      {/* Menu Items */}
+      <div className="px-4 py-6 flex-1">
+        {Object.keys(groupedMenuItems).length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">
+              {searchQuery ? "Aucun plat trouvé" : "Aucun plat disponible pour le moment"}
+            </p>
+          </div>
+        ) : (
+          Object.entries(groupedMenuItems).map(([category, items]) => (
+            <div key={category} className="mb-8">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xl">🍽️</span>
+                <h2 className="text-lg font-bold">{category}</h2>
               </div>
-            ))
-          )}
-        </div>
+              <div className="divide-y divide-border/50">
+                {items.map((item) => (
+                  <MenuItemCard
+                    key={item.id}
+                    imageUrl={item.image_url}
+                    name={item.name}
+                    description={item.description}
+                    price={item.price}
+                    onClick={() => handleItemClick(item)}
+                    onAdd={() => handleQuickAdd(item.id)}
+                  />
+                ))}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
 
-        {/* Reviews Section */}
-        <div className="container mx-auto px-4 py-6 md:py-8 border-t">
-          <h2 className="text-2xl font-bold mb-6">Avis clients</h2>
-          <ReviewsList restaurantId={restaurant.id} />
-        </div>
-      </main>
-      <Footer />
+      {/* Reviews Section */}
+      <div className="px-4 py-6 border-t bg-muted/30">
+        <h2 className="text-xl font-bold mb-4">Avis clients</h2>
+        <ReviewsList restaurantId={restaurant.id} />
+      </div>
+
+      <Footer className="hidden md:block" />
       <BottomNav />
       
       <MenuItemDetailModal

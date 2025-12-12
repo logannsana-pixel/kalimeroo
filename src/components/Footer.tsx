@@ -1,9 +1,14 @@
 import { Facebook, Instagram, Twitter, Heart, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
-export const Footer = () => {
+interface FooterProps {
+  className?: string;
+}
+
+export const Footer = ({ className }: FooterProps) => {
   return (
-    <footer className="bg-card border-t border-border/50 py-12 mt-8">
+    <footer className={cn("bg-card border-t border-border/50 py-12 mt-8", className)}>
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           {/* Brand */}
