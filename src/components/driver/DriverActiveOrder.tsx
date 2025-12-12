@@ -1,10 +1,16 @@
+import { lazy, Suspense } from "react";
 import { ArrowLeft, Phone, MapPin, MessageCircle, Navigation, CheckCircle, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ChatInterface } from "@/components/ChatInterface";
 import { DriverOrder } from "@/pages/DeliveryDashboard";
 import { ButtonLoader } from "@/components/ui/loading-spinner";
+import { useDriverLocation } from "@/hooks/useDriverLocation";
+
+// Lazy load map for performance
+const OrderTrackingMap = lazy(() => import("@/components/tracking/OrderTrackingMap"));
 
 interface DriverActiveOrderProps {
   order: DriverOrder;
@@ -30,6 +36,13 @@ export function DriverActiveOrder({
 }: DriverActiveOrderProps) {
   const currentStep = statusSteps.find(s => s.status === order.status) || statusSteps[0];
   const isLoading = actionLoading === order.id;
+
+  // Enable GPS tracking for active deliveries
+  useDriverLocation({
+    orderId: order.id,
+    enabled: ['pickup_accepted', 'picked_up', 'delivering'].includes(order.status),
+    updateInterval: 5000 // Update every 5 seconds
+  });
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -58,16 +71,19 @@ export function DriverActiveOrder({
       </div>
 
       <main className="flex-1 p-4 space-y-4 pb-32">
-        {/* Map Placeholder */}
-        <Card className="h-48 bg-muted flex items-center justify-center">
-          <div className="text-center">
-            <Navigation className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
-            <p className="text-sm text-muted-foreground">Carte de navigation</p>
-            <Button variant="outline" size="sm" className="mt-2">
-              Ouvrir GPS
-            </Button>
-          </div>
-        </Card>
+        {/* Live Map */}
+        <div className="rounded-2xl overflow-hidden">
+          <Suspense fallback={<Skeleton className="h-48 w-full" />}>
+            <OrderTrackingMap
+              orderId={order.id}
+              driverLocation={null} // Will be updated via realtime
+              restaurantLocation={null}
+              customerLocation={null}
+              status={order.status}
+              estimatedTime="15-20 min"
+            />
+          </Suspense>
+        </div>
 
         {/* Restaurant info */}
         <Card className={`p-4 ${order.status === 'pickup_accepted' ? 'border-2 border-primary' : ''}`}>
