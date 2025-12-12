@@ -11,7 +11,6 @@ import { AlertEngine } from "@/components/alerts/AlertEngine";
 import { FloatingCart } from "@/components/FloatingCart";
 import { NetworkStatus } from "@/components/NetworkStatus";
 import Index from "./pages/Index";
-import Auth from "./pages/Auth";
 import Restaurants from "./pages/Restaurants";
 import RestaurantDetail from "./pages/RestaurantDetail";
 import Cart from "./pages/Cart";
@@ -25,6 +24,12 @@ import AdminDashboard from "./pages/AdminDashboard";
 import EnableAlerts from "./pages/EnableAlerts";
 import AlertPlayground from "./pages/AlertPlayground";
 import NotFound from "./pages/NotFound";
+
+// Auth pages
+import CustomerAuth from "./pages/auth/CustomerAuth";
+import RestaurantAuth from "./pages/auth/RestaurantAuth";
+import DeliveryAuth from "./pages/auth/DeliveryAuth";
+import AdminAuth from "./pages/auth/AdminAuth";
 
 const queryClient = new QueryClient();
 
@@ -42,7 +47,14 @@ const App = () => (
               <FloatingCart />
               <Routes>
               <Route path="/" element={<Index />} />
-              <Route path="/auth" element={<Auth />} />
+              
+              {/* Auth routes - role specific */}
+              <Route path="/auth" element={<CustomerAuth />} />
+              <Route path="/auth/customer" element={<CustomerAuth />} />
+              <Route path="/auth/restaurant" element={<RestaurantAuth />} />
+              <Route path="/auth/delivery" element={<DeliveryAuth />} />
+              <Route path="/auth/admin" element={<AdminAuth />} />
+              
               <Route path="/restaurants" element={<Restaurants />} />
               <Route path="/restaurant/:id" element={<RestaurantDetail />} />
               <Route path="/enable-alerts" element={<EnableAlerts />} />

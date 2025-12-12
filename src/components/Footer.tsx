@@ -1,4 +1,4 @@
-import { Facebook, Instagram, Twitter, Heart, Sparkles } from "lucide-react";
+import { Facebook, Instagram, Twitter, Heart, Sparkles, Store, Bike, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -43,12 +43,12 @@ export const Footer = ({ className }: FooterProps) => {
           {/* For Customers */}
           <div>
             <h4 className="font-semibold mb-4 flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-primary" />
+              <User className="w-4 h-4 text-primary" />
               Pour vous
             </h4>
             <ul className="space-y-3 text-muted-foreground text-sm">
               <li><Link to="/restaurants" className="hover:text-primary transition-colors">Commander</Link></li>
-              <li><Link to="/auth" className="hover:text-primary transition-colors">Créer un compte</Link></li>
+              <li><Link to="/auth/customer" className="hover:text-primary transition-colors">Créer un compte client</Link></li>
               <li><a href="#" className="hover:text-primary transition-colors">Aide & Contact</a></li>
             </ul>
           </div>
@@ -56,19 +56,32 @@ export const Footer = ({ className }: FooterProps) => {
           {/* For Partners */}
           <div>
             <h4 className="font-semibold mb-4 flex items-center gap-2">
-              <Heart className="w-4 h-4 text-primary" />
+              <Sparkles className="w-4 h-4 text-primary" />
               Partenaires
             </h4>
             <ul className="space-y-3 text-muted-foreground text-sm">
-              <li><Link to="/auth" className="hover:text-primary transition-colors">Devenir restaurant partenaire</Link></li>
-              <li><Link to="/auth" className="hover:text-primary transition-colors">Devenir livreur</Link></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Conditions</a></li>
+              <li>
+                <Link to="/auth/restaurant" className="hover:text-primary transition-colors flex items-center gap-2">
+                  <Store className="w-4 h-4" />
+                  Espace restaurant
+                </Link>
+              </li>
+              <li>
+                <Link to="/auth/delivery" className="hover:text-primary transition-colors flex items-center gap-2">
+                  <Bike className="w-4 h-4" />
+                  Devenir livreur
+                </Link>
+              </li>
+              <li><a href="#" className="hover:text-primary transition-colors">Conditions partenaires</a></li>
             </ul>
           </div>
           
           {/* Info */}
           <div>
-            <h4 className="font-semibold mb-4">Informations</h4>
+            <h4 className="font-semibold mb-4 flex items-center gap-2">
+              <Heart className="w-4 h-4 text-primary" />
+              Informations
+            </h4>
             <ul className="space-y-3 text-muted-foreground text-sm">
               <li><a href="#" className="hover:text-primary transition-colors">À propos</a></li>
               <li><a href="#" className="hover:text-primary transition-colors">Confidentialité</a></li>
