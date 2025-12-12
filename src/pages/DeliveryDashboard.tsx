@@ -12,6 +12,8 @@ import { DriverProfileTab } from "@/components/driver/DriverProfileTab";
 import { DriverActiveOrder } from "@/components/driver/DriverActiveOrder";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { OrderCardSkeleton } from "@/components/ui/skeleton-card";
+import { ValidationLockScreen } from "@/components/validation/ValidationLockScreen";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 type OrderStatus = Database["public"]["Enums"]["order_status"];
 
@@ -35,14 +37,27 @@ export interface DriverOrder {
   } | null;
 }
 
+interface DriverProfile {
+  full_name: string | null;
+  is_available: boolean;
+  is_validated: boolean;
+  validation_notes: string | null;
+}
+
 export default function DeliveryDashboard() {
   const { user, signOut } = useAuth();
   const [activeTab, setActiveTab] = useState<'home' | 'orders' | 'earnings' | 'profile'>('home');
   const [orders, setOrders] = useState<DriverOrder[]>([]);
   const [loading, setLoading] = useState(true);
+  const [profileLoading, setProfileLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
-  const [driverProfile, setDriverProfile] = useState<{ full_name: string | null; is_available: boolean }>({ full_name: null, is_available: true });
+  const [driverProfile, setDriverProfile] = useState<DriverProfile>({ 
+    full_name: null, 
+    is_available: true,
+    is_validated: false,
+    validation_notes: null
+  });
   const [activeOrderView, setActiveOrderView] = useState<DriverOrder | null>(null);
   const [confirmDialog, setConfirmDialog] = useState<{
     open: boolean;
@@ -55,12 +70,38 @@ export default function DeliveryDashboard() {
       if (!user) return;
       const { data } = await supabase
         .from('profiles')
-        .select('full_name, is_available')
+        .select('full_name, is_available, is_validated, validation_notes')
         .eq('id', user.id)
         .single();
-      if (data) setDriverProfile(data);
+      if (data) {
+        setDriverProfile(data);
+      }
+      setProfileLoading(false);
     };
     fetchProfile();
+
+    // Real-time subscription for validation status changes
+    if (user) {
+      const channel = supabase
+        .channel('driver-validation')
+        .on('postgres_changes', {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles',
+          filter: `id=eq.${user.id}`
+        }, (payload) => {
+          setDriverProfile(prev => ({
+            ...prev,
+            is_validated: payload.new.is_validated as boolean,
+            validation_notes: payload.new.validation_notes as string | null
+          }));
+        })
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
   }, [user]);
 
   const fetchOrders = useCallback(async (showRefresh = false) => {
@@ -205,6 +246,41 @@ export default function DeliveryDashboard() {
   const availableOrders = orders.filter(o => o.status === 'pickup_pending');
   const activeOrders = orders.filter(o => ['pickup_accepted', 'picked_up', 'delivering'].includes(o.status));
   const completedOrders = orders.filter(o => o.status === 'delivered');
+
+  const handleRequestRevalidation = async () => {
+    if (!user) return;
+    
+    // Clear rejection notes to mark as pending again
+    await supabase
+      .from("profiles")
+      .update({ validation_notes: null })
+      .eq("id", user.id);
+    
+    setDriverProfile(prev => ({ ...prev, validation_notes: null }));
+  };
+
+  // Show loading while checking profile
+  if (profileLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
+
+  // Show lock screen if not validated
+  if (!driverProfile.is_validated) {
+    return (
+      <ValidationLockScreen
+        type="driver"
+        isValidated={driverProfile.is_validated}
+        validationNotes={driverProfile.validation_notes}
+        onLogout={signOut}
+        onRequestRevalidation={handleRequestRevalidation}
+        entityName={driverProfile.full_name || "Livreur"}
+      />
+    );
+  }
 
   // Show active order full-screen view
   if (activeOrderView) {

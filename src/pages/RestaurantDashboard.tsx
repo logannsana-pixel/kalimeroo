@@ -13,35 +13,103 @@ import { MenuOptionsTab } from "@/components/restaurant/MenuOptionsTab";
 import { BundlesTab } from "@/components/restaurant/BundlesTab";
 import { PromoCodesTab } from "@/components/restaurant/PromoCodesTab";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import { ValidationLockScreen } from "@/components/validation/ValidationLockScreen";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+
+interface RestaurantData {
+  id: string;
+  name: string;
+  is_validated: boolean;
+  validation_notes: string | null;
+}
 
 export default function RestaurantDashboard() {
   const { user, signOut } = useAuth();
-  const [restaurantId, setRestaurantId] = useState<string>("");
-  const [restaurantName, setRestaurantName] = useState<string>("");
+  const [restaurant, setRestaurant] = useState<RestaurantData | null>(null);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
 
   useEffect(() => {
     const fetchRestaurant = async () => {
       if (user) {
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from("restaurants")
-          .select("id, name")
+          .select("id, name, is_validated, validation_notes")
           .eq("owner_id", user.id)
-          .single();
+          .maybeSingle();
         
         if (data) {
-          setRestaurantId(data.id);
-          setRestaurantName(data.name);
+          setRestaurant(data);
         }
       }
+      setLoading(false);
     };
     fetchRestaurant();
+
+    // Real-time subscription for validation status changes
+    if (user) {
+      const channel = supabase
+        .channel('restaurant-validation')
+        .on('postgres_changes', {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'restaurants',
+          filter: `owner_id=eq.${user.id}`
+        }, (payload) => {
+          setRestaurant(prev => prev ? {
+            ...prev,
+            is_validated: payload.new.is_validated,
+            validation_notes: payload.new.validation_notes
+          } : null);
+        })
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
   }, [user]);
 
+  const handleRequestRevalidation = async () => {
+    if (!restaurant) return;
+    
+    // Clear rejection notes to mark as pending again
+    await supabase
+      .from("restaurants")
+      .update({ validation_notes: null })
+      .eq("id", restaurant.id);
+    
+    setRestaurant(prev => prev ? { ...prev, validation_notes: null } : null);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
+
+  // Show lock screen if not validated
+  if (restaurant && !restaurant.is_validated) {
+    return (
+      <ValidationLockScreen
+        type="restaurant"
+        isValidated={restaurant.is_validated}
+        validationNotes={restaurant.validation_notes}
+        onLogout={signOut}
+        onRequestRevalidation={handleRequestRevalidation}
+        entityName={restaurant.name}
+      />
+    );
+  }
+
   const renderContent = () => {
+    if (!restaurant) return null;
+    
     switch (activeTab) {
       case 'overview':
-        return <RestaurantOverview restaurantId={restaurantId} />;
+        return <RestaurantOverview restaurantId={restaurant.id} />;
       case 'orders':
         return <OrdersTab />;
       case 'menu':
@@ -49,7 +117,7 @@ export default function RestaurantDashboard() {
       case 'bundles':
         return <BundlesTab />;
       case 'options':
-        return restaurantId ? <MenuOptionsTab restaurantId={restaurantId} /> : null;
+        return <MenuOptionsTab restaurantId={restaurant.id} />;
       case 'promos':
         return <PromoCodesTab />;
       case 'hours':
@@ -59,7 +127,7 @@ export default function RestaurantDashboard() {
       case 'profile':
         return <RestaurantProfileTab />;
       default:
-        return <RestaurantOverview restaurantId={restaurantId} />;
+        return <RestaurantOverview restaurantId={restaurant.id} />;
     }
   };
 
@@ -69,11 +137,11 @@ export default function RestaurantDashboard() {
         <RestaurantSidebar 
           activeTab={activeTab} 
           onTabChange={setActiveTab}
-          restaurantName={restaurantName}
+          restaurantName={restaurant?.name || ""}
         />
         <SidebarInset className="flex-1">
           <RestaurantHeader 
-            restaurantName={restaurantName}
+            restaurantName={restaurant?.name || ""}
             onLogout={signOut}
           />
           <main className="p-4 md:p-6">

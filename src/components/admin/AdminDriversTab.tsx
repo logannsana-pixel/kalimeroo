@@ -340,22 +340,46 @@ export function AdminDriversTab() {
           <div className="space-y-4">
             {selectedDriver && (
               <div className="p-4 rounded-xl bg-muted">
-                <h3 className="font-semibold">{selectedDriver.full_name || 'Sans nom'}</h3>
-                <p className="text-sm text-muted-foreground">{selectedDriver.phone}</p>
-                {selectedDriver.vehicle_type && (
-                  <p className="text-sm text-muted-foreground">Véhicule: {selectedDriver.vehicle_type}</p>
-                )}
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-background flex items-center justify-center shrink-0">
+                    <Truck className="w-5 h-5 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">{selectedDriver.full_name || 'Sans nom'}</h3>
+                    <p className="text-sm text-muted-foreground">{selectedDriver.phone}</p>
+                  </div>
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Badge variant={selectedDriver.is_validated ? "default" : "secondary"}>
+                    {selectedDriver.is_validated ? "Validé" : "En attente"}
+                  </Badge>
+                  {selectedDriver.vehicle_type && (
+                    <Badge variant="outline">
+                      <Car className="w-3 h-3 mr-1" />
+                      {selectedDriver.vehicle_type}
+                    </Badge>
+                  )}
+                  {selectedDriver.city && (
+                    <Badge variant="outline">
+                      <MapPin className="w-3 h-3 mr-1" />
+                      {selectedDriver.city}
+                    </Badge>
+                  )}
+                </div>
               </div>
             )}
 
             <div className="space-y-2">
-              <Label>Notes de validation</Label>
+              <Label>Message pour le livreur</Label>
               <Textarea
-                placeholder="Ajouter des notes (optionnel)..."
+                placeholder="En cas de rejet, expliquez ce qui doit être corrigé (documents manquants, permis invalide, etc.)..."
                 value={validationNotes}
                 onChange={(e) => setValidationNotes(e.target.value)}
-                rows={3}
+                rows={4}
               />
+              <p className="text-xs text-muted-foreground">
+                Ce message sera visible par le livreur dans son tableau de bord
+              </p>
             </div>
 
             <div className="flex gap-3">
@@ -363,7 +387,7 @@ export function AdminDriversTab() {
                 variant="destructive"
                 className="flex-1"
                 onClick={() => handleValidation(false)}
-                disabled={actionLoading}
+                disabled={actionLoading || !validationNotes.trim()}
               >
                 <XCircle className="w-4 h-4 mr-2" />
                 Rejeter
@@ -377,6 +401,12 @@ export function AdminDriversTab() {
                 Valider
               </Button>
             </div>
+            
+            {!validationNotes.trim() && (
+              <p className="text-xs text-center text-muted-foreground">
+                ⚠️ Un message est requis pour rejeter
+              </p>
+            )}
           </div>
         </DialogContent>
       </Dialog>
