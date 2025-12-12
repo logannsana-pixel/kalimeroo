@@ -325,19 +325,45 @@ export function AdminRestaurantsTab() {
           <div className="space-y-4">
             {selectedRestaurant && (
               <div className="p-4 rounded-xl bg-muted">
-                <h3 className="font-semibold">{selectedRestaurant.name}</h3>
-                <p className="text-sm text-muted-foreground">{selectedRestaurant.address}</p>
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-background flex items-center justify-center overflow-hidden shrink-0">
+                    {selectedRestaurant.image_url ? (
+                      <img 
+                        src={selectedRestaurant.image_url} 
+                        alt={selectedRestaurant.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <Store className="w-5 h-5 text-muted-foreground" />
+                    )}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">{selectedRestaurant.name}</h3>
+                    <p className="text-sm text-muted-foreground">{selectedRestaurant.address}</p>
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center gap-2">
+                  <Badge variant={selectedRestaurant.is_validated ? "default" : "secondary"}>
+                    {selectedRestaurant.is_validated ? "Validé" : "En attente"}
+                  </Badge>
+                  {selectedRestaurant.cuisine_type && (
+                    <Badge variant="outline">{selectedRestaurant.cuisine_type}</Badge>
+                  )}
+                </div>
               </div>
             )}
 
             <div className="space-y-2">
-              <Label>Notes de validation</Label>
+              <Label>Message pour le restaurateur</Label>
               <Textarea
-                placeholder="Ajouter des notes (optionnel)..."
+                placeholder="En cas de rejet, expliquez ce qui doit être corrigé (documents manquants, informations incomplètes, etc.)..."
                 value={validationNotes}
                 onChange={(e) => setValidationNotes(e.target.value)}
-                rows={3}
+                rows={4}
               />
+              <p className="text-xs text-muted-foreground">
+                Ce message sera visible par le restaurateur dans son tableau de bord
+              </p>
             </div>
 
             <div className="flex gap-3">
@@ -345,7 +371,7 @@ export function AdminRestaurantsTab() {
                 variant="destructive"
                 className="flex-1"
                 onClick={() => handleValidation(false)}
-                disabled={actionLoading}
+                disabled={actionLoading || !validationNotes.trim()}
               >
                 <XCircle className="w-4 h-4 mr-2" />
                 Rejeter
@@ -359,6 +385,12 @@ export function AdminRestaurantsTab() {
                 Valider
               </Button>
             </div>
+            
+            {!validationNotes.trim() && (
+              <p className="text-xs text-center text-muted-foreground">
+                ⚠️ Un message est requis pour rejeter
+              </p>
+            )}
           </div>
         </DialogContent>
       </Dialog>
