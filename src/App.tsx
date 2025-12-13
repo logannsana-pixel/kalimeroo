@@ -24,25 +24,49 @@ export const HostRedirect = ({ children }: { children: React.ReactNode }) => {
   const hostname = typeof window !== "undefined" ? window.location.hostname : "";
 
   useEffect(() => {
-    // On attend que le DOM soit prêt
     setReady(true);
 
-    // Si sous-domaine admin-panel et pas déjà sur /auth/admin, on redirige
+    // REDIRECTION ADMIN
     if (
       hostname.startsWith("admin-panel.") &&
       !location.pathname.startsWith("/auth/admin")
     ) {
       navigate("/auth/admin", { replace: true });
+      return;
+    }
+
+    // REDIRECTION RESTO
+    if (
+      hostname.startsWith("restaurant.") &&
+      !location.pathname.startsWith("/auth/restaurant")
+    ) {
+      navigate("/auth/restaurant", { replace: true });
+      return;
+    }
+
+    // REDIRECTION LIVREUR (optionnel)
+    if (
+      hostname.startsWith("livreur.") &&
+      !location.pathname.startsWith("/auth/delivery")
+    ) {
+      navigate("/auth/delivery", { replace: true });
+      return;
+    }
+
+    // MAIN CLIENT APP
+    if (
+      hostname.startsWith("app.") &&
+      !location.pathname.startsWith("/auth")
+    ) {
+      navigate("/auth", { replace: true });
+      return;
     }
   }, [hostname, location.pathname, navigate]);
 
-  if (!ready) return null; // loader minimal
+  if (!ready) return null;
 
   return <>{children}</>;
 };
-
-
-
 
 // Lazy loaded pages for code splitting
 const Index = lazy(() => import("./pages/Index"));
