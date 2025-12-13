@@ -1,15 +1,12 @@
 import { useNavigate } from "react-router-dom";
-import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useLocation } from "@/contexts/LocationContext";
-import { Star } from "lucide-react";
 
 interface ServiceType {
   id: string;
   name: string;
   icon: string;
   available: boolean;
-  promo?: string;
 }
 
 const serviceTypes: ServiceType[] = [
@@ -18,7 +15,6 @@ const serviceTypes: ServiceType[] = [
     name: "Restaurants",
     icon: "🍔",
     available: true,
-    promo: "Promo 50%",
   },
   {
     id: "supermarkets",
@@ -53,52 +49,39 @@ export const ServiceTypes = () => {
   };
 
   return (
-    <div className="px-4 py-6">
-      <div className="grid grid-cols-3 gap-3">
+    <section className="px-4 py-4">
+      <div className="flex gap-3 overflow-x-auto scrollbar-hide">
         {serviceTypes.map((service, index) => (
           <button
             key={service.id}
             onClick={() => handleClick(service)}
-            className={`relative text-center transition-all duration-200 animate-fade-in ${
+            className={`relative flex-shrink-0 transition-all duration-200 animate-fade-in ${
               service.available 
                 ? "hover:scale-105 active:scale-95" 
-                : "opacity-60 cursor-default"
+                : "opacity-50 cursor-not-allowed"
             }`}
-            style={{ animationDelay: `${index * 100}ms` }}
+            style={{ animationDelay: `${index * 80}ms` }}
             disabled={!service.available}
           >
-            <Card className="relative p-4 border-none shadow-soft rounded-3xl bg-card overflow-visible">
-              {/* Promo badge */}
-              {service.promo && (
-                <div className="absolute -top-2 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1">
-                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  <Badge className="bg-yellow-400 text-yellow-900 text-[10px] px-2 py-0.5 rounded-md font-bold">
-                    {service.promo}
-                  </Badge>
-                </div>
+            <div className={`flex items-center gap-2.5 px-4 py-3 rounded-full ${
+              service.available 
+                ? "bg-primary text-primary-foreground shadow-soft" 
+                : "bg-muted text-muted-foreground"
+            }`}>
+              <span className="text-xl">{service.icon}</span>
+              <span className="text-sm font-semibold whitespace-nowrap">{service.name}</span>
+              {!service.available && (
+                <Badge 
+                  variant="secondary" 
+                  className="text-[9px] px-1.5 py-0 bg-background/50 text-muted-foreground"
+                >
+                  Bientôt
+                </Badge>
               )}
-              
-              {/* Icon */}
-              <div className="text-4xl mb-2 mt-2">{service.icon}</div>
-            </Card>
-            
-            {/* Label */}
-            <p className="text-sm font-medium mt-2 text-foreground">
-              {service.name}
-            </p>
-            
-            {/* Coming soon badge */}
-            {!service.available && (
-              <Badge 
-                variant="secondary" 
-                className="mt-1 text-[10px] bg-muted text-muted-foreground"
-              >
-                Bientôt
-              </Badge>
-            )}
+            </div>
           </button>
         ))}
       </div>
-    </div>
+    </section>
   );
 };
