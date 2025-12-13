@@ -10,6 +10,6 @@ export function middleware(req) {
       url.pathname = `/auth/admin${url.pathname}`;
       return NextResponse.rewrite(url);
     }
-  }
+  } 
   return NextResponse.next();
 }
