@@ -9,7 +9,6 @@ import { PopularDishes } from "@/components/PopularDishes";
 import { OrderAgainSection } from "@/components/OrderAgainSection";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { Star, Clock, ArrowRight, Truck } from "lucide-react";
@@ -43,7 +42,7 @@ const Index = () => {
         .select("id, name, image_url, rating, cuisine_type, delivery_time, delivery_fee, city")
         .eq("is_active", true)
         .order("rating", { ascending: false })
-        .limit(8);
+        .limit(6);
 
       if (city) {
         query = query.eq("city", city);
@@ -81,42 +80,42 @@ const Index = () => {
 
         {/* Popular Restaurants */}
         <section className="px-4 py-4">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-foreground">
-              {hasAddress ? "Restaurants populaires 🔥" : "Restaurants"}
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-base font-bold text-foreground">
+              {hasAddress ? "Restaurants populaires" : "Restaurants"}
             </h2>
             <Button
               variant="link"
-              className="text-primary p-0 h-auto font-medium"
+              className="text-primary p-0 h-auto text-sm font-medium"
               onClick={() => hasAddress ? navigate("/restaurants") : openModal()}
             >
-              Voir tout <ArrowRight className="ml-1 h-4 w-4" />
+              Voir tout <ArrowRight className="ml-1 h-3 w-3" />
             </Button>
           </div>
 
           {loading ? (
             <div className="grid grid-cols-2 gap-3">
               {[...Array(4)].map((_, i) => (
-                <Skeleton key={i} className="h-48 w-full rounded-3xl" />
+                <Skeleton key={i} className="h-44 w-full rounded-2xl" />
               ))}
             </div>
           ) : restaurants.length === 0 ? (
-            <Card className="text-center py-10 border-none shadow-soft rounded-3xl">
+            <Card className="text-center py-8 border-none shadow-soft rounded-2xl">
               <CardContent className="p-0">
-                <div className="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center mb-3">
-                  <Truck className="h-8 w-8 text-primary" />
+                <div className="w-14 h-14 mx-auto bg-primary/10 rounded-2xl flex items-center justify-center mb-3">
+                  <Truck className="h-7 w-7 text-primary" />
                 </div>
-                <h3 className="font-bold mb-1">
+                <h3 className="font-bold text-sm mb-1">
                   {hasAddress ? "Bientôt disponible" : "Définissez votre adresse"}
                 </h3>
-                <p className="text-sm text-muted-foreground mb-4">
+                <p className="text-xs text-muted-foreground mb-3 px-4">
                   {hasAddress 
                     ? "Nous préparons les meilleurs restaurants" 
                     : "Pour voir les restaurants disponibles"
                   }
                 </p>
                 {!hasAddress && (
-                  <Button onClick={openModal} className="rounded-full" size="sm">
+                  <Button onClick={openModal} className="rounded-full text-sm" size="sm">
                     Choisir ma ville
                   </Button>
                 )}
@@ -127,23 +126,19 @@ const Index = () => {
               {restaurants.map((restaurant, index) => (
                 <Card
                   key={restaurant.id}
-                  className={`group cursor-pointer overflow-hidden border-none shadow-soft hover:shadow-hover transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] animate-fade-in rounded-3xl ${
+                  className={`group cursor-pointer overflow-hidden border-none shadow-soft hover:shadow-hover transition-all duration-200 active:scale-[0.98] animate-fade-in rounded-2xl ${
                     !hasAddress ? "opacity-75" : ""
                   }`}
-                  style={{ animationDelay: `${index * 50}ms` }}
+                  style={{ animationDelay: `${index * 40}ms` }}
                   onClick={() => hasAddress ? navigate(`/restaurant/${restaurant.id}`) : openModal()}
                 >
                   {/* Image */}
-                  <div className="relative h-28 overflow-hidden">
+                  <div className="relative h-24 overflow-hidden">
                     <LazyImage
                       src={restaurant.image_url || "/placeholder.svg"}
                       alt={restaurant.name}
                       className="w-full h-full transition-transform duration-300 group-hover:scale-105"
                     />
-                    {/* Promo Badge */}
-                    <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground rounded-full px-2 py-0.5 text-[10px] font-bold">
-                      15% off
-                    </Badge>
                     {/* Favorite Button */}
                     {hasAddress && (
                       <div 
@@ -157,18 +152,18 @@ const Index = () => {
                   
                   {/* Content */}
                   <CardContent className="p-3">
-                    <h3 className="font-bold text-sm mb-1 line-clamp-1">{restaurant.name}</h3>
+                    <h3 className="font-bold text-sm mb-0.5 line-clamp-1">{restaurant.name}</h3>
                     {restaurant.cuisine_type && (
                       <p className="text-xs text-muted-foreground mb-2 line-clamp-1">{restaurant.cuisine_type}</p>
                     )}
                     <div className="flex items-center justify-between text-xs">
                       <div className="flex items-center gap-1">
                         <Star className="w-3 h-3 fill-primary text-primary" />
-                        <span className="font-semibold">{restaurant.rating.toFixed(1)}</span>
+                        <span className="font-semibold">{restaurant.rating?.toFixed(1) || "—"}</span>
                       </div>
                       <div className="flex items-center gap-1 text-muted-foreground">
                         <Clock className="w-3 h-3" />
-                        <span>{restaurant.delivery_time || "30-45"}</span>
+                        <span>{restaurant.delivery_time || "20-30"}'</span>
                       </div>
                     </div>
                   </CardContent>
@@ -176,30 +171,6 @@ const Index = () => {
               ))}
             </div>
           )}
-        </section>
-
-        {/* Stats */}
-        <section className="px-4 py-6">
-          <div className="grid grid-cols-3 gap-3">
-            <Card className="text-center py-4 border-none shadow-soft rounded-2xl">
-              <CardContent className="p-0">
-                <span className="font-bold text-primary text-xl block">500+</span>
-                <p className="text-[10px] text-muted-foreground">Restaurants</p>
-              </CardContent>
-            </Card>
-            <Card className="text-center py-4 border-none shadow-soft rounded-2xl">
-              <CardContent className="p-0">
-                <span className="font-bold text-primary text-xl block">50k+</span>
-                <p className="text-[10px] text-muted-foreground">Commandes</p>
-              </CardContent>
-            </Card>
-            <Card className="text-center py-4 border-none shadow-soft rounded-2xl">
-              <CardContent className="p-0">
-                <span className="font-bold text-primary text-xl block">4.8/5</span>
-                <p className="text-[10px] text-muted-foreground">Note moyenne</p>
-              </CardContent>
-            </Card>
-          </div>
         </section>
       </main>
       <BottomNav />

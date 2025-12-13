@@ -1,27 +1,33 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLocation } from "@/contexts/LocationContext";
 
-const categoryData: Record<string, { icon: string; color: string }> = {
-  "Burger": { icon: "🍔", color: "from-amber-100 to-amber-50" },
-  "Fast Food": { icon: "🍟", color: "from-red-100 to-red-50" },
-  "Pizza": { icon: "🍕", color: "from-orange-100 to-orange-50" },
-  "Africaine": { icon: "🍲", color: "from-yellow-100 to-yellow-50" },
-  "Chinoise": { icon: "🥡", color: "from-rose-100 to-rose-50" },
-  "Indienne": { icon: "🍛", color: "from-amber-100 to-amber-50" },
-  "Italienne": { icon: "🍝", color: "from-green-100 to-green-50" },
-  "Japonaise": { icon: "🍣", color: "from-pink-100 to-pink-50" },
-  "Desserts": { icon: "🍰", color: "from-pink-100 to-pink-50" },
-  "Grillades": { icon: "🥩", color: "from-red-100 to-red-50" },
-  "Sushi": { icon: "🍣", color: "from-teal-100 to-teal-50" },
-  "Salade": { icon: "🥗", color: "from-green-100 to-green-50" },
-  "Fruits de mer": { icon: "🦐", color: "from-blue-100 to-blue-50" },
-  "Poulet": { icon: "🍗", color: "from-amber-100 to-amber-50" },
-  "Sandwich": { icon: "🥪", color: "from-yellow-100 to-yellow-50" },
-  "Café": { icon: "☕", color: "from-brown-100 to-amber-50" },
+interface CategoryConfig {
+  icon: string;
+  gradient: string;
+}
+
+const categoryData: Record<string, CategoryConfig> = {
+  "Burger": { icon: "🍔", gradient: "from-amber-500/20 to-orange-500/10" },
+  "Fast Food": { icon: "🍟", gradient: "from-red-500/20 to-orange-500/10" },
+  "Pizza": { icon: "🍕", gradient: "from-orange-500/20 to-yellow-500/10" },
+  "Africaine": { icon: "🍲", gradient: "from-yellow-500/20 to-amber-500/10" },
+  "Chinoise": { icon: "🥡", gradient: "from-rose-500/20 to-red-500/10" },
+  "Indienne": { icon: "🍛", gradient: "from-amber-500/20 to-orange-500/10" },
+  "Italienne": { icon: "🍝", gradient: "from-green-500/20 to-emerald-500/10" },
+  "Japonaise": { icon: "🍣", gradient: "from-pink-500/20 to-rose-500/10" },
+  "Desserts": { icon: "🍰", gradient: "from-pink-500/20 to-purple-500/10" },
+  "Grillades": { icon: "🥩", gradient: "from-red-600/20 to-red-500/10" },
+  "Sushi": { icon: "🍣", gradient: "from-teal-500/20 to-cyan-500/10" },
+  "Salade": { icon: "🥗", gradient: "from-green-500/20 to-lime-500/10" },
+  "Fruits de mer": { icon: "🦐", gradient: "from-blue-500/20 to-cyan-500/10" },
+  "Poulet": { icon: "🍗", gradient: "from-amber-500/20 to-yellow-500/10" },
+  "Sandwich": { icon: "🥪", gradient: "from-yellow-500/20 to-amber-500/10" },
+  "Café": { icon: "☕", gradient: "from-amber-600/20 to-amber-500/10" },
+  "Boissons": { icon: "🧃", gradient: "from-blue-500/20 to-sky-500/10" },
+  "Petit-déjeuner": { icon: "🥐", gradient: "from-orange-400/20 to-yellow-500/10" },
 };
 
 export const FoodCategories = () => {
@@ -41,7 +47,7 @@ export const FoodCategories = () => {
 
       if (data) {
         const uniqueCategories = [...new Set(data.map(r => r.cuisine_type).filter(Boolean))] as string[];
-        setCategories(uniqueCategories.slice(0, 6));
+        setCategories(uniqueCategories.slice(0, 8));
       }
       setLoading(false);
     };
@@ -59,44 +65,50 @@ export const FoodCategories = () => {
 
   if (loading) {
     return (
-      <div className="px-4 py-2">
-        <div className="grid grid-cols-3 gap-3">
+      <section className="px-4 py-4">
+        <div className="flex items-center justify-between mb-3">
+          <Skeleton className="h-5 w-24" />
+        </div>
+        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="flex flex-col items-center gap-2">
-              <Skeleton className="w-full aspect-square rounded-3xl" />
-              <Skeleton className="w-16 h-3 rounded-full" />
+            <div key={i} className="flex flex-col items-center gap-2 flex-shrink-0">
+              <Skeleton className="w-16 h-16 rounded-2xl" />
+              <Skeleton className="w-12 h-3" />
             </div>
           ))}
         </div>
-      </div>
+      </section>
     );
   }
 
+  if (categories.length === 0) return null;
+
   return (
-    <div className="px-4 py-2">
-      <div className="grid grid-cols-3 gap-3">
+    <section className="px-4 py-4">
+      <h2 className="text-base font-bold text-foreground mb-3">Catégories</h2>
+      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
         {categories.map((category, index) => {
-          const data = categoryData[category] || { icon: "🍽️", color: "from-gray-100 to-gray-50" };
+          const config = categoryData[category] || { icon: "🍽️", gradient: "from-muted to-muted/50" };
           
           return (
             <button
               key={category}
               onClick={() => handleClick(category)}
-              className={`text-center transition-all duration-200 hover:scale-105 active:scale-95 animate-fade-in ${
+              className={`flex flex-col items-center gap-2 flex-shrink-0 transition-all duration-200 hover:scale-105 active:scale-95 animate-fade-in ${
                 !hasAddress ? "opacity-70" : ""
               }`}
-              style={{ animationDelay: `${index * 50}ms` }}
+              style={{ animationDelay: `${index * 40}ms` }}
             >
-              <Card className={`p-4 border-none shadow-soft rounded-3xl bg-gradient-to-br ${data.color}`}>
-                <div className="text-4xl">{data.icon}</div>
-              </Card>
-              <p className="text-xs font-medium mt-2 text-foreground line-clamp-1">
+              <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${config.gradient} flex items-center justify-center shadow-soft`}>
+                <span className="text-2xl">{config.icon}</span>
+              </div>
+              <span className="text-xs font-medium text-foreground/80 max-w-16 text-center line-clamp-1">
                 {category}
-              </p>
+              </span>
             </button>
           );
         })}
       </div>
-    </div>
+    </section>
   );
 };

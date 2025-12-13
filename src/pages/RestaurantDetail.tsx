@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Navbar } from "@/components/Navbar";
 import { BottomNav } from "@/components/BottomNav";
 import { Footer } from "@/components/Footer";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -131,17 +129,17 @@ export default function RestaurantDetail() {
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col pb-20 md:pb-0 bg-background">
-        <div className="relative h-48">
+        <div className="relative h-44">
           <Skeleton className="w-full h-full" />
           <div className="absolute top-4 left-4">
             <Skeleton className="w-10 h-10 rounded-full" />
           </div>
         </div>
-        <div className="relative -mt-16 mx-4">
-          <Skeleton className="h-40 rounded-3xl" />
+        <div className="relative -mt-14 mx-4">
+          <Skeleton className="h-36 rounded-2xl" />
         </div>
-        <div className="px-4 mt-6">
-          <Skeleton className="h-12 rounded-full mb-6" />
+        <div className="px-4 mt-4">
+          <Skeleton className="h-11 rounded-full mb-4" />
           {[...Array(4)].map((_, i) => (
             <MenuItemCardSkeleton key={i} />
           ))}
@@ -156,7 +154,7 @@ export default function RestaurantDetail() {
   return (
     <div className="min-h-screen flex flex-col pb-20 md:pb-0 bg-background">
       {/* Hero Image with Back Button */}
-      <div className="relative h-48 sm:h-56">
+      <div className="relative h-44">
         <LazyImage
           src={restaurant.image_url || "/placeholder.svg"}
           alt={restaurant.name}
@@ -167,96 +165,96 @@ export default function RestaurantDetail() {
         {/* Back Button */}
         <button
           onClick={() => navigate(-1)}
-          className="absolute top-4 left-4 w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center text-foreground hover:bg-background transition-colors"
+          className="absolute top-4 left-4 w-10 h-10 rounded-full bg-background/90 backdrop-blur-sm flex items-center justify-center text-foreground active:scale-95 transition-transform"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
       </div>
 
       {/* Restaurant Info Card - Floating */}
-      <div className="relative -mt-20 mx-4 z-10">
-        <div className="bg-card rounded-3xl shadow-lg p-6">
+      <div className="relative -mt-14 mx-4 z-10">
+        <div className="bg-card rounded-2xl shadow-lg p-4">
           {/* Restaurant Name */}
-          <h1 className="text-xl font-bold text-center mb-4">{restaurant.name}</h1>
+          <h1 className="text-lg font-bold text-center mb-3">{restaurant.name}</h1>
 
           {/* Delivery/Takeaway Toggle */}
-          <div className="flex justify-center mb-4">
-            <div className="inline-flex bg-muted rounded-full p-1">
+          <div className="flex justify-center mb-3">
+            <div className="inline-flex bg-muted rounded-full p-0.5">
               <button
                 onClick={() => setDeliveryMode('delivery')}
                 className={cn(
-                  "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors",
+                  "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all",
                   deliveryMode === 'delivery' 
                     ? "bg-primary text-primary-foreground" 
-                    : "text-muted-foreground hover:text-foreground"
+                    : "text-muted-foreground"
                 )}
               >
-                <Bike className="w-4 h-4" />
+                <Bike className="w-3.5 h-3.5" />
                 Livraison
               </button>
               <button
                 onClick={() => setDeliveryMode('takeaway')}
                 className={cn(
-                  "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors",
+                  "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all",
                   deliveryMode === 'takeaway' 
                     ? "bg-primary text-primary-foreground" 
-                    : "text-muted-foreground hover:text-foreground"
+                    : "text-muted-foreground"
                 )}
               >
-                <RotateCcw className="w-4 h-4" />
+                <RotateCcw className="w-3.5 h-3.5" />
                 À emporter
               </button>
             </div>
           </div>
 
           {/* Stats Row */}
-          <div className="flex justify-center items-center gap-6 text-sm">
+          <div className="flex justify-center items-center gap-6 text-xs">
             <div className="flex flex-col items-center">
-              <Clock className="w-5 h-5 mb-1 text-muted-foreground" />
-              <span className="font-medium">{restaurant.delivery_time || "20-30'"}</span>
+              <Clock className="w-4 h-4 mb-0.5 text-muted-foreground" />
+              <span className="font-semibold">{restaurant.delivery_time || "20-30'"}</span>
             </div>
             <div className="flex flex-col items-center">
-              <ThumbsUp className="w-5 h-5 mb-1 text-muted-foreground" />
-              <span className="font-medium">{restaurant.rating ? `${Math.round(restaurant.rating * 10)}%` : "90%"}</span>
+              <ThumbsUp className="w-4 h-4 mb-0.5 text-muted-foreground" />
+              <span className="font-semibold">{restaurant.rating ? `${Math.round(restaurant.rating * 10)}%` : "—"}</span>
             </div>
             <div className="flex flex-col items-center">
-              <Bike className="w-5 h-5 mb-1 text-muted-foreground" />
-              <span className="font-medium">{restaurant.delivery_fee?.toLocaleString('fr-FR')} FCFA</span>
+              <Bike className="w-4 h-4 mb-0.5 text-muted-foreground" />
+              <span className="font-semibold">{restaurant.delivery_fee?.toLocaleString('fr-FR')} F</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Search Bar */}
-      <div className="px-4 mt-6">
+      <div className="px-4 mt-4">
         <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             type="text"
-            placeholder="Que cherchez-vous ?"
+            placeholder="Rechercher un plat..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-12 pr-4 h-12 rounded-full bg-muted/50 border-0 focus-visible:ring-1"
+            className="pl-10 pr-4 h-11 rounded-full bg-muted/50 border-0 text-sm focus-visible:ring-1"
           />
         </div>
       </div>
 
       {/* Menu Items */}
-      <div className="px-4 py-6 flex-1">
+      <div className="px-4 py-4 flex-1">
         {Object.keys(groupedMenuItems).length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">
-              {searchQuery ? "Aucun plat trouvé" : "Aucun plat disponible pour le moment"}
+          <div className="text-center py-10">
+            <p className="text-sm text-muted-foreground">
+              {searchQuery ? "Aucun plat trouvé" : "Aucun plat disponible"}
             </p>
           </div>
         ) : (
           Object.entries(groupedMenuItems).map(([category, items]) => (
-            <div key={category} className="mb-8">
+            <div key={category} className="mb-6">
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-xl">🍽️</span>
-                <h2 className="text-lg font-bold">{category}</h2>
+                <span className="text-lg">🍽️</span>
+                <h2 className="text-base font-bold">{category}</h2>
               </div>
-              <div className="divide-y divide-border/50">
+              <div className="divide-y divide-border/30">
                 {items.map((item) => (
                   <MenuItemCard
                     key={item.id}
@@ -275,8 +273,8 @@ export default function RestaurantDetail() {
       </div>
 
       {/* Reviews Section */}
-      <div className="px-4 py-6 border-t bg-muted/30">
-        <h2 className="text-xl font-bold mb-4">Avis clients</h2>
+      <div className="px-4 py-4 border-t border-border/30 bg-muted/20">
+        <h2 className="text-base font-bold mb-3">Avis clients</h2>
         <ReviewsList restaurantId={restaurant.id} />
       </div>
 

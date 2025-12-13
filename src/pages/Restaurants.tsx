@@ -107,37 +107,37 @@ export default function Restaurants() {
       <Navbar />
       <main className="flex-1 container mx-auto px-4 py-4">
         {/* Search Section */}
-        <div className="mb-6">
+        <div className="mb-4">
           <AdvancedSearch onSearch={setFilters} initialFilters={initialFilters} />
         </div>
 
         {/* Results Count */}
         {!loading && filteredRestaurants.length > 0 && (
-          <p className="text-sm text-muted-foreground mb-4">
+          <p className="text-xs text-muted-foreground mb-3">
             {filteredRestaurants.length} restaurant{filteredRestaurants.length > 1 ? "s" : ""} trouvé{filteredRestaurants.length > 1 ? "s" : ""}
           </p>
         )}
 
-        {/* Restaurant Grid - 2 columns */}
+        {/* Restaurant Grid */}
         {loading ? (
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             {[...Array(6)].map((_, i) => (
               <RestaurantCardSkeleton key={i} />
             ))}
           </div>
         ) : filteredRestaurants.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-lg text-muted-foreground mb-2">
+            <p className="text-sm text-muted-foreground mb-2">
               {filters.query || filters.category !== "all"
                 ? "Aucun restaurant ne correspond à vos critères"
                 : "Aucun restaurant disponible pour le moment"}
             </p>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               Revenez bientôt, de nouveaux restaurants arrivent !
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             {filteredRestaurants.map((restaurant) => (
               <div key={restaurant.id} className="relative">
                 <div className="absolute top-2 right-2 z-10">
@@ -147,7 +147,6 @@ export default function Restaurants() {
                   imageUrl={restaurant.image_url || "/placeholder.svg"}
                   name={restaurant.name}
                   rating={restaurant.rating ? Math.round(restaurant.rating * 10) : undefined}
-                  reviewCount={Math.floor(Math.random() * 500) + 100}
                   badge={restaurant.city || undefined}
                   onClick={() => navigate(`/restaurant/${restaurant.id}`)}
                 />
