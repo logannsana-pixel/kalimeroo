@@ -13,61 +13,6 @@ import { FloatingCart } from "@/components/FloatingCart";
 import { NetworkStatus } from "@/components/NetworkStatus";
 import { Skeleton } from "@/components/ui/skeleton";
 
-// ici 
-import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-
-export const HostRedirect = ({ children }: { children: React.ReactNode }) => {
-  const [ready, setReady] = useState(false);
-  const location = useLocation();
-  const navigate = useNavigate();
-  const hostname = typeof window !== "undefined" ? window.location.hostname : "";
-
-  useEffect(() => {
-    setReady(true);
-
-    // REDIRECTION ADMIN
-    if (
-      hostname.startsWith("admin-panel.") &&
-      !location.pathname.startsWith("/auth/admin")
-    ) {
-      navigate("/auth/admin", { replace: true });
-      return;
-    }
-
-    // REDIRECTION RESTO
-    if (
-      hostname.startsWith("restaurant.") &&
-      !location.pathname.startsWith("/auth/restaurant")
-    ) {
-      navigate("/auth/restaurant", { replace: true });
-      return;
-    }
-
-    // REDIRECTION LIVREUR (optionnel)
-    if (
-      hostname.startsWith("livreur.") &&
-      !location.pathname.startsWith("/auth/delivery")
-    ) {
-      navigate("/auth/delivery", { replace: true });
-      return;
-    }
-
-    // MAIN CLIENT APP
-    if (
-      hostname.startsWith("app.") &&
-      !location.pathname.startsWith("/auth")
-    ) {
-      navigate("/auth", { replace: true });
-      return;
-    }
-  }, [hostname, location.pathname, navigate]);
-
-  if (!ready) return null;
-
-  return <>{children}</>;
-};
-
 // Lazy loaded pages for code splitting
 const Index = lazy(() => import("./pages/Index"));
 const Restaurants = lazy(() => import("./pages/Restaurants"));
@@ -120,7 +65,6 @@ const App = () => (
               <AlertEngine />
               <FloatingCart />
               <Suspense fallback={<PageLoader />}>
-                <HostRedirect>
                   <Routes>
                     <Route path="/" element={<Index />} />
                     
@@ -202,7 +146,6 @@ const App = () => (
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>
-                </HostRedirect>
               </Suspense>
             </CartProvider>
           </LocationProvider>
