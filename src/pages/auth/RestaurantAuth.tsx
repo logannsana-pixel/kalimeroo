@@ -188,12 +188,12 @@ const RestaurantAuth = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-background to-teal-50 dark:from-background dark:via-background dark:to-background">
       {/* Header */}
-      <div className="container mx-auto px-4 py-6">
+      {/* <div className="container mx-auto px-4 py-6">
         <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors">
           <ArrowLeft className="w-5 h-5" />
           Retour à l'accueil
         </Link>
-      </div>
+      </div> */}
 
       <div className="container mx-auto px-4 pb-12">
         <div className="grid lg:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
