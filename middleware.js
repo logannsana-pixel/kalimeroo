@@ -6,7 +6,7 @@ export function middleware(req) {
 
   // ADMIN PANEL
   if (hostname === "admin-panel.kalimero.shop") {
-    if (!url.pathname.startsWith("/admin")) {
+    if (!url.pathname.startsWith("/auth/admin")) {
       url.pathname = `/auth/admin${url.pathname}`;
       return NextResponse.rewrite(url);
     }
