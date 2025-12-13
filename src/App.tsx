@@ -13,26 +13,6 @@ import { FloatingCart } from "@/components/FloatingCart";
 import { NetworkStatus } from "@/components/NetworkStatus";
 import { Skeleton } from "@/components/ui/skeleton";
 
-// j'ai ajouter ceci pour rediriger mon sous domain vers ceci admin-panel.kalimero.app.
-
-import { Navigate, useLocation } from "react-router-dom";
-
-const HostRedirect = ({ children }: { children: React.ReactNode }) => {
-  const { pathname } = useLocation();
-  const hostname = window.location.hostname;
-
-  // ADMIN PANEL
-  if (
-    hostname.startsWith("admin-panel.") &&
-    !pathname.startsWith("/auth/admin")
-  ) {
-    return <Navigate to="/auth/admin" replace />;
-  }
-
-  return <>{children}</>;
-};
-
-
 
 // Lazy loaded pages for code splitting
 const Index = lazy(() => import("./pages/Index"));
@@ -86,8 +66,6 @@ const App = () => (
               <AlertEngine />
               <FloatingCart />
               <Suspense fallback={<PageLoader />}>
-                {/* et hostR */}
-                <HostRedirect>
                   <Routes>
                     <Route path="/" element={<Index />} />
                     
@@ -169,7 +147,6 @@ const App = () => (
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>
-                <HostRedirect>
               </Suspense>
             </CartProvider>
           </LocationProvider>
