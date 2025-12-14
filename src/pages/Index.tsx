@@ -64,13 +64,13 @@ const Index = () => {
           <HomeHeader />
 
           {/* SEARCH */}
-          <div className="relative">
+          {/* <div className="relative">
             <input
               type="text"
               placeholder="Rechercher un plat ou un restaurant"
               className="w-full h-12 rounded-full bg-muted px-5 text-sm outline-none focus:ring-2 focus:ring-primary"
             />
-          </div>
+          </div> */}
 
           {/* PROMO BANNER */}
           {/* <Card className="border-none rounded-2xl overflow-hidden bg-primary text-primary-foreground">
