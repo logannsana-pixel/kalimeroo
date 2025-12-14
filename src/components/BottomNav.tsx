@@ -43,17 +43,10 @@ export const BottomNav = () => {
 
     return (
       <Link to={to} className={`flex flex-col items-center justify-center flex-1 relative ${NAV_SIZE.gap}`}>
-        {/* <div
+        <div
           className={`relative flex items-center justify-center rounded-full transition-all duration-300
             ${NAV_SIZE.iconWrap}
-            ${active ? "bg-primary text-primary-foreground shadow-glow scale-105" : "text-muted-foreground"}
-          `}
-        > */}
-
-        <div
-          className={`relative flex items-center justify-center rounded-full
-            ${NAV_SIZE.iconWrap}
-            ${active ? "p-1 bg-primary shadow-glow scale-105" : ""}
+            ${active ? "p-1 bg-primary text-primary-foreground shadow-glow scale-105" : "text-muted-foreground"}
           `}
         >
           <Icon className={NAV_SIZE.icon} strokeWidth={active ? 2.5 : 2} />
