@@ -8,11 +8,11 @@ import { useCart } from "@/hooks/useCart";
    → change tout le sizing ici
 ================================ */
 const NAV_SIZE = {
-  bar: "h-14 px-3",
-  iconWrap: "h-9 w-9",
-  icon: "h-4 w-4",
+  bar: "h-15 px-4",
+  iconWrap: "h-8 w-8",
+  icon: "h-3 w-3",
   gap: "gap-0.5",
-  label: "text-[9px]",
+  label: "text-[8px]",
 };
 
 export const BottomNav = () => {
