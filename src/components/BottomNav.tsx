@@ -46,7 +46,7 @@ export const BottomNav = () => {
         <div
           className={`relative flex items-center justify-center rounded-full transition-all duration-300
             ${NAV_SIZE.iconWrap}
-            ${active ? "p-5 bg-primary text-primary-foreground shadow-glow scale-105" : "text-muted-foreground"}
+            ${active ? "bg-primary text-primary-foreground shadow-glow scale-105" : "text-muted-foreground"}
           `}
         >
           <Icon className={NAV_SIZE.icon} strokeWidth={active ? 2.5 : 2} />
