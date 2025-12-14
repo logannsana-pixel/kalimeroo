@@ -62,6 +62,216 @@ export type Database = {
         }
         Relationships: []
       }
+      affiliate_fraud_logs: {
+        Row: {
+          admin_notes: string | null
+          affiliate_id: string | null
+          created_at: string | null
+          details: Json | null
+          device_fingerprint: string | null
+          event_type: string
+          id: string
+          ip_address: string | null
+          referral_id: string | null
+          resolved: boolean | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string | null
+          user_agent: string | null
+          withdrawal_id: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          affiliate_id?: string | null
+          created_at?: string | null
+          details?: Json | null
+          device_fingerprint?: string | null
+          event_type: string
+          id?: string
+          ip_address?: string | null
+          referral_id?: string | null
+          resolved?: boolean | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string | null
+          user_agent?: string | null
+          withdrawal_id?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          affiliate_id?: string | null
+          created_at?: string | null
+          details?: Json | null
+          device_fingerprint?: string | null
+          event_type?: string
+          id?: string
+          ip_address?: string | null
+          referral_id?: string | null
+          resolved?: boolean | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string | null
+          user_agent?: string | null
+          withdrawal_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_fraud_logs_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "affiliates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "affiliate_fraud_logs_referral_id_fkey"
+            columns: ["referral_id"]
+            isOneToOne: false
+            referencedRelation: "referrals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "affiliate_fraud_logs_withdrawal_id_fkey"
+            columns: ["withdrawal_id"]
+            isOneToOne: false
+            referencedRelation: "affiliate_withdrawals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      affiliate_settings: {
+        Row: {
+          description: string | null
+          id: string
+          setting_key: string
+          setting_value: Json
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          description?: string | null
+          id?: string
+          setting_key: string
+          setting_value: Json
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          description?: string | null
+          id?: string
+          setting_key?: string
+          setting_value?: Json
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      affiliate_withdrawals: {
+        Row: {
+          affiliate_id: string
+          amount: number
+          created_at: string | null
+          fraud_check_notes: string | null
+          fraud_check_passed: boolean | null
+          id: string
+          mobile_money_number: string | null
+          payment_method: string | null
+          processed_at: string | null
+          processed_by: string | null
+          rejection_reason: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          affiliate_id: string
+          amount: number
+          created_at?: string | null
+          fraud_check_notes?: string | null
+          fraud_check_passed?: boolean | null
+          id?: string
+          mobile_money_number?: string | null
+          payment_method?: string | null
+          processed_at?: string | null
+          processed_by?: string | null
+          rejection_reason?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          affiliate_id?: string
+          amount?: number
+          created_at?: string | null
+          fraud_check_notes?: string | null
+          fraud_check_passed?: boolean | null
+          id?: string
+          mobile_money_number?: string | null
+          payment_method?: string | null
+          processed_at?: string | null
+          processed_by?: string | null
+          rejection_reason?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_withdrawals_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "affiliates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      affiliates: {
+        Row: {
+          available_balance: number | null
+          ban_reason: string | null
+          created_at: string | null
+          eligible_referrals: number | null
+          id: string
+          is_eligible: boolean | null
+          pending_balance: number | null
+          referral_code: string
+          referral_link: string | null
+          status: string | null
+          total_earnings: number | null
+          total_referrals: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          available_balance?: number | null
+          ban_reason?: string | null
+          created_at?: string | null
+          eligible_referrals?: number | null
+          id?: string
+          is_eligible?: boolean | null
+          pending_balance?: number | null
+          referral_code: string
+          referral_link?: string | null
+          status?: string | null
+          total_earnings?: number | null
+          total_referrals?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          available_balance?: number | null
+          ban_reason?: string | null
+          created_at?: string | null
+          eligible_referrals?: number | null
+          id?: string
+          is_eligible?: boolean | null
+          pending_balance?: number | null
+          referral_code?: string
+          referral_link?: string | null
+          status?: string | null
+          total_earnings?: number | null
+          total_referrals?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       bundles: {
         Row: {
           category: string
@@ -863,6 +1073,71 @@ export type Database = {
           },
         ]
       }
+      referrals: {
+        Row: {
+          city: string | null
+          country: string | null
+          created_at: string | null
+          device_fingerprint: string | null
+          fraud_reason: string | null
+          id: string
+          ip_address: string | null
+          is_suspicious: boolean | null
+          orders_count: number | null
+          referred_user_id: string
+          referrer_id: string
+          reward_amount: number | null
+          rewarded_at: string | null
+          status: string | null
+          updated_at: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          device_fingerprint?: string | null
+          fraud_reason?: string | null
+          id?: string
+          ip_address?: string | null
+          is_suspicious?: boolean | null
+          orders_count?: number | null
+          referred_user_id: string
+          referrer_id: string
+          reward_amount?: number | null
+          rewarded_at?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          device_fingerprint?: string | null
+          fraud_reason?: string | null
+          id?: string
+          ip_address?: string | null
+          is_suspicious?: boolean | null
+          orders_count?: number | null
+          referred_user_id?: string
+          referrer_id?: string
+          reward_amount?: number | null
+          rewarded_at?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referrals_referrer_id_fkey"
+            columns: ["referrer_id"]
+            isOneToOne: false
+            referencedRelation: "affiliates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       restaurants: {
         Row: {
           address: string
@@ -1295,6 +1570,7 @@ export type Database = {
         Args: { restaurant_owner_id: string }
         Returns: number
       }
+      generate_referral_code: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

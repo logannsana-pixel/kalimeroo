@@ -27,6 +27,7 @@ const DeliveryDashboard = lazy(() => import("./pages/DeliveryDashboard"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const EnableAlerts = lazy(() => import("./pages/EnableAlerts"));
 const AlertPlayground = lazy(() => import("./pages/AlertPlayground"));
+const Affiliate = lazy(() => import("./pages/Affiliate"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Auth pages
@@ -79,6 +80,14 @@ const App = () => (
                     <Route path="/restaurant/:id" element={<RestaurantDetail />} />
                     <Route path="/enable-alerts" element={<EnableAlerts />} />
                     <Route path="/dev/alerts" element={<AlertPlayground />} />
+                    <Route 
+                      path="/affiliate" 
+                      element={
+                        <ProtectedRoute allowedRoles={["customer"]}>
+                          <Affiliate />
+                        </ProtectedRoute>
+                      } 
+                    />
                     <Route 
                       path="/cart" 
                       element={
