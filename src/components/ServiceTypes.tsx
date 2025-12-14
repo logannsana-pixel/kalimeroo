@@ -37,48 +37,50 @@ export const ServiceTypes = () => {
 
   const handleClick = (service: ServiceType) => {
     if (!service.available) return;
-    
+
     if (!hasAddress) {
       openModal();
       return;
     }
-    
+
     if (service.id === "restaurants") {
       navigate("/restaurants");
     }
   };
 
   return (
-    <section className="px-4 py-4">
-      <div className="flex gap-3 overflow-x-auto scrollbar-hide">
-        {serviceTypes.map((service, index) => (
+    <section className="px-4 py-2">
+      <div className="grid grid-cols-3 gap-4">
+        {serviceTypes.map((service) => (
           <button
             key={service.id}
             onClick={() => handleClick(service)}
-            className={`relative flex-shrink-0 transition-all duration-200 animate-fade-in ${
-              service.available 
-                ? "hover:scale-105 active:scale-95" 
-                : "opacity-50 cursor-not-allowed"
-            }`}
-            style={{ animationDelay: `${index * 80}ms` }}
             disabled={!service.available}
+            className={`
+            relative
+            h-28
+            rounded-2xl
+            flex
+            flex-col
+            items-center
+            justify-center
+            gap-2
+            transition
+            ${service.available ? "bg-[#F7EFE6] active:scale-95" : "bg-[#F7EFE6] opacity-60 cursor-not-allowed"}
+          `}
           >
-            <div className={`flex items-center gap-2.5 px-4 py-3 rounded-full ${
-              service.available 
-                ? "bg-primary text-primary-foreground shadow-soft" 
-                : "bg-muted text-muted-foreground"
-            }`}>
-              <span className="text-xl">{service.icon}</span>
-              <span className="text-sm font-semibold whitespace-nowrap">{service.name}</span>
-              {!service.available && (
-                <Badge 
-                  variant="secondary" 
-                  className="text-[9px] px-1.5 py-0 bg-background/50 text-muted-foreground"
-                >
-                  Bientôt
-                </Badge>
-              )}
-            </div>
+            {/* Badge Bientôt */}
+            {!service.available && (
+              <span className="absolute top-2 right-2 text-[10px] font-semibold bg-white px-2 py-0.5 rounded-full">
+                Bientôt
+              </span>
+            )}
+
+            {/* Emoji */}
+            <span className="text-3xl">{service.icon}</span>
+
+            {/* Label */}
+            <span className="text-sm font-semibold text-center">{service.name}</span>
           </button>
         ))}
       </div>
