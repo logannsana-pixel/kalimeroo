@@ -73,7 +73,7 @@ const Index = () => {
           </div>
 
           {/* PROMO BANNER */}
-          <Card className="border-none rounded-2xl overflow-hidden bg-primary text-primary-foreground">
+          {/* <Card className="border-none rounded-2xl overflow-hidden bg-primary text-primary-foreground">
             <CardContent className="p-4 flex items-center justify-between">
               <div className="space-y-1">
                 <p className="text-xs opacity-90">Jusqu’à -35%</p>
@@ -84,7 +84,7 @@ const Index = () => {
               </div>
               <img src="/delivery-illustration.png" alt="" className="h-20 object-contain" />
             </CardContent>
-          </Card>
+          </Card> */}
         </div>
 
         {/* SERVICES */}
