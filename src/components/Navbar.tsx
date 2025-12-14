@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { ShoppingCart, User, Utensils, LayoutDashboard, Home, Search, MapPin, Menu, Bell, Settings } from "lucide-react";
+import { ShoppingCart, User, Utensils, LayoutDashboard, Home, Search, MapPin, Menu, Bell, Settings, Gift } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
@@ -17,6 +17,11 @@ import {
   SheetContent,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export const Navbar = () => {
   const navigate = useNavigate();
@@ -108,6 +113,26 @@ export const Navbar = () => {
         <div className="flex items-center gap-2">
           {user ? (
             <>
+              {/* Affiliate Gift Icon - Only for customers */}
+              {userRole === "customer" && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Link to="/affiliate">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-10 w-10 rounded-full hover:bg-primary/10 relative"
+                      >
+                        <Gift className="h-5 w-5 text-primary" />
+                      </Button>
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Programme de parrainage</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
+
               {/* Notifications */}
               <NotificationBell />
 

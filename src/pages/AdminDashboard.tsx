@@ -18,6 +18,7 @@ import { AdminMarketingTab } from "@/components/admin/AdminMarketingTab";
 import { AdminSettingsTab } from "@/components/admin/AdminSettingsTab";
 import { AdminAdminsTab } from "@/components/admin/AdminAdminsTab";
 import { AdminLiveMapTab } from "@/components/admin/AdminLiveMapTab";
+import { AdminAffiliateTab } from "@/components/admin/AdminAffiliateTab";
 
 const tabTitles: Record<AdminTab, string> = {
   overview: 'Dashboard',
@@ -32,6 +33,7 @@ const tabTitles: Record<AdminTab, string> = {
   settings: 'Paramètres',
   admins: 'Équipe Admin',
   'live-map': 'Carte Live',
+  affiliate: 'Affiliation',
 };
 
 export default function AdminDashboard() {
@@ -122,6 +124,8 @@ export default function AdminDashboard() {
         return <AdminAdminsTab />;
       case 'live-map':
         return <AdminLiveMapTab />;
+      case 'affiliate':
+        return <AdminAffiliateTab />;
       default:
         return <AdminOverviewTab stats={stats} recentOrders={recentOrders} loading={loading} />;
     }
