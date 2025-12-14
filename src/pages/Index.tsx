@@ -98,9 +98,9 @@ const Index = () => {
         </div>
 
         {/* PICKS FOR YOU */}
-        <div className="mt-6 px-4">
+        {/* <div className="mt-6 px-4">
           <PopularDishes />
-        </div>
+        </div> */}
 
         {/* ORDER AGAIN */}
         {hasAddress && (
