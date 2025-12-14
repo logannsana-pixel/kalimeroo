@@ -46,14 +46,14 @@ export const HomeHeader = () => {
       </div>
 
       {/* Search Bar */}
-      <button
+      {/* <button
         onClick={() => navigate("/restaurants")}
         className="w-full flex items-center gap-3 bg-muted px-4 py-3 rounded-2xl text-muted-foreground"
       >
         <Search className="h-5 w-5" />
         <span className="flex-1 text-left">Rechercher un restaurant ou un plat</span>
         <SlidersHorizontal className="h-5 w-5 opacity-60" />
-      </button>
+      </button> */}
     </header>
   );
 };
