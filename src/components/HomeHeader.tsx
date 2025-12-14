@@ -1,4 +1,4 @@
-import { Search, Gift, MapPin, ChevronDown } from "lucide-react";
+import { Search, Gift, MapPin, ChevronDown, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "@/contexts/LocationContext";
 import { useNavigate } from "react-router-dom";
@@ -11,51 +11,48 @@ export const HomeHeader = () => {
   const { user } = useAuth();
 
   return (
-    <header className="bg-primary text-primary-foreground">
-      {/* Top bar */}
-      <div className="flex items-center justify-between px-4 py-3">
-        {/* Logo */}
-        <div className="flex items-center gap-2">
-          <div className="flex items-center justify-center w-10 h-10 bg-white/20 rounded-2xl">
-            <span className="text-white font-bold text-xl">K</span>
-          </div>
-          <span className="font-bold text-xl tracking-tight text-white">
-            KALIMERO
-          </span>
-        </div>
+    <header className="bg-background text-foreground px-4 pt-4">
+      {/* Top Row */}
+      <div className="flex items-center justify-between mb-4">
+        {/* Location */}
+        <button
+          onClick={openModal}
+          className="flex items-center gap-2 bg-muted px-3 py-2 rounded-full text-sm font-medium hover:bg-muted/80"
+        >
+          <span className="w-2 h-2 rounded-full bg-primary" />
+          {city || "Choisir une ville"}
+          <ChevronDown className="h-4 w-4 opacity-60" />
+        </button>
 
-        {/* Right icons */}
+        {/* Right Icons */}
         <div className="flex items-center gap-2">
           <Button
-            variant="ghost"
             size="icon"
-            className="h-10 w-10 rounded-full text-white hover:bg-white/10"
+            variant="ghost"
+            className="rounded-full bg-muted hover:bg-muted/80"
             onClick={() => navigate("/restaurants")}
           >
             <Search className="h-5 w-5" />
           </Button>
+
           {user ? (
             <NotificationBell />
           ) : (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-10 w-10 rounded-full text-white hover:bg-white/10"
-            >
+            <Button size="icon" variant="ghost" className="rounded-full bg-muted hover:bg-muted/80">
               <Gift className="h-5 w-5" />
             </Button>
           )}
         </div>
       </div>
 
-      {/* Location selector */}
+      {/* Search Bar */}
       <button
-        onClick={openModal}
-        className="flex items-center justify-center gap-2 w-full py-3 hover:bg-white/10 transition-colors"
+        onClick={() => navigate("/restaurants")}
+        className="w-full flex items-center gap-3 bg-muted px-4 py-3 rounded-2xl text-muted-foreground"
       >
-        <MapPin className="h-4 w-4" />
-        <span className="font-medium">{city || "Choisir une ville"}</span>
-        <ChevronDown className="h-4 w-4" />
+        <Search className="h-5 w-5" />
+        <span className="flex-1 text-left">Rechercher un restaurant ou un plat</span>
+        <SlidersHorizontal className="h-5 w-5 opacity-60" />
       </button>
     </header>
   );
