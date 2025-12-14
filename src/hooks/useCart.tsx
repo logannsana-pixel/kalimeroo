@@ -64,7 +64,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     try {
       const { data, error } = await supabase
         .from("cart_items")
-        .select(`
+        .select(
+          `
           id,
           quantity,
           menu_item_id,
@@ -75,7 +76,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
             image_url,
             restaurant_id
           )
-        `)
+        `,
+        )
         .eq("user_id", user.id);
 
       if (error) throw error;
@@ -115,9 +117,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       }
 
       // Check if item already exists in cart (without options)
-      const existingItem = cartItems.find(
-        (item) => item.menu_item_id === menuItemId
-      );
+      const existingItem = cartItems.find((item) => item.menu_item_id === menuItemId);
 
       if (existingItem) {
         await updateQuantity(existingItem.id, existingItem.quantity + quantity);
@@ -145,10 +145,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     }
 
     try {
-      const { error } = await supabase
-        .from("cart_items")
-        .update({ quantity })
-        .eq("id", cartItemId);
+      const { error } = await supabase.from("cart_items").update({ quantity }).eq("id", cartItemId);
 
       if (error) throw error;
       await fetchCart();
@@ -160,10 +157,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const removeFromCart = async (cartItemId: string) => {
     try {
-      const { error } = await supabase
-        .from("cart_items")
-        .delete()
-        .eq("id", cartItemId);
+      const { error } = await supabase.from("cart_items").delete().eq("id", cartItemId);
 
       if (error) throw error;
       await fetchCart();
@@ -178,10 +172,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     if (!user) return;
 
     try {
-      const { error } = await supabase
-        .from("cart_items")
-        .delete()
-        .eq("user_id", user.id);
+      const { error } = await supabase.from("cart_items").delete().eq("user_id", user.id);
 
       if (error) throw error;
       setCartItems([]);
@@ -194,7 +185,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const getCartTotal = () => {
     return cartItems.reduce(
       (total, item) => total + Number(item.menu_items.price) * item.quantity,
-      0
+      // 0
     );
   };
 
