@@ -3,6 +3,18 @@ import { Home, User, ClipboardList, ShoppingCart } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
 
+/* ===============================
+   🔧 SIZE CONFIG (future-proof)
+   → change tout le sizing ici
+================================ */
+const NAV_SIZE = {
+  bar: "h-14 px-3",
+  iconWrap: "h-9 w-9",
+  icon: "h-4 w-4",
+  gap: "gap-0.5",
+  label: "text-[9px]",
+};
+
 export const BottomNav = () => {
   const location = useLocation();
   const { user, userRole } = useAuth();
@@ -28,13 +40,14 @@ export const BottomNav = () => {
     const active = isActive(to);
 
     return (
-      <Link to={to} className="flex flex-col items-center justify-center flex-1 gap-1 relative">
+      <Link to={to} className={`flex flex-col items-center justify-center flex-1 relative ${NAV_SIZE.gap}`}>
         <div
-          className={`relative flex items-center justify-center h-10 w-10 rounded-full transition-all duration-300 ${
-            active ? "bg-primary text-primary-foreground shadow-glow scale-105" : "text-muted-foreground"
-          }`}
+          className={`relative flex items-center justify-center rounded-full transition-all duration-300
+            ${NAV_SIZE.iconWrap}
+            ${active ? "bg-primary text-primary-foreground shadow-glow scale-105" : "text-muted-foreground"}
+          `}
         >
-          <Icon className="h-5 w-5" strokeWidth={active ? 2.5 : 2} />
+          <Icon className={NAV_SIZE.icon} strokeWidth={active ? 2.5 : 2} />
 
           {badge && badge > 0 && (
             <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center font-bold">
@@ -44,7 +57,9 @@ export const BottomNav = () => {
         </div>
 
         <span
-          className={`text-[10px] transition-all ${active ? "font-semibold text-primary" : "text-muted-foreground"}`}
+          className={`${NAV_SIZE.label} transition-all ${
+            active ? "font-semibold text-primary" : "font-medium text-muted-foreground"
+          }`}
         >
           {label}
         </span>
@@ -55,16 +70,23 @@ export const BottomNav = () => {
   const NavContainer = ({ children }: { children: React.ReactNode }) => (
     <nav className="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 safe-area-bottom">
       <div
-        className="flex items-center justify-between gap-2 px-4 h-16 min-w-[280px] max-w-[360px]
-        rounded-full bg-card/95 backdrop-blur-xl border border-border/40
-        shadow-float"
+        className={`flex items-center justify-between gap-2
+          ${NAV_SIZE.bar}
+          min-w-[260px] max-w-[340px]
+          rounded-full
+          bg-card/95 backdrop-blur-xl
+          border border-border/40
+          shadow-float
+        `}
       >
         {children}
       </div>
     </nav>
   );
 
-  // 👤 Non connecté
+  /* ===============================
+     👤 Non connecté
+  ================================ */
   if (!user) {
     return (
       <NavContainer>
@@ -75,7 +97,9 @@ export const BottomNav = () => {
     );
   }
 
-  // 🧑 Client
+  /* ===============================
+     🧑 Client
+  ================================ */
   if (userRole === "customer") {
     return (
       <NavContainer>
@@ -87,7 +111,9 @@ export const BottomNav = () => {
     );
   }
 
-  // 🏪 Resto / 🚴 Livreur / 👑 Admin
+  /* ===============================
+     🏪 Resto / 🚴 Livreur / 👑 Admin
+  ================================ */
   return (
     <NavContainer>
       <NavItem to="/" icon={Home} label="Accueil" />
