@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 import { toast } from "sonner";
 
-interface CartItem {
+export interface CartItem {
   id: string;
   quantity: number;
   menu_item_id: string;
@@ -17,15 +17,15 @@ interface CartItem {
   };
 }
 
-interface CartContextType {
+export interface CartContextType {
   cartItems: CartItem[];
   loading: boolean;
   addToCart: (menuItemId: string, quantity?: number, selectedOptions?: any[]) => Promise<void>;
   updateQuantity: (cartItemId: string, quantity: number) => Promise<void>;
   removeFromCart: (cartItemId: string) => Promise<void>;
   clearCart: () => Promise<void>;
-  getCartTotal: () => number;
-  getCartCount: () => number;
+  getCartTotal: () => number | undefined;
+  getCartCount: () => number | undefined;
   refreshCart: () => Promise<void>;
 }
 
@@ -36,16 +36,14 @@ const CartContext = createContext<CartContextType>({
   updateQuantity: async () => {},
   removeFromCart: async () => {},
   clearCart: async () => {},
-  getCartTotal: () => 0,
-  getCartCount: () => 0,
+  getCartTotal: () => undefined,
+  getCartCount: () => undefined,
   refreshCart: async () => {},
 });
 
 export const useCart = () => {
   const context = useContext(CartContext);
-  if (!context) {
-    throw new Error("useCart must be used within CartProvider");
-  }
+  if (!context) throw new Error("useCart must be used within CartProvider");
   return context;
 };
 
@@ -54,6 +52,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(false);
 
+  /** Fetch cart from Supabase */
   const fetchCart = async () => {
     if (!user) {
       setCartItems([]);
@@ -69,6 +68,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
           id,
           quantity,
           menu_item_id,
+          selected_options,
           menu_items (
             id,
             name,
@@ -82,8 +82,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
       if (error) throw error;
       setCartItems(data || []);
-    } catch (error) {
-      console.error("Error fetching cart:", error);
+    } catch (err) {
+      console.error("Error fetching cart:", err);
       toast.error("Erreur lors du chargement du panier");
     } finally {
       setLoading(false);
@@ -94,6 +94,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     fetchCart();
   }, [user]);
 
+  /** Add item to cart */
   const addToCart = async (menuItemId: string, quantity: number = 1, selectedOptions: any[] = []) => {
     if (!user) {
       toast.error("Veuillez vous connecter pour ajouter au panier");
@@ -101,7 +102,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     }
 
     try {
-      // Always add as new item if there are selected options
+      // Always insert new if selected options exist
       if (selectedOptions.length > 0) {
         const { error } = await supabase.from("cart_items").insert({
           user_id: user.id,
@@ -109,16 +110,15 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
           quantity,
           selected_options: selectedOptions,
         });
-
         if (error) throw error;
+
         await fetchCart();
         toast.success("Ajouté au panier");
         return;
       }
 
-      // Check if item already exists in cart (without options)
-      const existingItem = cartItems.find((item) => item.menu_item_id === menuItemId);
-
+      // Check if item already exists without options
+      const existingItem = cartItems.find((item) => item.menu_item_id === menuItemId && !item.selected_options?.length);
       if (existingItem) {
         await updateQuantity(existingItem.id, existingItem.quantity + quantity);
       } else {
@@ -127,17 +127,18 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
           menu_item_id: menuItemId,
           quantity,
         });
-
         if (error) throw error;
+
         await fetchCart();
         toast.success("Ajouté au panier");
       }
-    } catch (error) {
-      console.error("Error adding to cart:", error);
+    } catch (err) {
+      console.error("Error adding to cart:", err);
       toast.error("Erreur lors de l'ajout au panier");
     }
   };
 
+  /** Update quantity of a cart item */
   const updateQuantity = async (cartItemId: string, quantity: number) => {
     if (quantity <= 0) {
       await removeFromCart(cartItemId);
@@ -149,50 +150,54 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
       if (error) throw error;
       await fetchCart();
-    } catch (error) {
-      console.error("Error updating quantity:", error);
+    } catch (err) {
+      console.error("Error updating quantity:", err);
       toast.error("Erreur lors de la mise à jour");
     }
   };
 
+  /** Remove item from cart */
   const removeFromCart = async (cartItemId: string) => {
     try {
       const { error } = await supabase.from("cart_items").delete().eq("id", cartItemId);
-
       if (error) throw error;
+
       await fetchCart();
       toast.success("Retiré du panier");
-    } catch (error) {
-      console.error("Error removing from cart:", error);
+    } catch (err) {
+      console.error("Error removing from cart:", err);
       toast.error("Erreur lors de la suppression");
     }
   };
 
+  /** Clear entire cart */
   const clearCart = async () => {
     if (!user) return;
 
     try {
       const { error } = await supabase.from("cart_items").delete().eq("user_id", user.id);
-
       if (error) throw error;
+
       setCartItems([]);
-    } catch (error) {
-      console.error("Error clearing cart:", error);
+    } catch (err) {
+      console.error("Error clearing cart:", err);
       toast.error("Erreur lors du vidage du panier");
     }
   };
 
+  /** Total price of cart or undefined if empty */
   const getCartTotal = () => {
-    return cartItems.reduce(
-      (total, item) => total + Number(item.menu_items.price) * item.quantity,
-      // 0
-    );
+    if (!cartItems.length) return undefined;
+    return cartItems.reduce((total, item) => total + Number(item.menu_items.price) * item.quantity, 0);
   };
 
+  /** Total quantity of items or undefined if empty */
   const getCartCount = () => {
+    if (!cartItems.length) return undefined;
     return cartItems.reduce((count, item) => count + item.quantity, 0);
   };
 
+  /** Refresh cart data */
   const refreshCart = async () => {
     await fetchCart();
   };
