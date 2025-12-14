@@ -14,63 +14,85 @@ export const BottomNav = () => {
     return location.pathname.startsWith(path);
   };
 
-  const NavItem = ({ to, icon: Icon, label, badge }: { to: string; icon: React.ElementType; label: string; badge?: number }) => {
-    const active = to === "/" ? location.pathname === "/" : isActive(to);
+  const NavItem = ({
+    to,
+    icon: Icon,
+    label,
+    badge,
+  }: {
+    to: string;
+    icon: React.ElementType;
+    label: string;
+    badge?: number;
+  }) => {
+    const active = isActive(to);
+
     return (
-      <Link
-        to={to}
-        className={`flex flex-col items-center justify-center flex-1 h-full gap-0.5 transition-all duration-200 relative ${
-          active ? "text-primary" : "text-muted-foreground"
-        }`}
-      >
-        <div className={`relative p-1.5 rounded-xl transition-all duration-200 ${active ? "bg-primary/10" : ""}`}>
+      <Link to={to} className="flex flex-col items-center justify-center flex-1 gap-1 relative">
+        <div
+          className={`relative flex items-center justify-center h-10 w-10 rounded-full transition-all duration-300 ${
+            active ? "bg-primary text-primary-foreground shadow-glow scale-105" : "text-muted-foreground"
+          }`}
+        >
           <Icon className="h-5 w-5" strokeWidth={active ? 2.5 : 2} />
+
           {badge && badge > 0 && (
             <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center font-bold">
               {badge > 9 ? "9+" : badge}
             </span>
           )}
         </div>
-        <span className={`text-[10px] ${active ? "font-semibold" : "font-medium"}`}>{label}</span>
+
+        <span
+          className={`text-[10px] transition-all ${active ? "font-semibold text-primary" : "text-muted-foreground"}`}
+        >
+          {label}
+        </span>
       </Link>
     );
   };
 
-  // Non-authenticated user nav
-  if (!user) {
-    return (
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-lg border-t border-border/30 z-50 safe-area-bottom">
-        <div className="flex items-center justify-around h-16">
-          <NavItem to="/" icon={Home} label="Accueil" />
-          <NavItem to="/cart" icon={ShoppingCart} label="Panier" badge={cartCount} />
-          <NavItem to="/auth" icon={User} label="Connexion" />
-        </div>
-      </nav>
-    );
-  }
-
-  // Customer nav
-  if (userRole === "customer") {
-    return (
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-lg border-t border-border/30 z-50 safe-area-bottom">
-        <div className="flex items-center justify-around h-16">
-          <NavItem to="/" icon={Home} label="Accueil" />
-          <NavItem to="/cart" icon={ShoppingCart} label="Panier" badge={cartCount} />
-          <NavItem to="/orders" icon={ClipboardList} label="Commandes" />
-          <NavItem to="/profile" icon={User} label="Profil" />
-        </div>
-      </nav>
-    );
-  }
-
-  // Restaurant owner / Delivery / Admin nav - no cart
-  return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-lg border-t border-border/30 z-50 safe-area-bottom">
-      <div className="flex items-center justify-around h-16">
-        <NavItem to="/" icon={Home} label="Accueil" />
-        <NavItem to="/orders" icon={ClipboardList} label="Commandes" />
-        <NavItem to="/profile" icon={User} label="Profil" />
+  const NavContainer = ({ children }: { children: React.ReactNode }) => (
+    <nav className="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 safe-area-bottom">
+      <div
+        className="flex items-center justify-between gap-2 px-4 h-16 min-w-[280px] max-w-[360px]
+        rounded-full bg-card/95 backdrop-blur-xl border border-border/40
+        shadow-float"
+      >
+        {children}
       </div>
     </nav>
+  );
+
+  // 👤 Non connecté
+  if (!user) {
+    return (
+      <NavContainer>
+        <NavItem to="/" icon={Home} label="Accueil" />
+        <NavItem to="/cart" icon={ShoppingCart} label="Panier" badge={cartCount} />
+        <NavItem to="/auth" icon={User} label="Connexion" />
+      </NavContainer>
+    );
+  }
+
+  // 🧑 Client
+  if (userRole === "customer") {
+    return (
+      <NavContainer>
+        <NavItem to="/" icon={Home} label="Accueil" />
+        <NavItem to="/cart" icon={ShoppingCart} label="Panier" badge={cartCount} />
+        <NavItem to="/orders" icon={ClipboardList} label="Commandes" />
+        <NavItem to="/profile" icon={User} label="Profil" />
+      </NavContainer>
+    );
+  }
+
+  // 🏪 Resto / 🚴 Livreur / 👑 Admin
+  return (
+    <NavContainer>
+      <NavItem to="/" icon={Home} label="Accueil" />
+      <NavItem to="/orders" icon={ClipboardList} label="Commandes" />
+      <NavItem to="/profile" icon={User} label="Profil" />
+    </NavContainer>
   );
 };
