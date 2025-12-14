@@ -18,7 +18,7 @@ const serviceTypes: ServiceType[] = [
   },
   {
     id: "supermarkets",
-    name: "Supermarchés",
+    name: "Grocery",
     icon: "🛒",
     available: false,
   },
