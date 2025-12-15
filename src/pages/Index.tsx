@@ -6,14 +6,17 @@ import { HomeHeader } from "@/components/HomeHeader";
 import { ServiceTypes } from "@/components/ServiceTypes";
 import { FoodCategories } from "@/components/FoodCategories";
 import { OrderAgainSection } from "@/components/OrderAgainSection";
+import { IntentionFilters } from "@/components/IntentionFilters";
+import { PersonalizedCTA } from "@/components/PersonalizedCTA";
+import { FavoritesSection } from "@/components/FavoritesSection";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { Star, Clock, ArrowRight, Truck } from "lucide-react";
 import { useLocation } from "@/contexts/LocationContext";
 import { FavoritesButton } from "@/components/FavoritesButton";
 import { LazyImage } from "@/components/LazyImage";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Restaurant {
   id: string;
@@ -29,10 +32,12 @@ interface Restaurant {
 const Index = () => {
   const navigate = useNavigate();
   const { district, city, openModal } = useLocation();
+  const { user } = useAuth();
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
 
   const hasAddress = district && city;
+  const isConnected = !!user;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -63,22 +68,41 @@ const Index = () => {
           <HomeHeader />
         </div>
 
-        {/* Services */}
+        {/* Services (Quick Actions) */}
         <div className="mt-6">
           <ServiceTypes />
         </div>
+
+        {/* CTA Login for non-connected users */}
+        {!isConnected && (
+          <section className="px-4 mt-4">
+            <PersonalizedCTA />
+          </section>
+        )}
+
+        {/* Favorites Section for connected users */}
+        {isConnected && (
+          <section className="mt-4">
+            <FavoritesSection />
+          </section>
+        )}
+
+        {/* Order Again for connected users with address */}
+        {isConnected && hasAddress && (
+          <section className="px-4 mt-4">
+            <OrderAgainSection />
+          </section>
+        )}
 
         {/* Categories */}
         <div className="mt-4">
           <FoodCategories />
         </div>
 
-        {/* Order Again */}
-        {hasAddress && (
-          <section className="px-4 mt-4">
-            <OrderAgainSection />
-          </section>
-        )}
+        {/* Intention Filters */}
+        <div className="mt-4">
+          <IntentionFilters />
+        </div>
 
         {/* Restaurants */}
         <section className="px-4 mt-6 space-y-4">
