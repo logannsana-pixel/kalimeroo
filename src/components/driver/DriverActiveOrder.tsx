@@ -206,9 +206,9 @@ export function DriverActiveOrder({
         </Card>
 
         {/* Order details */}
-        <Card className="p-4">
-          <p className="text-sm text-muted-foreground mb-2">Montant</p>
-          <p className="text-2xl font-bold">{order.total.toFixed(0)} FCFA</p>
+        <Card className="p-3">
+          <p className="text-xs text-muted-foreground mb-1">Montant</p>
+          <p className="text-lg font-bold">{order.total.toFixed(0)} FCFA</p>
         </Card>
       </main>
 
@@ -218,11 +218,11 @@ export function DriverActiveOrder({
           <Button 
             onClick={onPickup} 
             disabled={isLoading}
-            className="w-full h-14 text-lg font-semibold"
+            className="w-full h-11 text-sm font-medium"
           >
             {isLoading ? <ButtonLoader /> : (
               <>
-                <Package className="h-5 w-5 mr-2" />
+                <Package className="h-4 w-4 mr-1.5" />
                 J'ai récupéré la commande
               </>
             )}
@@ -232,11 +232,11 @@ export function DriverActiveOrder({
           <Button 
             onClick={onComplete} 
             disabled={isLoading}
-            className="w-full h-14 text-lg font-semibold bg-primary"
+            className="w-full h-11 text-sm font-medium bg-primary"
           >
             {isLoading ? <ButtonLoader /> : (
               <>
-                <CheckCircle className="h-5 w-5 mr-2" />
+                <CheckCircle className="h-4 w-4 mr-1.5" />
                 Marquer comme livrée
               </>
             )}

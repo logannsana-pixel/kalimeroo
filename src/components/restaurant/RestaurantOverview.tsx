@@ -108,50 +108,50 @@ export function RestaurantOverview({ restaurantId }: RestaurantOverviewProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Aujourd'hui</CardTitle>
-            <ShoppingBag className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between p-3 pb-1">
+            <CardTitle className="text-xs font-medium">Aujourd'hui</CardTitle>
+            <ShoppingBag className="h-3.5 w-3.5 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.todayOrders}</div>
-            <p className="text-xs text-muted-foreground">commandes</p>
+          <CardContent className="p-3 pt-0">
+            <div className="text-lg font-bold">{stats.todayOrders}</div>
+            <p className="text-[10px] text-muted-foreground">commandes</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Revenus du jour</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between p-3 pb-1">
+            <CardTitle className="text-xs font-medium">Revenus</CardTitle>
+            <DollarSign className="h-3.5 w-3.5 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.todayRevenue.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">FCFA</p>
+          <CardContent className="p-3 pt-0">
+            <div className="text-lg font-bold">{stats.todayRevenue.toLocaleString()}</div>
+            <p className="text-[10px] text-muted-foreground">FCFA</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">En attente</CardTitle>
-            <Clock className="h-4 w-4 text-warning" />
+          <CardHeader className="flex flex-row items-center justify-between p-3 pb-1">
+            <CardTitle className="text-xs font-medium">En attente</CardTitle>
+            <Clock className="h-3.5 w-3.5 text-warning" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-warning">{stats.pendingOrders}</div>
-            <p className="text-xs text-muted-foreground">à traiter</p>
+          <CardContent className="p-3 pt-0">
+            <div className="text-lg font-bold text-warning">{stats.pendingOrders}</div>
+            <p className="text-[10px] text-muted-foreground">à traiter</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total</CardTitle>
-            <TrendingUp className="h-4 w-4 text-primary" />
+          <CardHeader className="flex flex-row items-center justify-between p-3 pb-1">
+            <CardTitle className="text-xs font-medium">Total</CardTitle>
+            <TrendingUp className="h-3.5 w-3.5 text-primary" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalRevenue.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">FCFA ({stats.totalOrders} cmd)</p>
+          <CardContent className="p-3 pt-0">
+            <div className="text-lg font-bold">{stats.totalRevenue.toLocaleString()}</div>
+            <p className="text-[10px] text-muted-foreground">FCFA ({stats.totalOrders} cmd)</p>
           </CardContent>
         </Card>
       </div>

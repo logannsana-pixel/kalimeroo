@@ -270,63 +270,63 @@ export function DriverEarningsTab({ orders }: DriverEarningsTabProps) {
   ];
 
   return (
-    <div className="p-4 space-y-6 pb-24">
-      <h2 className="text-xl font-bold">Mes gains</h2>
+    <div className="p-4 space-y-4 pb-24">
+      <h2 className="text-sm font-semibold">Mes gains</h2>
 
       {/* Main earnings card with withdraw button */}
-      <Card className="p-6 bg-gradient-to-br from-green-500 to-green-600 text-white">
-        <div className="flex items-center justify-between mb-4">
+      <Card className="p-4 bg-gradient-to-br from-green-500 to-green-600 text-white">
+        <div className="flex items-center justify-between mb-3">
           <div>
-            <p className="text-sm opacity-80">Solde disponible</p>
-            <p className="text-4xl font-bold mt-1">
-              {availableBalance.toFixed(0)} <span className="text-xl">FCFA</span>
+            <p className="text-xs opacity-80">Solde disponible</p>
+            <p className="text-2xl font-bold mt-0.5">
+              {availableBalance.toFixed(0)} <span className="text-sm">FCFA</span>
             </p>
           </div>
-          <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center">
-            <Wallet className="h-7 w-7" />
+          <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+            <Wallet className="h-5 w-5" />
           </div>
         </div>
         
-        <div className="flex items-center gap-4 mb-4 text-sm opacity-80">
+        <div className="flex items-center gap-3 mb-3 text-xs opacity-80">
           <span className="flex items-center gap-1">
-            <Package className="h-4 w-4" />
+            <Package className="h-3.5 w-3.5" />
             {deliveredOrders.length} livraisons
           </span>
           <span className="flex items-center gap-1">
-            <TrendingUp className="h-4 w-4" />
+            <TrendingUp className="h-3.5 w-3.5" />
             {totalEarnings.toFixed(0)} F total
           </span>
         </div>
 
         <Button 
           onClick={() => setShowWithdrawDialog(true)}
-          className="w-full h-12 bg-white text-green-600 hover:bg-white/90 font-semibold"
+          className="w-full h-10 bg-white text-green-600 hover:bg-white/90 font-medium text-sm"
           disabled={availableBalance < 1000}
         >
-          <ArrowUpRight className="h-5 w-5 mr-2" />
+          <ArrowUpRight className="h-4 w-4 mr-1.5" />
           Retirer mes gains
         </Button>
       </Card>
 
       {/* Stats grid */}
-      <div className="grid grid-cols-1 gap-3">
+      <div className="grid grid-cols-1 gap-2">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <Card key={stat.label} className="p-4">
+            <Card key={stat.label} className="p-3">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className={`w-12 h-12 rounded-xl bg-muted flex items-center justify-center`}>
-                    <Icon className={`h-6 w-6 ${stat.color}`} />
+                <div className="flex items-center gap-2">
+                  <div className={`w-9 h-9 rounded-lg bg-muted flex items-center justify-center`}>
+                    <Icon className={`h-4 w-4 ${stat.color}`} />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">{stat.label}</p>
-                    <p className="text-lg font-bold">{stat.earnings.toFixed(0)} FCFA</p>
+                    <p className="text-xs text-muted-foreground">{stat.label}</p>
+                    <p className="text-sm font-bold">{stat.earnings.toFixed(0)} F</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-3xl font-bold">{stat.deliveries}</p>
-                  <p className="text-xs text-muted-foreground">livraisons</p>
+                  <p className="text-xl font-bold">{stat.deliveries}</p>
+                  <p className="text-[10px] text-muted-foreground">livraisons</p>
                 </div>
               </div>
             </Card>
