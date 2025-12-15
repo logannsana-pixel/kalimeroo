@@ -7,16 +7,14 @@ const corsHeaders = {
 
 // Fonction pour normaliser et valider un mobile CG
 function normalizeCongoMobile(raw: string): string {
-  let p = raw.replace(/[\s\-\(\)]/g, ""); // Supprime espaces, tirets, parenthèses
+  const p = raw.replace(/[\s\-\(\)]/g, ""); // supprime espaces, tirets, parenthèses
 
-  // Retirer le 0 initial
-  if (p.startsWith("0")) p = p.slice(1);
-
-  // Valider mobile : doit commencer par 4, 5 ou 6 et avoir 8 chiffres
-  if (!p.match(/^(4|5|6)\d{7}$/)) {
+  // Valider mobile : doit commencer par 04, 05 ou 06 et avoir 8 chiffres
+  if (!p.match(/^0(4|5|6)\d{7}$/)) {
     throw new Error("Seuls les numéros mobiles sont acceptés (04xxxxxxx, 05xxxxxxx, 06xxxxxxx)");
   }
 
+  // On garde le 0 initial après le +242
   return "+242" + p;
 }
 
