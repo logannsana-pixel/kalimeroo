@@ -283,13 +283,13 @@ export default function Affiliate() {
             <Button variant="ghost" size="icon" className="rounded-full" onClick={() => navigate(-1)}>
               <ChevronLeft className="h-5 w-5" />
             </Button>
-            <h1 className="text-xl font-bold">Mon Parrainage</h1>
+            <h1 className="text-base font-semibold">Mon Parrainage</h1>
           </div>
-          <Card className="border-none shadow-soft rounded-3xl text-center py-12">
+          <Card className="border-none shadow-soft rounded-2xl text-center py-10">
             <CardContent>
-              <Ban className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-              <h3 className="font-bold text-lg mb-2">Programme en pause</h3>
-              <p className="text-muted-foreground">Le programme d'affiliation est temporairement désactivé.</p>
+              <Ban className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
+              <h3 className="font-semibold text-base mb-1">Programme en pause</h3>
+              <p className="text-sm text-muted-foreground">Le programme d'affiliation est temporairement désactivé.</p>
             </CardContent>
           </Card>
         </main>
@@ -307,51 +307,51 @@ export default function Affiliate() {
       <Navbar />
       <main className="flex-1 container mx-auto px-4 py-4 max-w-2xl">
         {/* Header */}
-        <div className="flex items-center gap-3 mb-6">
-          <Button variant="ghost" size="icon" className="rounded-full" onClick={() => navigate(-1)}>
-            <ChevronLeft className="h-5 w-5" />
+        <div className="flex items-center gap-3 mb-4">
+          <Button variant="ghost" size="icon" className="rounded-full h-8 w-8" onClick={() => navigate(-1)}>
+            <ChevronLeft className="h-4 w-4" />
           </Button>
-          <h1 className="text-xl font-bold flex items-center gap-2">
-            <Gift className="w-5 h-5 text-primary" />
+          <h1 className="text-base font-semibold flex items-center gap-2">
+            <Gift className="w-4 h-4 text-primary" />
             Mon Parrainage
           </h1>
         </div>
 
         {/* Referral Card */}
-        <Card className="border-none shadow-soft rounded-3xl overflow-hidden bg-gradient-primary text-primary-foreground mb-4">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-sm opacity-90">Ton code parrain</span>
+        <Card className="border-none shadow-soft rounded-2xl overflow-hidden bg-gradient-primary text-primary-foreground mb-3">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs opacity-90">Ton code parrain</span>
               {affiliate?.status === "banned" && (
-                <Badge variant="destructive">Suspendu</Badge>
+                <Badge variant="destructive" className="text-xs">Suspendu</Badge>
               )}
             </div>
-            <div className="flex items-center gap-3 mb-4">
-              <span className="text-3xl font-bold tracking-wider">{affiliate?.referral_code}</span>
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-2xl font-bold tracking-wider">{affiliate?.referral_code}</span>
               <Button
                 size="icon"
                 variant="ghost"
-                className="h-10 w-10 rounded-full bg-white/20 hover:bg-white/30"
+                className="h-8 w-8 rounded-full bg-white/20 hover:bg-white/30"
                 onClick={copyReferralCode}
               >
-                <Copy className="h-5 w-5" />
+                <Copy className="h-4 w-4" />
               </Button>
             </div>
             <div className="flex gap-2">
               <Button
                 size="sm"
-                className="rounded-full bg-white/20 hover:bg-white/30 text-primary-foreground"
+                className="rounded-full bg-white/20 hover:bg-white/30 text-primary-foreground text-xs h-8"
                 onClick={copyReferralLink}
               >
-                <Copy className="h-4 w-4 mr-2" />
+                <Copy className="h-3 w-3 mr-1" />
                 Copier lien
               </Button>
               <Button
                 size="sm"
-                className="rounded-full bg-white/20 hover:bg-white/30 text-primary-foreground"
+                className="rounded-full bg-white/20 hover:bg-white/30 text-primary-foreground text-xs h-8"
                 onClick={shareViaWhatsApp}
               >
-                <MessageCircle className="h-4 w-4 mr-2" />
+                <MessageCircle className="h-3 w-3 mr-1" />
                 WhatsApp
               </Button>
             </div>
@@ -359,26 +359,26 @@ export default function Affiliate() {
         </Card>
 
         {/* Balance Cards */}
-        <div className="grid grid-cols-3 gap-3 mb-4">
-          <Card className="border-none shadow-soft rounded-2xl">
-            <CardContent className="p-4 text-center">
-              <Wallet className="w-6 h-6 mx-auto text-primary mb-2" />
-              <p className="text-lg font-bold">{affiliate?.available_balance?.toFixed(0) || 0}</p>
-              <p className="text-xs text-muted-foreground">Disponible</p>
+        <div className="grid grid-cols-3 gap-2 mb-3">
+          <Card className="border-none shadow-soft rounded-xl">
+            <CardContent className="p-3 text-center">
+              <Wallet className="w-5 h-5 mx-auto text-primary mb-1" />
+              <p className="text-base font-bold">{affiliate?.available_balance?.toFixed(0) || 0}</p>
+              <p className="text-[10px] text-muted-foreground">Disponible</p>
             </CardContent>
           </Card>
-          <Card className="border-none shadow-soft rounded-2xl">
-            <CardContent className="p-4 text-center">
-              <Clock className="w-6 h-6 mx-auto text-warning mb-2" />
-              <p className="text-lg font-bold">{affiliate?.pending_balance?.toFixed(0) || 0}</p>
-              <p className="text-xs text-muted-foreground">En attente</p>
+          <Card className="border-none shadow-soft rounded-xl">
+            <CardContent className="p-3 text-center">
+              <Clock className="w-5 h-5 mx-auto text-warning mb-1" />
+              <p className="text-base font-bold">{affiliate?.pending_balance?.toFixed(0) || 0}</p>
+              <p className="text-[10px] text-muted-foreground">En attente</p>
             </CardContent>
           </Card>
-          <Card className="border-none shadow-soft rounded-2xl">
-            <CardContent className="p-4 text-center">
-              <TrendingUp className="w-6 h-6 mx-auto text-success mb-2" />
-              <p className="text-lg font-bold">{affiliate?.total_earnings?.toFixed(0) || 0}</p>
-              <p className="text-xs text-muted-foreground">Total gagné</p>
+          <Card className="border-none shadow-soft rounded-xl">
+            <CardContent className="p-3 text-center">
+              <TrendingUp className="w-5 h-5 mx-auto text-success mb-1" />
+              <p className="text-base font-bold">{affiliate?.total_earnings?.toFixed(0) || 0}</p>
+              <p className="text-[10px] text-muted-foreground">Total gagné</p>
             </CardContent>
           </Card>
         </div>
@@ -386,46 +386,46 @@ export default function Affiliate() {
         {/* Withdrawal Button */}
         {affiliate && affiliate.available_balance >= (settings?.min_withdrawal_amount || 5000) && (
           <Button
-            className="w-full rounded-2xl h-12 mb-4 btn-playful"
+            className="w-full rounded-xl h-10 mb-3 text-sm"
             onClick={() => setShowWithdrawModal(true)}
             disabled={affiliate.status === "banned"}
           >
-            <DollarSign className="w-5 h-5 mr-2" />
+            <DollarSign className="w-4 h-4 mr-2" />
             Demander un retrait
           </Button>
         )}
 
         {/* Stats */}
-        <Card className="border-none shadow-soft rounded-3xl mb-4">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Users className="w-5 h-5 text-primary" />
+        <Card className="border-none shadow-soft rounded-2xl mb-3">
+          <CardHeader className="pb-2 px-4 pt-4">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Users className="w-4 h-4 text-primary" />
               Mes Filleuls
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-3 gap-4 text-center">
+          <CardContent className="space-y-3 px-4 pb-4">
+            <div className="grid grid-cols-3 gap-3 text-center">
               <div>
-                <p className="text-2xl font-bold text-success">{eligibleCount}</p>
-                <p className="text-xs text-muted-foreground">Éligibles</p>
+                <p className="text-lg font-bold text-success">{eligibleCount}</p>
+                <p className="text-[10px] text-muted-foreground">Éligibles</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-warning">{pendingCount}</p>
-                <p className="text-xs text-muted-foreground">En cours</p>
+                <p className="text-lg font-bold text-warning">{pendingCount}</p>
+                <p className="text-[10px] text-muted-foreground">En cours</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-muted-foreground">{notEligibleCount}</p>
-                <p className="text-xs text-muted-foreground">Non éligibles</p>
+                <p className="text-lg font-bold text-muted-foreground">{notEligibleCount}</p>
+                <p className="text-[10px] text-muted-foreground">Non éligibles</p>
               </div>
             </div>
             <Separator />
-            <div className="text-sm text-muted-foreground">
-              <p className="flex items-center gap-2 mb-1">
-                <CheckCircle className="w-4 h-4 text-success" />
+            <div className="text-xs text-muted-foreground">
+              <p className="flex items-center gap-1.5 mb-0.5">
+                <CheckCircle className="w-3 h-3 text-success" />
                 <span><strong>{settings?.reward_amount} FCFA</strong> par filleul éligible</span>
               </p>
-              <p className="flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-warning" />
+              <p className="flex items-center gap-1.5">
+                <AlertTriangle className="w-3 h-3 text-warning" />
                 <span>Éligible après <strong>{settings?.min_orders_required}</strong> commandes</span>
               </p>
             </div>

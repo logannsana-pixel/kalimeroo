@@ -232,54 +232,56 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-subtle p-4">
-      <Card className="w-full max-w-2xl">
+      <Card className="w-full max-w-md">
         {step !== "login" && (
-          <div className="px-6 pt-6">
-            <div className="flex justify-center mb-4">
-              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <Utensils className="h-6 w-6 text-primary" />
+          <div className="px-4 pt-4">
+            <div className="flex justify-center mb-3">
+              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Utensils className="h-5 w-5 text-primary" />
               </div>
             </div>
           </div>
         )}
         
-        <CardContent className="p-6">
+        <CardContent className="p-4">
           {step === "login" && (
-            <div className="space-y-6">
-              <div className="text-center space-y-2">
-                <div className="flex justify-center mb-4">
-                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Utensils className="h-6 w-6 text-primary" />
+            <div className="space-y-4">
+              <div className="text-center space-y-1">
+                <div className="flex justify-center mb-3">
+                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Utensils className="h-5 w-5 text-primary" />
                   </div>
                 </div>
-                <h2 className="text-2xl md:text-3xl font-bold">Connexion</h2>
-                <p className="text-muted-foreground">Accédez à votre compte DeliverEat</p>
+                <h2 className="text-lg font-semibold">Connexion</h2>
+                <p className="text-sm text-muted-foreground">Accédez à votre compte</p>
               </div>
 
-              <form onSubmit={handleLogin} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+              <form onSubmit={handleLogin} className="space-y-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="email" className="text-xs">Email</Label>
                   <Input
                     id="email"
                     type="email"
                     value={loginData.email}
                     onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
                     placeholder="votre@email.com"
+                    className="h-10 text-sm"
                     required
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password">Mot de passe</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="password" className="text-xs">Mot de passe</Label>
                   <Input
                     id="password"
                     type="password"
                     value={loginData.password}
                     onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
                     placeholder="••••••••"
+                    className="h-10 text-sm"
                     required
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button type="submit" className="w-full h-10 text-sm" disabled={isLoading}>
                   {isLoading ? "Connexion..." : "Se connecter"}
                 </Button>
               </form>
@@ -288,7 +290,7 @@ const Auth = () => {
                 <Button 
                   variant="link" 
                   onClick={() => setStep("role-select")}
-                  className="text-sm"
+                  className="text-xs"
                 >
                   Pas encore de compte ? Inscrivez-vous
                 </Button>
@@ -332,11 +334,11 @@ const Auth = () => {
           )}
 
           {step !== "login" && (
-            <div className="text-center mt-4">
+            <div className="text-center mt-3">
               <Button 
                 variant="link" 
                 onClick={() => setStep("login")}
-                className="text-sm"
+                className="text-xs"
               >
                 Déjà un compte ? Connectez-vous
               </Button>
