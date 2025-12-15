@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Star, Loader2, Truck } from "lucide-react";
@@ -7,22 +6,20 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
-interface DriverRatingFormProps {
+export interface DriverRatingFormProps {
   orderId: string;
   driverId: string;
   driverName: string;
-  isOpen: boolean;
-  onClose: () => void;
   onSuccess?: () => void;
+  onCancel?: () => void;
 }
 
 export function DriverRatingForm({ 
   orderId, 
   driverId, 
   driverName, 
-  isOpen, 
-  onClose, 
-  onSuccess 
+  onSuccess,
+  onCancel
 }: DriverRatingFormProps) {
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
@@ -76,7 +73,6 @@ export function DriverRatingForm({
 
       toast.success("Merci pour votre avis !");
       onSuccess?.();
-      onClose();
     } catch (error: any) {
       console.error("Error submitting review:", error);
       if (error.code === '23505') {
@@ -90,74 +86,69 @@ export function DriverRatingForm({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-sm">
-        <DialogHeader>
-          <DialogTitle className="text-center">Noter le livreur</DialogTitle>
-        </DialogHeader>
-
-        <div className="space-y-6 py-4">
-          {/* Driver Info */}
-          <div className="flex flex-col items-center gap-3">
-            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-              <Truck className="w-8 h-8 text-primary" />
-            </div>
-            <p className="font-semibold">{driverName}</p>
-          </div>
-
-          {/* Star Rating */}
-          <div className="flex justify-center gap-2">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <button
-                key={star}
-                onClick={() => setRating(star)}
-                onMouseEnter={() => setHoverRating(star)}
-                onMouseLeave={() => setHoverRating(0)}
-                className="transition-transform hover:scale-110 active:scale-95"
-              >
-                <Star 
-                  className={cn(
-                    "w-10 h-10 transition-colors",
-                    (hoverRating || rating) >= star 
-                      ? "text-yellow-500 fill-yellow-500" 
-                      : "text-muted-foreground"
-                  )} 
-                />
-              </button>
-            ))}
-          </div>
-
-          {/* Rating Label */}
-          <p className="text-center text-sm text-muted-foreground">
-            {rating === 1 && "Très mauvais"}
-            {rating === 2 && "Mauvais"}
-            {rating === 3 && "Correct"}
-            {rating === 4 && "Bien"}
-            {rating === 5 && "Excellent !"}
-          </p>
-
-          {/* Comment */}
-          <div className="space-y-2">
-            <Textarea
-              placeholder="Un commentaire ? (optionnel)"
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              rows={3}
-              className="resize-none"
-            />
-          </div>
+    <div className="space-y-6">
+      {/* Driver Info */}
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+          <Truck className="w-8 h-8 text-primary" />
         </div>
+        <p className="font-semibold">{driverName}</p>
+      </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose} className="flex-1">
+      {/* Star Rating */}
+      <div className="flex justify-center gap-2">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <button
+            key={star}
+            onClick={() => setRating(star)}
+            onMouseEnter={() => setHoverRating(star)}
+            onMouseLeave={() => setHoverRating(0)}
+            className="transition-transform hover:scale-110 active:scale-95"
+          >
+            <Star 
+              className={cn(
+                "w-10 h-10 transition-colors",
+                (hoverRating || rating) >= star 
+                  ? "text-yellow-500 fill-yellow-500" 
+                  : "text-muted-foreground"
+              )} 
+            />
+          </button>
+        ))}
+      </div>
+
+      {/* Rating Label */}
+      <p className="text-center text-sm text-muted-foreground">
+        {rating === 1 && "Très mauvais"}
+        {rating === 2 && "Mauvais"}
+        {rating === 3 && "Correct"}
+        {rating === 4 && "Bien"}
+        {rating === 5 && "Excellent !"}
+      </p>
+
+      {/* Comment */}
+      <div className="space-y-2">
+        <Textarea
+          placeholder="Un commentaire ? (optionnel)"
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          rows={3}
+          className="resize-none"
+        />
+      </div>
+
+      {/* Actions */}
+      <div className="flex gap-3">
+        {onCancel && (
+          <Button variant="outline" onClick={onCancel} className="flex-1">
             Plus tard
           </Button>
-          <Button onClick={handleSubmit} disabled={loading || rating === 0} className="flex-1">
-            {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-            Envoyer
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        )}
+        <Button onClick={handleSubmit} disabled={loading || rating === 0} className="flex-1">
+          {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+          Envoyer
+        </Button>
+      </div>
+    </div>
   );
 }
