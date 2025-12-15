@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { BottomNav } from "@/components/BottomNav";
 import { Footer } from "@/components/Footer";
@@ -16,6 +17,7 @@ import { DeliveryProfileTab } from "@/components/delivery/DeliveryProfileTab";
 import { ImageUpload } from "@/components/ImageUpload";
 
 export default function Profile() {
+  const navigate = useNavigate();
   const { user, userRole, signOut } = useAuth();
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -122,15 +124,25 @@ export default function Profile() {
     <div className="min-h-screen flex flex-col pb-20 md:pb-0 bg-background">
       <Navbar />
       <main className="flex-1 container mx-auto px-4 py-4 md:py-8">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-          <h1 className="text-xl md:text-2xl font-bold">Mon profil</h1>
+        {/* Header with back */}
+        <div className="flex items-center justify-between gap-3 mb-6">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate(-1)}
+              className="w-10 h-10 rounded-full bg-muted/50 flex items-center justify-center text-foreground hover:bg-muted transition-colors md:hidden"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <h1 className="text-xl md:text-2xl font-bold">Mon profil</h1>
+          </div>
           <Button 
             variant="outline" 
             onClick={signOut}
-            className="w-full sm:w-auto rounded-full"
+            size="sm"
+            className="rounded-full"
           >
             <LogOut className="h-4 w-4 mr-2" />
-            Déconnexion
+            <span className="hidden sm:inline">Déconnexion</span>
           </Button>
         </div>
         

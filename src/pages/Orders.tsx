@@ -1,4 +1,5 @@
 import { useEffect, useState, lazy, Suspense } from "react";
+import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { BottomNav } from "@/components/BottomNav";
 import { Footer } from "@/components/Footer";
@@ -79,6 +80,7 @@ const statusConfig: Record<OrderStatus, { label: string; variant: "default" | "s
 };
 
 export default function Orders() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { coordinates } = useLocationContext();
   const [orders, setOrders] = useState<Order[]>([]);
@@ -193,11 +195,12 @@ export default function Orders() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col pb-16 md:pb-0">
+      <div className="min-h-screen flex flex-col pb-20 md:pb-0 bg-background">
         <Navbar />
         <main className="flex-1 container mx-auto px-4 py-4 md:py-8">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-xl md:text-3xl font-bold">Mes commandes</h1>
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-full bg-muted/50 md:hidden" />
+            <h1 className="text-xl md:text-2xl font-bold">Mes commandes</h1>
           </div>
           <div className="max-w-4xl mx-auto space-y-4">
             {Array.from({ length: 3 }).map((_, i) => (
@@ -205,7 +208,7 @@ export default function Orders() {
             ))}
           </div>
         </main>
-        <Footer />
+        <Footer className="hidden md:block" />
         <BottomNav />
       </div>
     );
@@ -213,39 +216,59 @@ export default function Orders() {
 
   if (orders.length === 0) {
     return (
-      <div className="min-h-screen flex flex-col pb-16 md:pb-0">
+      <div className="min-h-screen flex flex-col pb-20 md:pb-0 bg-background">
         <Navbar />
         <main className="flex-1 container mx-auto px-4 py-4 md:py-8">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-xl md:text-3xl font-bold">Mes commandes</h1>
+          <div className="flex items-center justify-between gap-3 mb-6">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => navigate("/")}
+                className="w-10 h-10 rounded-full bg-muted/50 flex items-center justify-center text-foreground hover:bg-muted transition-colors md:hidden"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+              </button>
+              <h1 className="text-xl md:text-2xl font-bold">Mes commandes</h1>
+            </div>
             <RefreshButton onClick={() => fetchOrders(true)} loading={refreshing} />
           </div>
           <div className="max-w-4xl mx-auto">
-            <Card className="text-center">
+            <Card className="text-center border-none shadow-soft rounded-3xl overflow-hidden">
               <CardContent className="py-12 md:py-16">
-                <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
-                  <Package className="w-10 h-10 text-muted-foreground" />
+                <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Package className="w-10 h-10 text-primary" />
                 </div>
                 <h3 className="text-lg font-semibold mb-2">Aucune commande</h3>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground mb-6">
                   Vos commandes apparaîtront ici
                 </p>
+                <Button onClick={() => navigate("/restaurants")} className="rounded-full">
+                  Découvrir les restaurants
+                </Button>
               </CardContent>
             </Card>
           </div>
         </main>
-        <Footer />
+        <Footer className="hidden md:block" />
         <BottomNav />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col pb-16 md:pb-0">
+    <div className="min-h-screen flex flex-col pb-20 md:pb-0 bg-background">
       <Navbar />
       <main className="flex-1 container mx-auto px-4 py-4 md:py-8">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-xl md:text-3xl font-bold">Mes commandes</h1>
+        {/* Header with back */}
+        <div className="flex items-center justify-between gap-3 mb-6">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate("/")}
+              className="w-10 h-10 rounded-full bg-muted/50 flex items-center justify-center text-foreground hover:bg-muted transition-colors md:hidden"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <h1 className="text-xl md:text-2xl font-bold">Mes commandes</h1>
+          </div>
           <RefreshButton onClick={() => fetchOrders(true)} loading={refreshing} />
         </div>
         
