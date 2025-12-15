@@ -41,9 +41,10 @@ serve(async (req) => {
   try {
     const { phone } = await req.json();
 
+    // IMPORTANT UX: ne pas renvoyer 4xx pour les erreurs attendues côté utilisateur
     if (!phone) {
-      return new Response(JSON.stringify({ error: "Phone number is required" }), {
-        status: 400,
+      return new Response(JSON.stringify({ success: false, message: "Phone number is required" }), {
+        status: 200,
         headers: corsHeaders,
       });
     }
@@ -53,7 +54,7 @@ serve(async (req) => {
     const serviceSid = Deno.env.get("TWILIO_VERIFY_SERVICE_SID");
 
     if (!accountSid || !authToken || !serviceSid) {
-      return new Response(JSON.stringify({ error: "Twilio configuration error" }), {
+      return new Response(JSON.stringify({ success: false, message: "Twilio configuration error" }), {
         status: 500,
         headers: corsHeaders,
       });
@@ -63,8 +64,8 @@ serve(async (req) => {
     try {
       formattedPhone = normalizeCongoMobile(phone);
     } catch (err: any) {
-      return new Response(JSON.stringify({ error: err.message }), {
-        status: 400,
+      return new Response(JSON.stringify({ success: false, message: err.message }), {
+        status: 200,
         headers: corsHeaders,
       });
     }
@@ -87,10 +88,14 @@ serve(async (req) => {
 
     if (!response.ok) {
       console.error("❌ Twilio error:", data);
-      return new Response(JSON.stringify({ error: data.message || "Failed to send OTP" }), {
-        status: response.status,
-        headers: corsHeaders,
-      });
+      return new Response(
+        JSON.stringify({
+          success: false,
+          message: data?.message || "Failed to send OTP",
+          twilio_status: data?.status ?? null,
+        }),
+        { status: 200, headers: corsHeaders },
+      );
     }
 
     return new Response(
@@ -103,7 +108,7 @@ serve(async (req) => {
     );
   } catch (error) {
     console.error("🔥 send-otp error:", error);
-    return new Response(JSON.stringify({ error: "Internal server error" }), {
+    return new Response(JSON.stringify({ success: false, message: "Internal server error" }), {
       status: 500,
       headers: corsHeaders,
     });
