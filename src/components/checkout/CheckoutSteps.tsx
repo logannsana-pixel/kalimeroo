@@ -5,11 +5,12 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { CreditCard, Banknote, Bike, MapPin, User, Phone, Edit2, Package, Check, Navigation } from "lucide-react";
+import { CreditCard, Banknote, Bike, MapPin, User, Phone, Edit2, Package, Check, Navigation, Loader2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLocation } from "@/contexts/LocationContext";
 import { toast } from "sonner";
 import { VoiceNoteInput } from "@/components/voice/VoiceNoteInput";
+import { useVoiceNoteUpload } from "@/hooks/useVoiceNoteUpload";
 
 interface CheckoutData {
   phone: string;
@@ -22,6 +23,10 @@ interface CheckoutData {
   orderForSomeoneElse: boolean;
   recipientName?: string;
   recipientPhone?: string;
+  city?: string;
+  district?: string;
+  addressComplement?: string;
+  voiceNoteUrl?: string;
 }
 
 interface CheckoutStepsProps {
@@ -46,6 +51,7 @@ export function CheckoutSteps({
   const [loading, setLoading] = useState(false);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [audioDuration, setAudioDuration] = useState(0);
+  const { uploadVoiceNote, uploading: uploadingVoiceNote } = useVoiceNoteUpload();
 
   // Build full address from location context
   const fullAddress = [address, addressComplement].filter(Boolean).join(" - ");
@@ -97,10 +103,23 @@ export function CheckoutSteps({
 
     setLoading(true);
     try {
+      // Upload voice note if exists
+      let voiceNoteUrl: string | undefined;
+      if (audioBlob) {
+        const url = await uploadVoiceNote(audioBlob);
+        if (url) {
+          voiceNoteUrl = url;
+        }
+      }
+
       await onSubmit({
         ...formData,
         address: fullAddress,
+        city: city || undefined,
+        district: district || undefined,
+        addressComplement: addressComplement || undefined,
         phone: formData.orderForSomeoneElse ? formData.recipientPhone! : formData.phone,
+        voiceNoteUrl,
       });
     } finally {
       setLoading(false);
@@ -395,10 +414,17 @@ export function CheckoutSteps({
 
           <Button
             onClick={handleSubmit}
-            disabled={loading || (formData.deliveryMode === "delivery" && !hasAddress)}
+            disabled={loading || uploadingVoiceNote || (formData.deliveryMode === "delivery" && !hasAddress)}
             className="w-full h-14 rounded-2xl text-lg font-semibold btn-playful"
           >
-            {loading ? <span className="animate-pulse">Traitement...</span> : `Payer ${effectiveTotal.toFixed(0)} FCFA`}
+            {loading || uploadingVoiceNote ? (
+              <span className="flex items-center gap-2">
+                <Loader2 className="w-5 h-5 animate-spin" />
+                {uploadingVoiceNote ? "Envoi de la note vocale..." : "Traitement..."}
+              </span>
+            ) : (
+              `Payer ${effectiveTotal.toFixed(0)} FCFA`
+            )}
           </Button>
 
           {formData.deliveryMode === "delivery" && !hasAddress && (
