@@ -5,18 +5,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { 
-  CreditCard, 
-  Banknote, 
-  Bike, 
-  MapPin, 
-  User,
-  Phone,
-  Edit2,
-  Package,
-  Check,
-  Navigation
-} from "lucide-react";
+import { CreditCard, Banknote, Bike, MapPin, User, Phone, Edit2, Package, Check, Navigation } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLocation } from "@/contexts/LocationContext";
 import { toast } from "sonner";
@@ -44,17 +33,24 @@ interface CheckoutStepsProps {
   onSubmit: (data: CheckoutData) => Promise<void>;
 }
 
-export function CheckoutSteps({ cartItems, subtotal, deliveryFee, discount = 0, total: propTotal, onSubmit }: CheckoutStepsProps) {
+export function CheckoutSteps({
+  cartItems,
+  subtotal,
+  deliveryFee,
+  discount = 0,
+  total: propTotal,
+  onSubmit,
+}: CheckoutStepsProps) {
   const { district, city, address, addressComplement, coordinates, hasGPS, openModal } = useLocation();
-  const calculatedTotal = propTotal ?? (subtotal + deliveryFee - discount);
+  const calculatedTotal = propTotal ?? subtotal + deliveryFee - discount;
   const [loading, setLoading] = useState(false);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [audioDuration, setAudioDuration] = useState(0);
-  
+
   // Build full address from location context
   const fullAddress = [address, addressComplement].filter(Boolean).join(" - ");
   const hasAddress = !!(address || (coordinates && (district || city)));
-  
+
   const [formData, setFormData] = useState<CheckoutData>({
     phone: "",
     address: fullAddress,
@@ -72,18 +68,18 @@ export function CheckoutSteps({ cartItems, subtotal, deliveryFee, discount = 0, 
 
   const validate = () => {
     const newErrors: Partial<Record<keyof CheckoutData, string>> = {};
-    
+
     if (formData.deliveryMode === "delivery" && !hasAddress) {
       newErrors.address = "L'adresse de livraison est requise";
     }
-    
+
     if (formData.orderForSomeoneElse) {
       if (!formData.recipientName?.trim()) newErrors.recipientName = "Le nom du destinataire est requis";
       if (!formData.recipientPhone?.trim()) newErrors.recipientPhone = "Le téléphone du destinataire est requis";
     } else {
       if (!formData.phone.trim()) newErrors.phone = "Le téléphone est requis";
     }
-    
+
     if (formData.paymentMethod === "mobile_money") {
       if (!formData.mobileMoneyProvider) newErrors.mobileMoneyProvider = "Sélectionnez un opérateur";
       if (!formData.mobileMoneyNumber?.trim()) newErrors.mobileMoneyNumber = "Le numéro est requis";
@@ -98,7 +94,7 @@ export function CheckoutSteps({ cartItems, subtotal, deliveryFee, discount = 0, 
       toast.error("Veuillez remplir tous les champs obligatoires");
       return;
     }
-    
+
     setLoading(true);
     try {
       await onSubmit({
@@ -125,6 +121,54 @@ export function CheckoutSteps({ cartItems, subtotal, deliveryFee, discount = 0, 
 
   return (
     <div className="space-y-4">
+      {/* SECTION B: Mode de livraison */}
+      <Card className="rounded-3xl border-none shadow-soft">
+        <CardContent className="p-4 space-y-3">
+          <h3 className="font-semibold flex items-center gap-2">
+            <Bike className="w-5 h-5 text-primary" />
+            Mode de réception
+          </h3>
+
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, deliveryMode: "delivery" })}
+              className={`p-4 rounded-2xl border-2 transition-all ${
+                formData.deliveryMode === "delivery"
+                  ? "border-primary bg-primary/5"
+                  : "border-border hover:border-primary/50"
+              }`}
+            >
+              <Bike
+                className={`w-6 h-6 mx-auto mb-2 ${
+                  formData.deliveryMode === "delivery" ? "text-primary" : "text-muted-foreground"
+                }`}
+              />
+              <p className="font-medium text-sm">Livraison</p>
+              <p className="text-xs text-muted-foreground">{deliveryFee.toFixed(0)} FCFA</p>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, deliveryMode: "pickup" })}
+              className={`p-4 rounded-2xl border-2 transition-all ${
+                formData.deliveryMode === "pickup"
+                  ? "border-primary bg-primary/5"
+                  : "border-border hover:border-primary/50"
+              }`}
+            >
+              <Package
+                className={`w-6 h-6 mx-auto mb-2 ${
+                  formData.deliveryMode === "pickup" ? "text-primary" : "text-muted-foreground"
+                }`}
+              />
+              <p className="font-medium text-sm">À emporter</p>
+              <p className="text-xs text-muted-foreground">Gratuit</p>
+            </button>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* SECTION A: Adresse de livraison - Pre-filled from GPS/Manual */}
       {formData.deliveryMode === "delivery" && (
         <Card className="rounded-3xl border-none shadow-soft overflow-hidden">
@@ -145,7 +189,8 @@ export function CheckoutSteps({ cartItems, subtotal, deliveryFee, discount = 0, 
                   </h3>
                   {hasAddress ? (
                     <p className="text-sm text-muted-foreground truncate">
-                      {hasGPS && "📍 GPS • "}{city || district} {address && `• ${address.substring(0, 30)}...`}
+                      {hasGPS && "📍 GPS • "}
+                      {city || district} {address && `• ${address.substring(0, 30)}...`}
                     </p>
                   ) : (
                     <p className="text-sm text-destructive">Aucune adresse définie</p>
@@ -157,7 +202,7 @@ export function CheckoutSteps({ cartItems, subtotal, deliveryFee, discount = 0, 
                 {hasAddress ? "Modifier" : "Définir"}
               </Button>
             </div>
-            
+
             {/* Show full address details if available */}
             {hasAddress && fullAddress && (
               <div className="mt-3 p-3 bg-muted/50 rounded-xl text-sm">
@@ -170,7 +215,7 @@ export function CheckoutSteps({ cartItems, subtotal, deliveryFee, discount = 0, 
               </div>
             )}
           </div>
-          
+
           <CardContent className="p-4 space-y-4">
             {/* Order for someone else toggle */}
             <div className="flex items-center justify-between p-3 bg-muted/50 rounded-xl">
@@ -238,58 +283,12 @@ export function CheckoutSteps({ cartItems, subtotal, deliveryFee, discount = 0, 
         </Card>
       )}
 
-      {/* SECTION B: Mode de livraison */}
-      <Card className="rounded-3xl border-none shadow-soft">
-        <CardContent className="p-4 space-y-3">
-          <h3 className="font-semibold flex items-center gap-2">
-            <Bike className="w-5 h-5 text-primary" />
-            Mode de réception
-          </h3>
-          
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              onClick={() => setFormData({ ...formData, deliveryMode: "delivery" })}
-              className={`p-4 rounded-2xl border-2 transition-all ${
-                formData.deliveryMode === "delivery" 
-                  ? "border-primary bg-primary/5" 
-                  : "border-border hover:border-primary/50"
-              }`}
-            >
-              <Bike className={`w-6 h-6 mx-auto mb-2 ${
-                formData.deliveryMode === "delivery" ? "text-primary" : "text-muted-foreground"
-              }`} />
-              <p className="font-medium text-sm">Livraison</p>
-              <p className="text-xs text-muted-foreground">{deliveryFee.toFixed(0)} FCFA</p>
-            </button>
-            
-            <button
-              type="button"
-              onClick={() => setFormData({ ...formData, deliveryMode: "pickup" })}
-              className={`p-4 rounded-2xl border-2 transition-all ${
-                formData.deliveryMode === "pickup" 
-                  ? "border-primary bg-primary/5" 
-                  : "border-border hover:border-primary/50"
-              }`}
-            >
-              <Package className={`w-6 h-6 mx-auto mb-2 ${
-                formData.deliveryMode === "pickup" ? "text-primary" : "text-muted-foreground"
-              }`} />
-              <p className="font-medium text-sm">À emporter</p>
-              <p className="text-xs text-muted-foreground">Gratuit</p>
-            </button>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* SECTION C: Notes / Instructions avec VoiceNoteInput */}
       <Card className="rounded-3xl border-none shadow-soft">
         <CardContent className="p-4 space-y-3">
           <h3 className="font-semibold">Instructions (optionnel)</h3>
-          <p className="text-xs text-muted-foreground mb-2">
-            Pour le livreur ou le restaurant • Texte ou note vocale
-          </p>
-          
+          <p className="text-xs text-muted-foreground mb-2">Pour le livreur ou le restaurant • Texte ou note vocale</p>
+
           <VoiceNoteInput
             value={formData.notes}
             onChange={(notes) => setFormData({ ...formData, notes })}
@@ -305,14 +304,14 @@ export function CheckoutSteps({ cartItems, subtotal, deliveryFee, discount = 0, 
       <Card className="rounded-3xl border-none shadow-soft">
         <CardContent className="p-4 space-y-4">
           <h3 className="font-semibold">Mode de paiement</h3>
-          
+
           <RadioGroup
             value={formData.paymentMethod}
             onValueChange={(value: "mobile_money" | "cod") => setFormData({ ...formData, paymentMethod: value })}
             className="space-y-3"
           >
-            <label 
-              htmlFor="cod" 
+            <label
+              htmlFor="cod"
               className={`flex items-center gap-3 p-4 border-2 rounded-2xl cursor-pointer transition-all ${
                 formData.paymentMethod === "cod" ? "border-primary bg-primary/5" : "border-border"
               }`}
@@ -325,8 +324,8 @@ export function CheckoutSteps({ cartItems, subtotal, deliveryFee, discount = 0, 
               </div>
             </label>
 
-            <label 
-              htmlFor="mobile_money" 
+            <label
+              htmlFor="mobile_money"
               className={`flex items-center gap-3 p-4 border-2 rounded-2xl cursor-pointer transition-all ${
                 formData.paymentMethod === "mobile_money" ? "border-primary bg-primary/5" : "border-border"
               }`}
@@ -342,8 +341,8 @@ export function CheckoutSteps({ cartItems, subtotal, deliveryFee, discount = 0, 
 
           {formData.paymentMethod === "mobile_money" && (
             <div className="space-y-3 pt-3 border-t">
-              <Select 
-                value={formData.mobileMoneyProvider} 
+              <Select
+                value={formData.mobileMoneyProvider}
                 onValueChange={(value) => setFormData({ ...formData, mobileMoneyProvider: value })}
               >
                 <SelectTrigger className="h-12 rounded-xl">
@@ -394,22 +393,16 @@ export function CheckoutSteps({ cartItems, subtotal, deliveryFee, discount = 0, 
             <span className="text-primary">{effectiveTotal.toFixed(0)} FCFA</span>
           </div>
 
-          <Button 
-            onClick={handleSubmit} 
+          <Button
+            onClick={handleSubmit}
             disabled={loading || (formData.deliveryMode === "delivery" && !hasAddress)}
             className="w-full h-14 rounded-2xl text-lg font-semibold btn-playful"
           >
-            {loading ? (
-              <span className="animate-pulse">Traitement...</span>
-            ) : (
-              `Payer ${effectiveTotal.toFixed(0)} FCFA`
-            )}
+            {loading ? <span className="animate-pulse">Traitement...</span> : `Payer ${effectiveTotal.toFixed(0)} FCFA`}
           </Button>
-          
+
           {formData.deliveryMode === "delivery" && !hasAddress && (
-            <p className="text-center text-sm text-destructive">
-              Définissez une adresse de livraison pour continuer
-            </p>
+            <p className="text-center text-sm text-destructive">Définissez une adresse de livraison pour continuer</p>
           )}
         </CardContent>
       </Card>
