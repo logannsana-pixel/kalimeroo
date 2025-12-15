@@ -1,8 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Phone } from "lucide-react";
+import { Clock, Phone, Navigation } from "lucide-react";
+import { useRoute } from "@/hooks/useRoute";
 
 interface OrderTrackingMapProps {
   orderId: string;
@@ -31,9 +32,11 @@ export const OrderTrackingMap: React.FC<OrderTrackingMapProps> = ({
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<any>(null);
   const markersLayerRef = useRef<any>(null);
+  const routeLayerRef = useRef<any>(null);
   const [leaflet, setLeaflet] = useState<LeafletModule | null>(null);
   const [driverLocation, setDriverLocation] = useState(initialDriverLocation || null);
-  const [routePoints, setRoutePoints] = useState<[number, number][]>([]);
+  
+  const { route, fetchRoute, loading: routeLoading } = useRoute();
 
   // Met à jour la position du livreur quand la prop change
   useEffect(() => {
@@ -102,6 +105,7 @@ export const OrderTrackingMap: React.FC<OrderTrackingMapProps> = ({
       }).addTo(map);
 
       markersLayerRef.current = L.layerGroup().addTo(map);
+      routeLayerRef.current = L.layerGroup().addTo(map);
       mapInstanceRef.current = map;
     };
 
@@ -113,18 +117,27 @@ export const OrderTrackingMap: React.FC<OrderTrackingMapProps> = ({
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
         markersLayerRef.current = null;
+        routeLayerRef.current = null;
       }
     };
   }, []);
 
+  // Fetch real route when locations change
+  useEffect(() => {
+    if (driverLocation && customerLocation) {
+      fetchRoute(driverLocation, customerLocation);
+    }
+  }, [driverLocation, customerLocation, fetchRoute]);
+
   // Mise à jour des marqueurs et du tracé
   useEffect(() => {
-    if (!leaflet || !mapInstanceRef.current || !markersLayerRef.current) return;
+    if (!leaflet || !mapInstanceRef.current || !markersLayerRef.current || !routeLayerRef.current) return;
 
     const L = leaflet;
 
     // Nettoyer les anciens marqueurs
     markersLayerRef.current.clearLayers();
+    routeLayerRef.current.clearLayers();
 
     const points: [number, number][] = [];
 
@@ -165,22 +178,28 @@ export const OrderTrackingMap: React.FC<OrderTrackingMapProps> = ({
       points.push(pos);
     }
 
-    // Tracé simple entre livreur et client
-    if (driverLocation && customerLocation) {
-      const route: [number, number][] = [
+    // Draw route from OpenRouteService if available
+    if (route && route.coordinates && route.coordinates.length > 0) {
+      const polyline = L.polyline(route.coordinates as [number, number][], {
+        color: "#FF8A00",
+        weight: 5,
+        opacity: 0.9,
+        lineJoin: "round",
+      });
+      routeLayerRef.current.addLayer(polyline);
+    } else if (driverLocation && customerLocation) {
+      // Fallback to direct line
+      const directLine: [number, number][] = [
         [driverLocation.lat, driverLocation.lng],
         [customerLocation.lat, customerLocation.lng],
       ];
-      setRoutePoints(route);
-      const polyline = L.polyline(route, {
+      const polyline = L.polyline(directLine, {
         color: "#FF8A00",
         weight: 4,
-        opacity: 0.8,
+        opacity: 0.6,
         dashArray: "10, 10",
       });
-      markersLayerRef.current.addLayer(polyline);
-    } else {
-      setRoutePoints([]);
+      routeLayerRef.current.addLayer(polyline);
     }
 
     // Ajuster la vue pour englober tous les points
@@ -188,7 +207,7 @@ export const OrderTrackingMap: React.FC<OrderTrackingMapProps> = ({
       const bounds = L.latLngBounds(points);
       mapInstanceRef.current.fitBounds(bounds, { padding: [40, 40], maxZoom: 16 });
     }
-  }, [leaflet, driverLocation, restaurantLocation, customerLocation]);
+  }, [leaflet, driverLocation, restaurantLocation, customerLocation, route]);
 
   const statusConfig: Record<string, { label: string; color: string }> = {
     pending: { label: "En attente", color: "bg-yellow-500" },
@@ -213,12 +232,20 @@ export const OrderTrackingMap: React.FC<OrderTrackingMapProps> = ({
             <Badge className={`${currentStatus.color} text-white px-3 py-1`}>
               {currentStatus.label}
             </Badge>
-            {estimatedTime && (
+            {route && route.duration > 0 ? (
+              <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                <Navigation className="h-4 w-4" />
+                <span>{route.distance} km</span>
+                <span className="mx-1">•</span>
+                <Clock className="h-4 w-4" />
+                <span>~{route.duration} min</span>
+              </div>
+            ) : estimatedTime ? (
               <div className="flex items-center gap-1 text-sm text-muted-foreground">
                 <Clock className="h-4 w-4" />
                 <span>~{estimatedTime}</span>
               </div>
-            )}
+            ) : null}
           </div>
         </div>
 
