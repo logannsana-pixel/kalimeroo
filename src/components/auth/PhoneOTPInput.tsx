@@ -16,26 +16,26 @@ interface PhoneOTPInputProps {
 
 /**
  * Normalise un numéro congolais en format E.164
- * Ex:
- *  - 06 12 34 56 7 → +24261234567
- *  - 61234567     → +24261234567
+ * Entrées acceptées :
+ *  - 04xxxxxxx | 05xxxxxxx | 06xxxxxxx
+ *  - 4xxxxxxx  | 5xxxxxxx  | 6xxxxxxx
+ *  - +2424xxxxxxx | +2425xxxxxxx | +2426xxxxxxx
+ *  - 2424xxxxxxx  | 2425xxxxxxx  | 2426xxxxxxx
+ * Sortie : +242XXXXXXXX (8 chiffres après +242)
  */
 const normalizePhone = (raw: string): string => {
-  let p = raw.replace(/\D/g, "");
+  const digits = raw.replace(/\D/g, "");
+  let national = digits.startsWith("242") ? digits.slice(3) : digits;
 
-  if (p.startsWith("0") && p.length === 9) {
-    return "+242" + p.slice(1);
+  if (national.startsWith("0") && national.length === 9) {
+    national = national.slice(1);
   }
 
-  if (p.startsWith("6") && p.length === 8) {
-    return "+242" + p;
+  if (!/^[456]\d{7}$/.test(national)) {
+    throw new Error("Numéro congolais invalide");
   }
 
-  if (p.startsWith("242") && p.length === 11) {
-    return "+" + p;
-  }
-
-  throw new Error("Numéro congolais invalide");
+  return "+242" + national;
 };
 
 export const PhoneOTPInput = ({ phone, onPhoneChange, onVerified, disabled }: PhoneOTPInputProps) => {

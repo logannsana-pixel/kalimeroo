@@ -3,17 +3,29 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Content-Type": "application/json",
 };
 
-// Normalisation et validation Congo mobile
+// Normalisation et validation Congo mobile (accepte plusieurs formats)
+// Entrées acceptées :
+// - 04xxxxxxx | 05xxxxxxx | 06xxxxxxx
+// - 4xxxxxxx  | 5xxxxxxx  | 6xxxxxxx
+// - +2424xxxxxxx | +2425xxxxxxx | +2426xxxxxxx
+// - 2424xxxxxxx  | 2425xxxxxxx  | 2426xxxxxxx
+// Sortie : +242XXXXXXXX (8 chiffres après +242)
 function normalizeCongoMobile(raw: string): string {
-  let p = raw.replace(/[\s\-\(\)]/g, "");
-  if (p.startsWith("0")) p = p.slice(1);
-  // Mobile Congo : 04, 05 ou 06
-  if (!p.match(/^(4|5|6)\d{7}$/)) {
+  const digits = raw.replace(/\D/g, "");
+  let national = digits.startsWith("242") ? digits.slice(3) : digits;
+
+  if (national.startsWith("0") && national.length === 9) {
+    national = national.slice(1);
+  }
+
+  if (!/^[456]\d{7}$/.test(national)) {
     throw new Error("Seuls les numéros mobiles sont acceptés (04xxxxxxx, 05xxxxxxx, 06xxxxxxx)");
   }
-  return "+242" + p;
+
+  return "+242" + national;
 }
 
 serve(async (req) => {
@@ -26,7 +38,7 @@ serve(async (req) => {
     if (!phone || !code) {
       return new Response(JSON.stringify({ error: "Phone number and code are required" }), {
         status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: corsHeaders,
       });
     }
 
@@ -37,11 +49,19 @@ serve(async (req) => {
     if (!accountSid || !authToken || !serviceSid) {
       return new Response(JSON.stringify({ error: "Server configuration error" }), {
         status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: corsHeaders,
       });
     }
 
-    const formattedPhone = normalizeCongoMobile(phone);
+    let formattedPhone: string;
+    try {
+      formattedPhone = normalizeCongoMobile(phone);
+    } catch (err: any) {
+      return new Response(JSON.stringify({ error: err.message }), {
+        status: 400,
+        headers: corsHeaders,
+      });
+    }
 
     // Twilio Verification Check
     const twilioUrl = `https://verify.twilio.com/v2/Services/${serviceSid}/VerificationCheck`;
@@ -53,16 +73,17 @@ serve(async (req) => {
       },
       body: new URLSearchParams({
         To: formattedPhone,
-        Code: code,
+        Code: String(code),
       }),
     });
 
     const data = await response.json();
+
     if (!response.ok) {
       console.error("Twilio error:", data);
       return new Response(JSON.stringify({ error: data.message || "Failed to verify OTP" }), {
         status: response.status,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: corsHeaders,
       });
     }
 
@@ -75,12 +96,11 @@ serve(async (req) => {
         }),
         {
           status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          headers: corsHeaders,
         },
       );
     }
 
-    // ✅ OTP validé → renvoie juste succès
     return new Response(
       JSON.stringify({
         success: true,
@@ -88,14 +108,15 @@ serve(async (req) => {
         message: "Numéro vérifié avec succès",
       }),
       {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+        headers: corsHeaders,
       },
     );
   } catch (error) {
     console.error("Error in verify-otp:", error);
     return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: corsHeaders,
     });
   }
 });

@@ -6,20 +6,30 @@ const corsHeaders = {
   "Content-Type": "application/json",
 };
 
-// ✅ Normalisation mobile Congo (FORMAT OFFICIEL TWILIO)
+// ✅ Normalisation mobile Congo (accepte plusieurs formats)
+// Entrées acceptées :
+// - 04xxxxxxx | 05xxxxxxx | 06xxxxxxx
+// - 4xxxxxxx  | 5xxxxxxx  | 6xxxxxxx
+// - +2424xxxxxxx | +2425xxxxxxx | +2426xxxxxxx
+// - 2424xxxxxxx  | 2425xxxxxxx  | 2426xxxxxxx
+// Sortie : +242XXXXXXXX (8 chiffres après +242)
 function normalizeCongoMobile(raw: string): string {
-  const cleaned = raw.replace(/[\s\-\(\)]/g, "");
+  const digits = raw.replace(/\D/g, "");
 
-  // L'utilisateur DOIT entrer : 04xxxxxxx | 05xxxxxxx | 06xxxxxxx
-  if (!/^0[456]\d{7}$/.test(cleaned)) {
+  // retire l'indicatif si présent
+  let national = digits.startsWith("242") ? digits.slice(3) : digits;
+
+  // retire le 0 de tête si l'utilisateur l'a saisi (format local 0[456]xxxxxxx)
+  if (national.startsWith("0") && national.length === 9) {
+    national = national.slice(1);
+  }
+
+  // au Congo : 8 chiffres significatifs, commencent par 4/5/6
+  if (!/^[456]\d{7}$/.test(national)) {
     throw new Error("Numéro mobile invalide (04xxxxxxx, 05xxxxxxx, 06xxxxxxx)");
   }
 
-  // 🔥 SUPPRESSION DU 0 NATIONAL (OBLIGATOIRE)
-  const withoutZero = cleaned.slice(1);
-
-  // FORMAT E.164
-  return "+242" + withoutZero;
+  return "+242" + national;
 }
 
 serve(async (req) => {
