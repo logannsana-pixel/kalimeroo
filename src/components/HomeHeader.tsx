@@ -1,4 +1,4 @@
-import { Search, Gift, Menu, ChevronDown, SlidersHorizontal } from "lucide-react";
+import { Search, Menu, ChevronDown, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "@/contexts/LocationContext";
 import { useNavigate } from "react-router-dom";
@@ -12,13 +12,13 @@ export const HomeHeader = () => {
 
   return (
     <header className="bg-background text-foreground">
-      {/* Top Row - Premium Dark Style */}
-      <div className="flex items-center justify-between mb-5">
+      {/* Top Row */}
+      <div className="flex items-center justify-between mb-4">
         {/* Menu Button */}
         <Button
           size="icon"
           variant="ghost"
-          className="h-11 w-11 rounded-full bg-secondary hover:bg-secondary/80 transition-all duration-200"
+          className="h-11 w-11 rounded-full bg-secondary hover:bg-secondary/80 transition-all"
         >
           <Menu className="h-5 w-5 text-foreground" />
         </Button>
@@ -26,9 +26,9 @@ export const HomeHeader = () => {
         {/* Location - Center */}
         <button
           onClick={openModal}
-          className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-all duration-200 hover:opacity-80"
+          className="flex items-center gap-2 px-3 py-2 text-sm font-medium transition-all hover:opacity-80"
         >
-          <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+          <span className="w-2 h-2 rounded-full bg-primary" />
           <span className="text-foreground">{city || "Choisir une ville"}</span>
           <ChevronDown className="h-4 w-4 text-muted-foreground" />
         </button>
@@ -41,7 +41,7 @@ export const HomeHeader = () => {
             <Button 
               size="icon" 
               variant="ghost" 
-              className="h-11 w-11 rounded-full bg-secondary hover:bg-secondary/80 transition-all duration-200"
+              className="h-11 w-11 rounded-full bg-secondary hover:bg-secondary/80 transition-all"
             >
               <SlidersHorizontal className="h-5 w-5 text-foreground" />
             </Button>
@@ -49,10 +49,10 @@ export const HomeHeader = () => {
         </div>
       </div>
 
-      {/* Search Bar - Premium Style */}
+      {/* Search Bar */}
       <button
         onClick={() => navigate("/restaurants")}
-        className="w-full flex items-center gap-3 bg-secondary hover:bg-secondary/80 px-5 py-3.5 rounded-full text-muted-foreground transition-all duration-200"
+        className="w-full flex items-center gap-3 bg-secondary hover:bg-secondary/80 px-4 py-3 rounded-full text-muted-foreground transition-all"
       >
         <Search className="h-5 w-5" />
         <span className="flex-1 text-left text-sm">Rechercher</span>

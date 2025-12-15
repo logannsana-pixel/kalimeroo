@@ -6,75 +6,58 @@ import { useLocation } from "@/contexts/LocationContext";
 
 interface CategoryConfig {
   icon: string;
-  gradient: string;
 }
 
-// Comprehensive cuisine categories with unique icons and gradients
 const categoryData: Record<string, CategoryConfig> = {
-  // Fast Food & Street Food
-  "Burger": { icon: "🍔", gradient: "from-amber-500 to-orange-600" },
-  "Fast Food": { icon: "🍟", gradient: "from-yellow-500 to-amber-600" },
-  "Pizza": { icon: "🍕", gradient: "from-red-500 to-orange-600" },
-  "Sandwich": { icon: "🥪", gradient: "from-amber-400 to-yellow-500" },
-  "Tacos": { icon: "🌮", gradient: "from-orange-500 to-red-600" },
-  "Kebab": { icon: "🥙", gradient: "from-amber-600 to-orange-700" },
-  "Hot-Dog": { icon: "🌭", gradient: "from-red-400 to-amber-500" },
-  
-  // African Cuisines
-  "Africaine": { icon: "🍲", gradient: "from-amber-600 to-yellow-700" },
-  "Congolaise": { icon: "🥘", gradient: "from-green-600 to-emerald-700" },
-  "Sénégalaise": { icon: "🍛", gradient: "from-yellow-600 to-orange-700" },
-  "Camerounaise": { icon: "🫕", gradient: "from-green-500 to-teal-600" },
-  "Ivoirienne": { icon: "🥗", gradient: "from-orange-500 to-amber-600" },
-  "Marocaine": { icon: "🫖", gradient: "from-red-600 to-orange-700" },
-  "Éthiopienne": { icon: "🥙", gradient: "from-yellow-700 to-amber-800" },
-  
-  // Asian Cuisines
-  "Chinoise": { icon: "🥡", gradient: "from-red-600 to-rose-700" },
-  "Japonaise": { icon: "🍣", gradient: "from-pink-500 to-rose-600" },
-  "Coréenne": { icon: "🍜", gradient: "from-red-500 to-pink-600" },
-  "Thaïlandaise": { icon: "🍲", gradient: "from-green-500 to-lime-600" },
-  "Vietnamienne": { icon: "🍜", gradient: "from-lime-500 to-green-600" },
-  "Indienne": { icon: "🍛", gradient: "from-orange-600 to-red-700" },
-  "Asiatique": { icon: "🥢", gradient: "from-red-500 to-amber-600" },
-  
-  // European Cuisines  
-  "Française": { icon: "🥐", gradient: "from-blue-500 to-indigo-600" },
-  "Italienne": { icon: "🍝", gradient: "from-green-600 to-red-600" },
-  "Espagnole": { icon: "🥘", gradient: "from-red-600 to-yellow-600" },
-  "Grecque": { icon: "🥗", gradient: "from-blue-600 to-cyan-600" },
-  "Libanaise": { icon: "🧆", gradient: "from-green-500 to-emerald-600" },
-  "Turque": { icon: "🍢", gradient: "from-red-600 to-orange-600" },
-  
-  // American Cuisines
-  "Américaine": { icon: "🥩", gradient: "from-blue-600 to-red-600" },
-  "Mexicaine": { icon: "🌯", gradient: "from-green-600 to-red-600" },
-  "Brésilienne": { icon: "🍖", gradient: "from-green-500 to-yellow-500" },
-  
-  // Food Types
-  "Poulet": { icon: "🍗", gradient: "from-amber-500 to-orange-600" },
-  "Grillades": { icon: "🥩", gradient: "from-red-600 to-orange-700" },
-  "Poisson": { icon: "🐟", gradient: "from-blue-500 to-cyan-600" },
-  "Fruits de mer": { icon: "🦐", gradient: "from-cyan-500 to-blue-600" },
-  "Végétarien": { icon: "🥬", gradient: "from-green-500 to-emerald-600" },
-  "Vegan": { icon: "🌱", gradient: "from-green-600 to-lime-600" },
-  "Healthy": { icon: "🥗", gradient: "from-lime-500 to-green-600" },
-  "Bio": { icon: "🌿", gradient: "from-emerald-500 to-green-600" },
-  
-  // Desserts & Drinks
-  "Desserts": { icon: "🍰", gradient: "from-pink-500 to-rose-600" },
-  "Pâtisserie": { icon: "🧁", gradient: "from-pink-400 to-purple-500" },
-  "Glaces": { icon: "🍦", gradient: "from-cyan-400 to-pink-500" },
-  "Café": { icon: "☕", gradient: "from-amber-700 to-orange-800" },
-  "Jus & Smoothies": { icon: "🧃", gradient: "from-orange-500 to-yellow-500" },
-  "Boulangerie": { icon: "🥖", gradient: "from-amber-500 to-yellow-600" },
-  
-  // Specialty
-  "Sushi": { icon: "🍱", gradient: "from-pink-500 to-red-600" },
-  "Ramen": { icon: "🍜", gradient: "from-amber-600 to-orange-700" },
-  "Curry": { icon: "🍛", gradient: "from-yellow-600 to-orange-700" },
-  "Brunch": { icon: "🥞", gradient: "from-amber-400 to-orange-500" },
-  "Petit-déjeuner": { icon: "🍳", gradient: "from-yellow-400 to-amber-500" },
+  "Burger": { icon: "🍔" },
+  "Fast Food": { icon: "🍟" },
+  "Pizza": { icon: "🍕" },
+  "Sandwich": { icon: "🥪" },
+  "Tacos": { icon: "🌮" },
+  "Kebab": { icon: "🥙" },
+  "Hot-Dog": { icon: "🌭" },
+  "Africaine": { icon: "🍲" },
+  "Congolaise": { icon: "🥘" },
+  "Sénégalaise": { icon: "🍛" },
+  "Camerounaise": { icon: "🫕" },
+  "Ivoirienne": { icon: "🥗" },
+  "Marocaine": { icon: "🫖" },
+  "Éthiopienne": { icon: "🥙" },
+  "Chinoise": { icon: "🥡" },
+  "Japonaise": { icon: "🍣" },
+  "Coréenne": { icon: "🍜" },
+  "Thaïlandaise": { icon: "🍲" },
+  "Vietnamienne": { icon: "🍜" },
+  "Indienne": { icon: "🍛" },
+  "Asiatique": { icon: "🥢" },
+  "Française": { icon: "🥐" },
+  "Italienne": { icon: "🍝" },
+  "Espagnole": { icon: "🥘" },
+  "Grecque": { icon: "🥗" },
+  "Libanaise": { icon: "🧆" },
+  "Turque": { icon: "🍢" },
+  "Américaine": { icon: "🥩" },
+  "Mexicaine": { icon: "🌯" },
+  "Brésilienne": { icon: "🍖" },
+  "Poulet": { icon: "🍗" },
+  "Grillades": { icon: "🥩" },
+  "Poisson": { icon: "🐟" },
+  "Fruits de mer": { icon: "🦐" },
+  "Végétarien": { icon: "🥬" },
+  "Vegan": { icon: "🌱" },
+  "Healthy": { icon: "🥗" },
+  "Bio": { icon: "🌿" },
+  "Desserts": { icon: "🍰" },
+  "Pâtisserie": { icon: "🧁" },
+  "Glaces": { icon: "🍦" },
+  "Café": { icon: "☕" },
+  "Jus & Smoothies": { icon: "🧃" },
+  "Boulangerie": { icon: "🥖" },
+  "Sushi": { icon: "🍱" },
+  "Ramen": { icon: "🍜" },
+  "Curry": { icon: "🍛" },
+  "Brunch": { icon: "🥞" },
+  "Petit-déjeuner": { icon: "🍳" },
 };
 
 export const FoodCategories = () => {
@@ -93,14 +76,12 @@ export const FoodCategories = () => {
         .eq("is_active", true);
 
       if (data) {
-        // Get unique categories, filter nulls, and remove duplicates
         const uniqueCategories = [...new Set(
           data
             .map((r) => r.cuisine_type)
             .filter((c): c is string => Boolean(c))
         )];
         
-        // Sort by whether we have icon data, then alphabetically
         const sortedCategories = uniqueCategories.sort((a, b) => {
           const hasA = categoryData[a] ? 0 : 1;
           const hasB = categoryData[b] ? 0 : 1;
@@ -108,7 +89,7 @@ export const FoodCategories = () => {
           return a.localeCompare(b);
         });
         
-        setCategories(sortedCategories.slice(0, 12));
+        setCategories(sortedCategories.slice(0, 10));
       }
       setLoading(false);
     };
@@ -127,12 +108,12 @@ export const FoodCategories = () => {
   if (loading) {
     return (
       <section className="px-4 py-4">
-        <Skeleton className="h-5 w-24 mb-3" />
-        <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
-          {[...Array(8)].map((_, i) => (
-            <div key={i} className="flex flex-col items-center gap-2 min-w-[72px]">
-              <Skeleton className="w-16 h-16 rounded-2xl" />
-              <Skeleton className="w-12 h-3" />
+        <Skeleton className="h-5 w-24 mb-4 bg-secondary" />
+        <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="flex flex-col items-center gap-2 min-w-[64px]">
+              <Skeleton className="w-14 h-14 rounded-full bg-secondary" />
+              <Skeleton className="w-12 h-3 bg-secondary" />
             </div>
           ))}
         </div>
@@ -144,40 +125,35 @@ export const FoodCategories = () => {
 
   return (
     <section className="px-4 py-4">
-      <h2 className="text-base font-bold mb-4 text-foreground">Categories</h2>
+      <h2 className="text-base font-bold mb-4 text-foreground">Catégories</h2>
 
       <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
-        {/* All Category - First with primary active state */}
+        {/* All Category */}
         <button
           onClick={() => hasAddress ? navigate("/restaurants") : openModal()}
-          className="flex flex-col items-center gap-2 min-w-[64px] transition-all duration-200 hover:scale-105 active:scale-95"
+          className="flex flex-col items-center gap-2 min-w-[64px] transition-all hover:scale-105 active:scale-95"
         >
-          <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center text-xl shadow-glow ring-2 ring-primary/30">
+          <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center text-xl shadow-glow">
             🍽️
           </div>
-          <span className="text-xs font-semibold text-primary">
-            All
-          </span>
+          <span className="text-xs font-semibold text-primary">Tout</span>
         </button>
 
         {categories.map((category) => {
-          const config = categoryData[category] || { 
-            icon: "🍽️", 
-            gradient: "from-gray-500 to-gray-600" 
-          };
+          const config = categoryData[category] || { icon: "🍽️" };
 
           return (
             <button
               key={category}
               onClick={() => handleClick(category)}
-              className={`flex flex-col items-center gap-2 min-w-[64px] transition-all duration-200 ${
+              className={`flex flex-col items-center gap-2 min-w-[64px] transition-all ${
                 !hasAddress ? "opacity-50" : "hover:scale-105 active:scale-95"
               }`}
             >
-              <div className="w-14 h-14 rounded-full bg-secondary flex items-center justify-center text-xl transition-all duration-200 hover:bg-secondary/80">
+              <div className="w-14 h-14 rounded-full bg-secondary flex items-center justify-center text-xl hover:bg-secondary/80 transition-colors">
                 {config.icon}
               </div>
-              <span className="text-xs font-medium text-center text-muted-foreground line-clamp-1 w-14">
+              <span className="text-xs font-medium text-muted-foreground text-center line-clamp-1 w-14">
                 {category}
               </span>
             </button>
