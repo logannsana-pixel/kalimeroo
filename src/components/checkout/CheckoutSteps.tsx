@@ -324,7 +324,7 @@ export function CheckoutSteps({
               </div>
             </label>
 
-            <label
+            {/* <label
               htmlFor="mobile_money"
               className={`flex items-center gap-3 p-4 border-2 rounded-2xl cursor-pointer transition-all ${
                 formData.paymentMethod === "mobile_money" ? "border-primary bg-primary/5" : "border-border"
@@ -336,7 +336,7 @@ export function CheckoutSteps({
                 <p className="font-medium">Mobile Money</p>
                 <p className="text-xs text-muted-foreground">Orange, Airtel, MTN</p>
               </div>
-            </label>
+            </label> */}
           </RadioGroup>
 
           {formData.paymentMethod === "mobile_money" && (
