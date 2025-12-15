@@ -13,6 +13,7 @@ import { AdminOrdersTab } from "@/components/admin/AdminOrdersTab";
 import { AdminUsersTab } from "@/components/admin/AdminUsersTab";
 import { AdminPaymentsTab } from "@/components/admin/AdminPaymentsTab";
 import { AdminAnalyticsTab } from "@/components/admin/AdminAnalyticsTab";
+import { AdminAdvancedAnalyticsTab } from "@/components/admin/AdminAdvancedAnalyticsTab";
 import { AdminSupportTab } from "@/components/admin/AdminSupportTab";
 import { AdminMarketingTab } from "@/components/admin/AdminMarketingTab";
 import { AdminSettingsTab } from "@/components/admin/AdminSettingsTab";
@@ -28,6 +29,7 @@ const tabTitles: Record<AdminTab, string> = {
   users: 'Utilisateurs',
   payments: 'Paiements',
   analytics: 'Analytics',
+  'advanced-analytics': 'Analytics Avancés',
   support: 'Support',
   marketing: 'Marketing',
   settings: 'Paramètres',
@@ -114,6 +116,8 @@ export default function AdminDashboard() {
         return <AdminPaymentsTab />;
       case 'analytics':
         return <AdminAnalyticsTab />;
+      case 'advanced-analytics':
+        return <AdminAdvancedAnalyticsTab />;
       case 'support':
         return <AdminSupportTab />;
       case 'marketing':
