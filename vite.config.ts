@@ -45,17 +45,20 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.ico", "robots.txt"],
+      includeAssets: ["pwa-192x192.png", "robots.txt"],
       manifest: {
-        name: "DeliverEat - Livraison de repas",
-        short_name: "DeliverEat",
-        description: "Manger comme au restaurant, sans sortir de chez soi",
-        theme_color: "#ea580c",
-        background_color: "#ffffff",
+        name: "Kalimero - Livraison de repas au Congo",
+        short_name: "Kalimero",
+        description: "Manger comme au restaurant, sans sortir de chez soi. Livraison rapide à Brazzaville et Pointe-Noire.",
+        theme_color: "#FF8A00",
+        background_color: "#0a0a0a",
         display: "standalone",
         orientation: "portrait",
         scope: "/",
         start_url: "/",
+        categories: ["food", "shopping", "lifestyle"],
+        lang: "fr",
+        dir: "ltr",
         icons: [
           {
             src: "/pwa-192x192.png",
@@ -72,6 +75,20 @@ export default defineConfig(({ mode }) => ({
             sizes: "512x512",
             type: "image/png",
             purpose: "maskable",
+          },
+        ],
+        shortcuts: [
+          {
+            name: "Restaurants",
+            short_name: "Restos",
+            url: "/restaurants",
+            icons: [{ src: "/pwa-192x192.png", sizes: "192x192" }],
+          },
+          {
+            name: "Mes commandes",
+            short_name: "Commandes",
+            url: "/orders",
+            icons: [{ src: "/pwa-192x192.png", sizes: "192x192" }],
           },
         ],
       },

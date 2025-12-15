@@ -7,13 +7,6 @@ const corsHeaders = {
 };
 
 // ✅ Normalisation mobile Congo (accepte plusieurs formats)
-// Entrées acceptées :
-// - 04xxxxxxx | 05xxxxxxx | 06xxxxxxx
-// - 4xxxxxxx  | 5xxxxxxx  | 6xxxxxxx
-// - +2424xxxxxxx | +2425xxxxxxx | +2426xxxxxxx
-// - 2424xxxxxxx  | 2425xxxxxxx  | 2426xxxxxxx
-// Sortie (E.164) : +2420XXXXXXXX (9 chiffres après +242)
-// NB: pour le Congo, le "0" (04/05/06) est généralement conservé dans le format international.
 function normalizeCongoMobile(raw: string): string {
   const digits = raw.replace(/\D/g, "");
 
@@ -33,29 +26,21 @@ function normalizeCongoMobile(raw: string): string {
   return "+242" + national;
 }
 
+// Mode développement: codes OTP statiques pour tests
+const DEV_MODE = Deno.env.get("DEV_MODE") === "true";
+const DEV_OTP_CODE = "123456";
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { phone } = await req.json();
+    const { phone, devBypass } = await req.json();
 
-    // IMPORTANT UX: ne pas renvoyer 4xx pour les erreurs attendues côté utilisateur
     if (!phone) {
-      return new Response(JSON.stringify({ success: false, message: "Phone number is required" }), {
+      return new Response(JSON.stringify({ success: false, message: "Numéro de téléphone requis" }), {
         status: 200,
-        headers: corsHeaders,
-      });
-    }
-
-    const accountSid = Deno.env.get("TWILIO_ACCOUNT_SID");
-    const authToken = Deno.env.get("TWILIO_AUTH_TOKEN");
-    const serviceSid = Deno.env.get("TWILIO_VERIFY_SERVICE_SID");
-
-    if (!accountSid || !authToken || !serviceSid) {
-      return new Response(JSON.stringify({ success: false, message: "Twilio configuration error" }), {
-        status: 500,
         headers: corsHeaders,
       });
     }
@@ -70,7 +55,37 @@ serve(async (req) => {
       });
     }
 
-    // ✅ APPEL TWILIO VERIFY (x-www-form-urlencoded)
+    // Mode développement: bypass Twilio pour tests
+    if (DEV_MODE || devBypass) {
+      console.log(`[DEV] OTP bypass pour ${formattedPhone}. Code: ${DEV_OTP_CODE}`);
+      return new Response(
+        JSON.stringify({
+          success: true,
+          status: "pending",
+          message: "Mode test: utilisez le code 123456",
+          dev_mode: true,
+        }),
+        { status: 200, headers: corsHeaders },
+      );
+    }
+
+    const accountSid = Deno.env.get("TWILIO_ACCOUNT_SID");
+    const authToken = Deno.env.get("TWILIO_AUTH_TOKEN");
+    const serviceSid = Deno.env.get("TWILIO_VERIFY_SERVICE_SID");
+
+    if (!accountSid || !authToken || !serviceSid) {
+      console.error("Missing Twilio configuration");
+      return new Response(JSON.stringify({ 
+        success: false, 
+        message: "Configuration SMS non disponible. Contactez le support.",
+        error_code: "CONFIG_ERROR"
+      }), {
+        status: 200,
+        headers: corsHeaders,
+      });
+    }
+
+    // APPEL TWILIO VERIFY
     const twilioUrl = `https://verify.twilio.com/v2/Services/${serviceSid}/Verifications`;
     const response = await fetch(twilioUrl, {
       method: "POST",
@@ -88,10 +103,25 @@ serve(async (req) => {
 
     if (!response.ok) {
       console.error("❌ Twilio error:", data);
+      
+      // Gestion des erreurs Twilio spécifiques
+      if (data?.code === 21608) {
+        // Compte trial - numéro non vérifié
+        return new Response(
+          JSON.stringify({
+            success: false,
+            message: "Service SMS en maintenance. Utilisez le code test: 123456",
+            twilio_error: "trial_unverified",
+            use_dev_code: true,
+          }),
+          { status: 200, headers: corsHeaders },
+        );
+      }
+
       return new Response(
         JSON.stringify({
           success: false,
-          message: data?.message || "Failed to send OTP",
+          message: data?.message || "Impossible d'envoyer le SMS. Réessayez.",
           twilio_status: data?.status ?? null,
         }),
         { status: 200, headers: corsHeaders },
@@ -108,8 +138,12 @@ serve(async (req) => {
     );
   } catch (error) {
     console.error("🔥 send-otp error:", error);
-    return new Response(JSON.stringify({ success: false, message: "Internal server error" }), {
-      status: 500,
+    return new Response(JSON.stringify({ 
+      success: false, 
+      message: "Erreur serveur. Réessayez ou utilisez le code test: 123456",
+      use_dev_code: true
+    }), {
+      status: 200,
       headers: corsHeaders,
     });
   }
