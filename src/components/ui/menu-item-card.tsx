@@ -26,6 +26,7 @@ const MenuItemCard = React.forwardRef<HTMLDivElement, MenuItemCardProps>(
     return (
       <div
         ref={ref}
+        data-testid="menu-item"
         onClick={onClick}
         className={cn(
           "flex gap-3 py-4 cursor-pointer transition-all duration-200",

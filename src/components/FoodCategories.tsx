@@ -145,6 +145,7 @@ export const FoodCategories = () => {
           return (
             <button
               key={category}
+              data-testid="food-category"
               onClick={() => handleClick(category)}
               className={`flex flex-col items-center gap-2 min-w-[64px] transition-all ${
                 !hasAddress ? "opacity-50" : "hover:scale-105 active:scale-95"
