@@ -696,6 +696,7 @@ export type Database = {
           total: number
           updated_at: string
           user_id: string
+          voice_note_url: string | null
         }
         Insert: {
           created_at?: string
@@ -713,6 +714,7 @@ export type Database = {
           total: number
           updated_at?: string
           user_id: string
+          voice_note_url?: string | null
         }
         Update: {
           created_at?: string
@@ -730,6 +732,7 @@ export type Database = {
           total?: number
           updated_at?: string
           user_id?: string
+          voice_note_url?: string | null
         }
         Relationships: [
           {
