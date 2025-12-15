@@ -4,9 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { congoDistricts, cities } from "@/data/congoLocations";
-import { ChevronLeft, ChevronRight, Phone, User, MapPin } from "lucide-react";
+import { ChevronLeft, ChevronRight, User, MapPin } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-import { Card } from "@/components/ui/card";
+import { PhoneOTPInput } from "./PhoneOTPInput";
 
 interface CustomerData {
   fullName: string;
@@ -23,14 +23,9 @@ interface CustomerSignupFormProps {
   onBack: () => void;
 }
 
-const validateCongoPhone = (phone: string): boolean => {
-  const cleanPhone = phone.replace(/[\s\-\(\)]/g, '');
-  const patterns = [/^0[456]\d{7}$/, /^\+242[0456]\d{7}$/, /^242[0456]\d{7}$/];
-  return patterns.some(pattern => pattern.test(cleanPhone));
-};
-
 export function CustomerSignupForm({ onSubmit, onBack }: CustomerSignupFormProps) {
   const [step, setStep] = useState(1);
+  const [phoneVerified, setPhoneVerified] = useState(false);
   const [formData, setFormData] = useState<CustomerData>({
     fullName: "",
     phone: "",
@@ -46,11 +41,7 @@ export function CustomerSignupForm({ onSubmit, onBack }: CustomerSignupFormProps
   const validateStep1 = () => {
     const newErrors: Partial<Record<keyof CustomerData, string>> = {};
     if (!formData.fullName.trim()) newErrors.fullName = "Le nom est requis";
-    if (!formData.phone.trim()) {
-      newErrors.phone = "Le téléphone est requis";
-    } else if (!validateCongoPhone(formData.phone)) {
-      newErrors.phone = "Numéro congolais invalide (ex: 06 123 45 67)";
-    }
+    if (!phoneVerified) newErrors.phone = "Veuillez vérifier votre numéro";
     if (formData.password.length < 6) newErrors.password = "Minimum 6 caractères";
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Les mots de passe ne correspondent pas";
@@ -93,33 +84,57 @@ export function CustomerSignupForm({ onSubmit, onBack }: CustomerSignupFormProps
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="fullName">Nom complet *</Label>
-              <Input id="fullName" value={formData.fullName} onChange={(e) => setFormData({ ...formData, fullName: e.target.value })} placeholder="Jean-Claude Makaya" className="h-12 rounded-xl" />
+              <Input 
+                id="fullName" 
+                value={formData.fullName} 
+                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })} 
+                placeholder="Jean-Claude Makaya" 
+                className="h-12 rounded-xl" 
+              />
               {errors.fullName && <p className="text-sm text-destructive">{errors.fullName}</p>}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="phone" className="flex items-center gap-2"><Phone className="w-4 h-4" /> Numéro de téléphone *</Label>
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg">🇨🇬</span>
-                <Input id="phone" type="tel" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} placeholder="06 123 45 67" className="h-12 rounded-xl pl-12" />
-              </div>
-              <p className="text-xs text-muted-foreground">Format: 06 XXX XX XX</p>
-              {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
-            </div>
+            <PhoneOTPInput
+              phone={formData.phone}
+              onPhoneChange={(phone) => setFormData({ ...formData, phone })}
+              onVerified={() => setPhoneVerified(true)}
+            />
+            {errors.phone && !phoneVerified && <p className="text-sm text-destructive">{errors.phone}</p>}
 
             <div className="space-y-2">
               <Label htmlFor="password">Mot de passe *</Label>
-              <Input id="password" type="password" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} placeholder="Minimum 6 caractères" className="h-12 rounded-xl" />
+              <Input 
+                id="password" 
+                type="password" 
+                value={formData.password} 
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })} 
+                placeholder="Minimum 6 caractères" 
+                className="h-12 rounded-xl" 
+              />
               {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">Confirmer le mot de passe *</Label>
-              <Input id="confirmPassword" type="password" value={formData.confirmPassword} onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })} placeholder="Retapez votre mot de passe" className="h-12 rounded-xl" />
+              <Input 
+                id="confirmPassword" 
+                type="password" 
+                value={formData.confirmPassword} 
+                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })} 
+                placeholder="Retapez votre mot de passe" 
+                className="h-12 rounded-xl" 
+              />
               {errors.confirmPassword && <p className="text-sm text-destructive">{errors.confirmPassword}</p>}
             </div>
 
-            <Button type="button" onClick={handleNext} className="w-full h-12 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600">Suivant <ChevronRight className="w-4 h-4 ml-2" /></Button>
+            <Button 
+              type="button" 
+              onClick={handleNext} 
+              className="w-full h-12 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600"
+              disabled={!phoneVerified}
+            >
+              Suivant <ChevronRight className="w-4 h-4 ml-2" />
+            </Button>
           </div>
         )}
 
@@ -144,17 +159,28 @@ export function CustomerSignupForm({ onSubmit, onBack }: CustomerSignupFormProps
 
             <div className="space-y-2">
               <Label>Complément d'adresse (optionnel)</Label>
-              <Input value={formData.addressComplement} onChange={(e) => setFormData({ ...formData, addressComplement: e.target.value })} placeholder="Rue, numéro, bâtiment..." className="h-12 rounded-xl" />
+              <Input 
+                value={formData.addressComplement} 
+                onChange={(e) => setFormData({ ...formData, addressComplement: e.target.value })} 
+                placeholder="Rue, numéro, bâtiment..." 
+                className="h-12 rounded-xl" 
+              />
             </div>
 
             <div className="flex gap-3">
-              <Button type="button" variant="outline" onClick={() => setStep(1)} className="flex-1 h-12 rounded-xl"><ChevronLeft className="w-4 h-4 mr-2" /> Retour</Button>
-              <Button type="submit" className="flex-1 h-12 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600">Créer mon compte 🎉</Button>
+              <Button type="button" variant="outline" onClick={() => setStep(1)} className="flex-1 h-12 rounded-xl">
+                <ChevronLeft className="w-4 h-4 mr-2" /> Retour
+              </Button>
+              <Button type="submit" className="flex-1 h-12 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600">
+                Créer mon compte 🎉
+              </Button>
             </div>
           </div>
         )}
       </form>
-      <Button variant="ghost" onClick={onBack} className="w-full text-muted-foreground"><ChevronLeft className="w-4 h-4 mr-2" /> Retour à la connexion</Button>
+      <Button variant="ghost" onClick={onBack} className="w-full text-muted-foreground">
+        <ChevronLeft className="w-4 h-4 mr-2" /> Retour à la connexion
+      </Button>
     </div>
   );
 }

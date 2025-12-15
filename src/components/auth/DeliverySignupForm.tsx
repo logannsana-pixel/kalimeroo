@@ -2,22 +2,18 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ChevronLeft, Bike, Phone } from "lucide-react";
+import { ChevronLeft, Bike } from "lucide-react";
 import { DistrictSelector } from "@/components/DistrictSelector";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { PhoneOTPInput } from "./PhoneOTPInput";
 
 interface DeliverySignupFormProps {
   onSubmit: (data: any) => void;
   onBack: () => void;
 }
 
-const validateCongoPhone = (phone: string): boolean => {
-  const cleanPhone = phone.replace(/[\s\-\(\)]/g, '');
-  const patterns = [/^0[456]\d{7}$/, /^\+242[0456]\d{7}$/, /^242[0456]\d{7}$/];
-  return patterns.some(pattern => pattern.test(cleanPhone));
-};
-
 export function DeliverySignupForm({ onSubmit, onBack }: DeliverySignupFormProps) {
+  const [phoneVerified, setPhoneVerified] = useState(false);
   const [formData, setFormData] = useState({
     fullName: "",
     phone: "",
@@ -28,14 +24,10 @@ export function DeliverySignupForm({ onSubmit, onBack }: DeliverySignupFormProps
     vehicleType: "moto",
     licenseNumber: "",
   });
-  const [phoneError, setPhoneError] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateCongoPhone(formData.phone)) {
-      setPhoneError("Numéro congolais invalide (ex: 06 123 45 67)");
-      return;
-    }
+    if (!phoneVerified) return;
     if (formData.password !== formData.confirmPassword) return;
     onSubmit(formData);
   };
@@ -45,22 +37,27 @@ export function DeliverySignupForm({ onSubmit, onBack }: DeliverySignupFormProps
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
           <Label>Nom complet *</Label>
-          <Input value={formData.fullName} onChange={(e) => setFormData({ ...formData, fullName: e.target.value })} placeholder="Jean-Claude Makaya" className="h-12 rounded-xl" required />
+          <Input 
+            value={formData.fullName} 
+            onChange={(e) => setFormData({ ...formData, fullName: e.target.value })} 
+            placeholder="Jean-Claude Makaya" 
+            className="h-12 rounded-xl" 
+            required 
+          />
         </div>
 
-        <div className="space-y-2">
-          <Label className="flex items-center gap-2"><Phone className="w-4 h-4" /> Numéro de téléphone *</Label>
-          <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg">🇨🇬</span>
-            <Input type="tel" value={formData.phone} onChange={(e) => { setFormData({ ...formData, phone: e.target.value }); setPhoneError(""); }} placeholder="06 123 45 67" className="h-12 rounded-xl pl-12" required />
-          </div>
-          <p className="text-xs text-muted-foreground">Format: 06 XXX XX XX</p>
-          {phoneError && <p className="text-sm text-destructive">{phoneError}</p>}
-        </div>
+        <PhoneOTPInput
+          phone={formData.phone}
+          onPhoneChange={(phone) => setFormData({ ...formData, phone })}
+          onVerified={() => setPhoneVerified(true)}
+        />
 
         <div className="space-y-2">
           <Label>Quartier de résidence *</Label>
-          <DistrictSelector selectedDistrict={formData.district} onSelect={(district, city) => setFormData({ ...formData, district, city })} />
+          <DistrictSelector 
+            selectedDistrict={formData.district} 
+            onSelect={(district, city) => setFormData({ ...formData, district, city })} 
+          />
         </div>
 
         <div className="space-y-2">
@@ -78,18 +75,43 @@ export function DeliverySignupForm({ onSubmit, onBack }: DeliverySignupFormProps
 
         <div className="space-y-2">
           <Label>Mot de passe *</Label>
-          <Input type="password" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} placeholder="Minimum 6 caractères" className="h-12 rounded-xl" required minLength={6} />
+          <Input 
+            type="password" 
+            value={formData.password} 
+            onChange={(e) => setFormData({ ...formData, password: e.target.value })} 
+            placeholder="Minimum 6 caractères" 
+            className="h-12 rounded-xl" 
+            required 
+            minLength={6} 
+          />
         </div>
 
         <div className="space-y-2">
           <Label>Confirmer le mot de passe *</Label>
-          <Input type="password" value={formData.confirmPassword} onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })} placeholder="Retapez le mot de passe" className="h-12 rounded-xl" required />
-          {formData.password !== formData.confirmPassword && formData.confirmPassword && <p className="text-sm text-destructive">Les mots de passe ne correspondent pas</p>}
+          <Input 
+            type="password" 
+            value={formData.confirmPassword} 
+            onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })} 
+            placeholder="Retapez le mot de passe" 
+            className="h-12 rounded-xl" 
+            required 
+          />
+          {formData.password !== formData.confirmPassword && formData.confirmPassword && (
+            <p className="text-sm text-destructive">Les mots de passe ne correspondent pas</p>
+          )}
         </div>
 
-        <Button type="submit" className="w-full h-12 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600" disabled={formData.password !== formData.confirmPassword}>S'inscrire comme Livreur 🚀</Button>
+        <Button 
+          type="submit" 
+          className="w-full h-12 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600" 
+          disabled={!phoneVerified || formData.password !== formData.confirmPassword}
+        >
+          S'inscrire comme Livreur 🚀
+        </Button>
       </form>
-      <Button variant="ghost" onClick={onBack} className="w-full text-muted-foreground"><ChevronLeft className="w-4 h-4 mr-2" /> Retour à la connexion</Button>
+      <Button variant="ghost" onClick={onBack} className="w-full text-muted-foreground">
+        <ChevronLeft className="w-4 h-4 mr-2" /> Retour à la connexion
+      </Button>
     </div>
   );
 }

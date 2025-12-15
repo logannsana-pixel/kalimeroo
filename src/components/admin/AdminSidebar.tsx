@@ -1,6 +1,6 @@
 import { 
   LayoutDashboard, Store, Truck, Package, Users, CreditCard, 
-  BarChart3, Settings, MessageSquare, Megaphone, Map, Shield, ChevronDown
+  BarChart3, Settings, MessageSquare, Megaphone, Map, Shield, ChevronDown, Gift
 } from "lucide-react";
 import {
   Sidebar,
@@ -24,7 +24,7 @@ import {
 export type AdminTab = 
   | 'overview' | 'restaurants' | 'drivers' | 'orders' 
   | 'users' | 'payments' | 'analytics' | 'support' 
-  | 'marketing' | 'settings' | 'live-map' | 'admins';
+  | 'marketing' | 'settings' | 'live-map' | 'admins' | 'affiliate';
 
 interface AdminSidebarProps {
   activeTab: AdminTab;
@@ -42,6 +42,7 @@ const mainMenuItems = [
 const financeMenuItems = [
   { id: 'payments' as AdminTab, label: 'Paiements', icon: CreditCard },
   { id: 'analytics' as AdminTab, label: 'Analytics', icon: BarChart3 },
+  { id: 'affiliate' as AdminTab, label: 'Affiliation', icon: Gift },
 ];
 
 const operationsMenuItems = [

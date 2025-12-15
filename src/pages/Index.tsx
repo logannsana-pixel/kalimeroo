@@ -5,7 +5,6 @@ import { LocationModal } from "@/components/LocationModal";
 import { HomeHeader } from "@/components/HomeHeader";
 import { ServiceTypes } from "@/components/ServiceTypes";
 import { FoodCategories } from "@/components/FoodCategories";
-import { PopularDishes } from "@/components/PopularDishes";
 import { OrderAgainSection } from "@/components/OrderAgainSection";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
