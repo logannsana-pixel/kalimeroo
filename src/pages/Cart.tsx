@@ -15,17 +15,20 @@ export default function Cart() {
   const { cartItems, loading, updateQuantity, removeFromCart, getCartTotal } = useCart();
 
   // Group items by restaurant
-  const groupedItems = cartItems.reduce((acc, item) => {
-    const restaurantId = item.menu_items?.restaurant_id;
-    if (!acc[restaurantId]) {
-      acc[restaurantId] = {
-        items: [],
-        restaurantName: "Restaurant",
-      };
-    }
-    acc[restaurantId].items.push(item);
-    return acc;
-  }, {} as Record<string, { items: typeof cartItems; restaurantName: string }>);
+  const groupedItems = cartItems.reduce(
+    (acc, item) => {
+      const restaurantId = item.menu_items?.restaurant_id;
+      if (!acc[restaurantId]) {
+        acc[restaurantId] = {
+          items: [],
+          restaurantName: "Restaurant",
+        };
+      }
+      acc[restaurantId].items.push(item);
+      return acc;
+    },
+    {} as Record<string, { items: typeof cartItems; restaurantName: string }>,
+  );
 
   if (loading) {
     return (
@@ -81,11 +84,7 @@ export default function Cart() {
               <p className="text-muted-foreground mb-8 max-w-xs mx-auto">
                 Parcourez nos restaurants et ajoutez vos plats préférés !
               </p>
-              <Button 
-                onClick={() => navigate("/restaurants")} 
-                size="lg" 
-                className="rounded-full px-8 btn-playful"
-              >
+              <Button onClick={() => navigate("/restaurants")} size="lg" className="rounded-full px-8 btn-playful">
                 Explorer les restaurants
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
@@ -114,12 +113,12 @@ export default function Cart() {
           <h1 className="text-xl md:text-2xl font-bold">Mon panier</h1>
           <span className="ml-auto text-sm text-muted-foreground">{cartItems.length} article(s)</span>
         </div>
-        
+
         {/* Cart Items */}
         <div className="space-y-4 mb-6">
           {cartItems.map((item, index) => (
-            <Card 
-              key={item.id} 
+            <Card
+              key={item.id}
               className="border-none shadow-soft rounded-3xl overflow-hidden animate-fade-in"
               style={{ animationDelay: `${index * 50}ms` }}
             >
@@ -133,7 +132,7 @@ export default function Cart() {
                       className="w-full h-full"
                     />
                   </div>
-                  
+
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start gap-2">
@@ -149,12 +148,12 @@ export default function Cart() {
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
-                    
+
                     <div className="flex items-center justify-between mt-3">
                       <span className="font-bold text-primary text-lg">
                         {(Number(item.menu_items?.price) * item.quantity).toFixed(0)} FCFA
                       </span>
-                      
+
                       {/* Quantity Controls */}
                       <div className="flex items-center gap-1 bg-muted/50 rounded-full p-1">
                         <Button
@@ -213,10 +212,7 @@ export default function Cart() {
                 <span className="font-bold text-primary">{total.toFixed(0)} FCFA</span>
               </div>
             </div>
-            <Button
-              className="w-full mt-6 h-14 rounded-2xl btn-playful text-lg"
-              onClick={() => navigate("/checkout")}
-            >
+            <Button className="w-full mt-6 h-14 rounded-2xl btn-playful text-lg" onClick={() => navigate("/checkout")}>
               Passer la commande
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
@@ -231,12 +227,9 @@ export default function Cart() {
             <p className="text-xs text-muted-foreground">Total</p>
             <p className="text-xl font-bold text-primary">{total.toFixed(0)} FCFA</p>
           </div>
-          <p className="text-xs text-muted-foreground">Frais de livraison inclus</p>
+          {/* <p className="text-xs text-muted-foreground">Frais de livraison inclus</p> */}
         </div>
-        <Button
-          className="w-full h-14 rounded-2xl btn-playful text-lg"
-          onClick={() => navigate("/checkout")}
-        >
+        <Button className="w-full h-14 rounded-2xl btn-playful text-lg" onClick={() => navigate("/checkout")}>
           Commander maintenant
           <ArrowRight className="ml-2 h-5 w-5" />
         </Button>
