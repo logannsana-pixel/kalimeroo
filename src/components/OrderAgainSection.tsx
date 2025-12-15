@@ -31,7 +31,8 @@ export const OrderAgainSection = () => {
 
       const { data: orders } = await supabase
         .from("orders")
-        .select(`
+        .select(
+          `
           id,
           restaurant_id,
           restaurants (name),
@@ -39,7 +40,8 @@ export const OrderAgainSection = () => {
             menu_item_id,
             menu_items (id, name, image_url, price)
           )
-        `)
+        `,
+        )
         .eq("user_id", user.id)
         .eq("status", "delivered")
         .order("created_at", { ascending: false })
@@ -82,7 +84,7 @@ export const OrderAgainSection = () => {
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl md:text-2xl font-bold flex items-center gap-2">
           <RotateCcw className="w-5 h-5 text-primary" />
-          Commander à nouveau
+          Commander encore
         </h2>
         <Button variant="ghost" size="sm" onClick={() => navigate("/orders")} className="rounded-full text-primary">
           Historique <ArrowRight className="ml-1 h-4 w-4" />
