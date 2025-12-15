@@ -7,12 +7,12 @@ export interface CartItem {
   id: string;
   quantity: number;
   menu_item_id: string;
-  selected_options?: any[];
+  selected_options?: any[] | null;
   menu_items: {
     id: string;
     name: string;
     price: number;
-    image_url: string;
+    image_url: string | null;
     restaurant_id: string;
   };
 }
@@ -81,7 +81,11 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         .eq("user_id", user.id);
 
       if (error) throw error;
-      setCartItems(data || []);
+      const items = (data || []).map((item: any) => ({
+        ...item,
+        selected_options: Array.isArray(item.selected_options) ? item.selected_options : [],
+      }));
+      setCartItems(items);
     } catch (err) {
       console.error("Error fetching cart:", err);
       toast.error("Erreur lors du chargement du panier");
