@@ -6,17 +6,20 @@ const corsHeaders = {
   "Content-Type": "application/json",
 };
 
-// 🔹 Normalisation et validation mobile Congo
+// ✅ Normalisation mobile Congo (FORMAT OFFICIEL TWILIO)
 function normalizeCongoMobile(raw: string): string {
-  const p = raw.replace(/[\s\-\(\)]/g, ""); // Supprime espaces, tirets, parenthèses
+  const cleaned = raw.replace(/[\s\-\(\)]/g, "");
 
-  // Vérifier format Congo : 04xxxxxxx, 05xxxxxxx, 06xxxxxxx
-  if (!p.match(/^0(4|5|6)\d{7}$/)) {
-    throw new Error("Seuls les numéros mobiles sont acceptés (04xxxxxxx, 05xxxxxxx, 06xxxxxxx)");
+  // L'utilisateur DOIT entrer : 04xxxxxxx | 05xxxxxxx | 06xxxxxxx
+  if (!/^0[456]\d{7}$/.test(cleaned)) {
+    throw new Error("Numéro mobile invalide (04xxxxxxx, 05xxxxxxx, 06xxxxxxx)");
   }
 
-  // On garde le 0 initial pour Twilio
-  return "+242" + p;
+  // 🔥 SUPPRESSION DU 0 NATIONAL (OBLIGATOIRE)
+  const withoutZero = cleaned.slice(1);
+
+  // FORMAT E.164
+  return "+242" + withoutZero;
 }
 
 serve(async (req) => {
@@ -36,13 +39,13 @@ serve(async (req) => {
     const serviceSid = Deno.env.get("TWILIO_VERIFY_SERVICE_SID");
 
     if (!accountSid || !authToken || !serviceSid) {
-      console.error("Missing Twilio credentials");
-      return new Response(JSON.stringify({ error: "Server configuration error" }), {
+      return new Response(JSON.stringify({ error: "Twilio configuration error" }), {
         status: 500,
         headers: corsHeaders,
       });
     }
 
+    // ✅ NORMALISATION UNIQUE
     let formattedPhone: string;
     try {
       formattedPhone = normalizeCongoMobile(phone);
@@ -50,24 +53,26 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: err.message }), { status: 400, headers: corsHeaders });
     }
 
-    // ✅ Envoi du SMS OTP via Twilio Verify
-    const twilioUrl = `https://verify.twilio.com/v2/Services/${serviceSid}/Verifications`;
-    const response = await fetch(twilioUrl, {
+    // 🔍 DEBUG (À GARDER JUSQU’À VALIDATION)
+    console.log("📞 PHONE SENT TO TWILIO =", formattedPhone);
+
+    // ✅ APPEL TWILIO VERIFY (FormData recommandé)
+    const form = new FormData();
+    form.append("To", formattedPhone);
+    form.append("Channel", "sms");
+
+    const response = await fetch(`https://verify.twilio.com/v2/Services/${serviceSid}/Verifications`, {
       method: "POST",
       headers: {
         Authorization: "Basic " + btoa(`${accountSid}:${authToken}`),
-        "Content-Type": "application/x-www-form-urlencoded",
       },
-      body: new URLSearchParams({
-        To: formattedPhone,
-        Channel: "sms",
-      }),
+      body: form,
     });
 
     const data = await response.json();
 
     if (!response.ok) {
-      console.error("Twilio error:", data);
+      console.error("❌ Twilio error:", data);
       return new Response(JSON.stringify({ error: data.message || "Failed to send OTP" }), {
         status: response.status,
         headers: corsHeaders,
@@ -78,12 +83,12 @@ serve(async (req) => {
       JSON.stringify({
         success: true,
         status: data.status,
-        message: `Code envoyé par SMS à ${formattedPhone}`,
+        message: "Code envoyé par SMS",
       }),
-      { headers: corsHeaders },
+      { status: 200, headers: corsHeaders },
     );
   } catch (error) {
-    console.error("Error in send-otp:", error);
+    console.error("🔥 Edge error:", error);
     return new Response(JSON.stringify({ error: "Internal server error" }), { status: 500, headers: corsHeaders });
   }
 });
