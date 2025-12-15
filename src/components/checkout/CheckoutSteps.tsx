@@ -145,12 +145,12 @@ export function CheckoutSteps({
         <Card className="rounded-3xl border-none shadow-soft overflow-hidden">
           <div className="bg-primary/5 p-4 border-b">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                   {hasGPS ? (
-                    <Navigation className="w-5 h-5 text-primary" />
+                    <Navigation className="w-4 h-4 text-primary" />
                   ) : (
-                    <MapPin className="w-5 h-5 text-primary" />
+                    <MapPin className="w-4 h-4 text-primary" />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -212,7 +212,7 @@ export function CheckoutSteps({
                       value={formData.recipientName}
                       onChange={(e) => setFormData({ ...formData, recipientName: e.target.value })}
                       placeholder="Nom complet"
-                      className="pl-10 h-12 rounded-xl"
+                      className="pl-10 h-10 rounded-xl"
                     />
                   </div>
                   {errors.recipientName && <p className="text-sm text-destructive">{errors.recipientName}</p>}
@@ -227,7 +227,7 @@ export function CheckoutSteps({
                       value={formData.recipientPhone}
                       onChange={(e) => setFormData({ ...formData, recipientPhone: e.target.value })}
                       placeholder="06 XXX XX XX"
-                      className="pl-10 h-12 rounded-xl"
+                      className="pl-10 h-10 rounded-xl"
                     />
                   </div>
                   {errors.recipientPhone && <p className="text-sm text-destructive">{errors.recipientPhone}</p>}
@@ -244,7 +244,7 @@ export function CheckoutSteps({
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     placeholder="06 XXX XX XX"
-                    className="pl-10 h-12 rounded-xl"
+                    className="pl-10 h-10 rounded-xl"
                   />
                 </div>
                 {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
@@ -257,46 +257,46 @@ export function CheckoutSteps({
       {/* SECTION B: Mode de livraison */}
       <Card className="rounded-3xl border-none shadow-soft">
         <CardContent className="p-4 space-y-3">
-          <h3 className="font-semibold flex items-center gap-2">
-            <Bike className="w-5 h-5 text-primary" />
+          <h3 className="font-semibold text-sm flex items-center gap-2">
+            <Bike className="w-4 h-4 text-primary" />
             Mode de réception
           </h3>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2">
             <button
               type="button"
               onClick={() => setFormData({ ...formData, deliveryMode: "delivery" })}
-              className={`p-4 rounded-2xl border-2 transition-all ${
+              className={`p-3 rounded-xl border-2 transition-all ${
                 formData.deliveryMode === "delivery"
                   ? "border-primary bg-primary/5"
                   : "border-border hover:border-primary/50"
               }`}
             >
               <Bike
-                className={`w-6 h-6 mx-auto mb-2 ${
+                className={`w-5 h-5 mx-auto mb-1 ${
                   formData.deliveryMode === "delivery" ? "text-primary" : "text-muted-foreground"
                 }`}
               />
-              <p className="font-medium text-sm">Livraison</p>
-              <p className="text-xs text-muted-foreground">{deliveryFee.toFixed(0)} FCFA</p>
+              <p className="font-medium text-xs">Livraison</p>
+              <p className="text-[10px] text-muted-foreground">{deliveryFee.toFixed(0)} FCFA</p>
             </button>
 
             <button
               type="button"
               onClick={() => setFormData({ ...formData, deliveryMode: "pickup" })}
-              className={`p-4 rounded-2xl border-2 transition-all ${
+              className={`p-3 rounded-xl border-2 transition-all ${
                 formData.deliveryMode === "pickup"
                   ? "border-primary bg-primary/5"
                   : "border-border hover:border-primary/50"
               }`}
             >
               <Package
-                className={`w-6 h-6 mx-auto mb-2 ${
+                className={`w-5 h-5 mx-auto mb-1 ${
                   formData.deliveryMode === "pickup" ? "text-primary" : "text-muted-foreground"
                 }`}
               />
-              <p className="font-medium text-sm">À emporter</p>
-              <p className="text-xs text-muted-foreground">Gratuit</p>
+              <p className="font-medium text-xs">À emporter</p>
+              <p className="text-[10px] text-muted-foreground">Gratuit</p>
             </button>
           </div>
         </CardContent>
@@ -304,9 +304,9 @@ export function CheckoutSteps({
 
       {/* SECTION C: Notes / Instructions avec VoiceNoteInput */}
       <Card className="rounded-3xl border-none shadow-soft">
-        <CardContent className="p-4 space-y-3">
-          <h3 className="font-semibold">Instructions (optionnel)</h3>
-          <p className="text-xs text-muted-foreground mb-2">Pour le livreur ou le restaurant • Texte ou note vocale</p>
+        <CardContent className="p-4 space-y-2">
+          <h3 className="font-semibold text-sm">Instructions (optionnel)</h3>
+          <p className="text-[10px] text-muted-foreground">Pour le livreur ou le restaurant • Texte ou note vocale</p>
 
           <VoiceNoteInput
             value={formData.notes}
@@ -321,25 +321,25 @@ export function CheckoutSteps({
 
       {/* SECTION D: Paiement */}
       <Card className="rounded-3xl border-none shadow-soft">
-        <CardContent className="p-4 space-y-4">
-          <h3 className="font-semibold">Mode de paiement</h3>
+        <CardContent className="p-4 space-y-3">
+          <h3 className="font-semibold text-sm">Mode de paiement</h3>
 
           <RadioGroup
             value={formData.paymentMethod}
             onValueChange={(value: "mobile_money" | "cod") => setFormData({ ...formData, paymentMethod: value })}
-            className="space-y-3"
+            className="space-y-2"
           >
             <label
               htmlFor="cod"
-              className={`flex items-center gap-3 p-4 border-2 rounded-2xl cursor-pointer transition-all ${
+              className={`flex items-center gap-2 p-3 border-2 rounded-xl cursor-pointer transition-all ${
                 formData.paymentMethod === "cod" ? "border-primary bg-primary/5" : "border-border"
               }`}
             >
               <RadioGroupItem value="cod" id="cod" />
-              <Banknote className="w-5 h-5 text-muted-foreground" />
+              <Banknote className="w-4 h-4 text-muted-foreground" />
               <div className="flex-1">
-                <p className="font-medium">Paiement à la livraison</p>
-                <p className="text-xs text-muted-foreground">Payez en espèces</p>
+                <p className="font-medium text-sm">Paiement à la livraison</p>
+                <p className="text-[10px] text-muted-foreground">Payez en espèces</p>
               </div>
             </label>
 
@@ -364,7 +364,7 @@ export function CheckoutSteps({
                 value={formData.mobileMoneyProvider}
                 onValueChange={(value) => setFormData({ ...formData, mobileMoneyProvider: value })}
               >
-                <SelectTrigger className="h-12 rounded-xl">
+                <SelectTrigger className="h-10 rounded-xl">
                   <SelectValue placeholder="Choisir l'opérateur" />
                 </SelectTrigger>
                 <SelectContent>
@@ -380,7 +380,7 @@ export function CheckoutSteps({
                 value={formData.mobileMoneyNumber}
                 onChange={(e) => setFormData({ ...formData, mobileMoneyNumber: e.target.value })}
                 placeholder="Numéro Mobile Money"
-                className="h-12 rounded-xl"
+                className="h-10 rounded-xl"
               />
               {errors.mobileMoneyNumber && <p className="text-sm text-destructive">{errors.mobileMoneyNumber}</p>}
             </div>
@@ -419,7 +419,7 @@ export function CheckoutSteps({
           >
             {loading || uploadingVoiceNote ? (
               <span className="flex items-center gap-2">
-                <Loader2 className="w-5 h-5 animate-spin" />
+                <Loader2 className="w-4 h-4 animate-spin" />
                 {uploadingVoiceNote ? "Envoi de la note vocale..." : "Traitement..."}
               </span>
             ) : (
