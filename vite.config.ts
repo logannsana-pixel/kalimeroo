@@ -10,6 +10,36 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
+  build: {
+    // Optimize for African context with slow connections
+    target: 'es2020',
+    minify: 'esbuild',
+    cssMinify: true,
+    rollupOptions: {
+      output: {
+        // Manual chunk splitting for better caching
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-ui': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-tabs'],
+          'vendor-query': ['@tanstack/react-query'],
+          'vendor-supabase': ['@supabase/supabase-js'],
+          'vendor-map': ['leaflet', 'react-leaflet'],
+        },
+        // Compress chunk names for smaller file sizes
+        chunkFileNames: 'assets/[name]-[hash:8].js',
+        entryFileNames: 'assets/[name]-[hash:8].js',
+        assetFileNames: 'assets/[name]-[hash:8].[ext]',
+      },
+    },
+    // Increase chunk size warning limit for map dependencies
+    chunkSizeWarningLimit: 600,
+    // Enable source maps only in development
+    sourcemap: mode === 'development',
+  },
+  // Optimize dependencies
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'react-router-dom', '@supabase/supabase-js'],
+  },
   plugins: [
     react(),
     mode === "development" && componentTagger(),

@@ -18,6 +18,7 @@ const RestaurantCard = React.forwardRef<HTMLDivElement, RestaurantCardProps>(
     return (
       <div
         ref={ref}
+        data-testid="restaurant-card"
         onClick={onClick}
         className={cn(
           "group cursor-pointer transition-all duration-300",
