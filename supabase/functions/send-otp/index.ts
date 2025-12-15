@@ -5,19 +5,36 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Fonction pour normaliser et valider un mobile CG
+function normalizeCongoMobile(raw: string): string {
+  let p = raw.replace(/[\s\-\(\)]/g, "");
+
+  // Retirer le 0 initial
+  if (p.startsWith("0")) {
+    p = p.slice(1);
+  }
+
+  // Valider mobile : doit commencer par 6 et avoir 8 chiffres
+  if (!p.match(/^6\d{7}$/)) {
+    throw new Error("Seuls les numéros mobiles sont acceptés (6xxxxxxxx)");
+  }
+
+  return "+242" + p;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { phone, action } = await req.json();
+    const { phone } = await req.json();
 
     if (!phone) {
-      return new Response(
-        JSON.stringify({ error: "Phone number is required" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "Phone number is required" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const accountSid = Deno.env.get("TWILIO_ACCOUNT_SID");
@@ -26,26 +43,29 @@ serve(async (req) => {
 
     if (!accountSid || !authToken || !serviceSid) {
       console.error("Missing Twilio credentials");
-      return new Response(
-        JSON.stringify({ error: "Server configuration error" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "Server configuration error" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    // Format phone for Twilio (needs +242 prefix for Congo)
-    let formattedPhone = phone.replace(/[\s\-\(\)]/g, "");
-    if (formattedPhone.startsWith("0")) {
-      formattedPhone = "+242" + formattedPhone.slice(1);
-    } else if (!formattedPhone.startsWith("+")) {
-      formattedPhone = "+" + formattedPhone;
+    // Normaliser et valider
+    let formattedPhone: string;
+    try {
+      formattedPhone = normalizeCongoMobile(phone);
+    } catch (err: any) {
+      return new Response(JSON.stringify({ error: err.message }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const twilioUrl = `https://verify.twilio.com/v2/Services/${serviceSid}/Verifications`;
-    
+
     const response = await fetch(twilioUrl, {
       method: "POST",
       headers: {
-        "Authorization": "Basic " + btoa(`${accountSid}:${authToken}`),
+        Authorization: "Basic " + btoa(`${accountSid}:${authToken}`),
         "Content-Type": "application/x-www-form-urlencoded",
       },
       body: new URLSearchParams({
@@ -58,25 +78,25 @@ serve(async (req) => {
 
     if (!response.ok) {
       console.error("Twilio error:", data);
-      return new Response(
-        JSON.stringify({ error: data.message || "Failed to send OTP" }),
-        { status: response.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: data.message || "Failed to send OTP" }), {
+        status: response.status,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
+      JSON.stringify({
+        success: true,
         status: data.status,
-        message: "Code envoyé par SMS"
+        message: "Code envoyé par SMS",
       }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (error) {
     console.error("Error in send-otp:", error);
-    return new Response(
-      JSON.stringify({ error: "Internal server error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 });
