@@ -144,9 +144,22 @@ export const FoodCategories = () => {
 
   return (
     <section className="px-4 py-4">
-      <h2 className="text-base font-bold mb-4 text-foreground">Catégories de cuisine</h2>
+      <h2 className="text-base font-bold mb-4 text-foreground">Categories</h2>
 
-      <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
+      <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
+        {/* All Category - First with primary active state */}
+        <button
+          onClick={() => hasAddress ? navigate("/restaurants") : openModal()}
+          className="flex flex-col items-center gap-2 min-w-[64px] transition-all duration-200 hover:scale-105 active:scale-95"
+        >
+          <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center text-xl shadow-glow ring-2 ring-primary/30">
+            🍽️
+          </div>
+          <span className="text-xs font-semibold text-primary">
+            All
+          </span>
+        </button>
+
         {categories.map((category) => {
           const config = categoryData[category] || { 
             icon: "🍽️", 
@@ -157,14 +170,14 @@ export const FoodCategories = () => {
             <button
               key={category}
               onClick={() => handleClick(category)}
-              className={`flex flex-col items-center gap-2 min-w-[72px] transition-all duration-200 ${
+              className={`flex flex-col items-center gap-2 min-w-[64px] transition-all duration-200 ${
                 !hasAddress ? "opacity-50" : "hover:scale-105 active:scale-95"
               }`}
             >
-              <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${config.gradient} flex items-center justify-center text-2xl shadow-lg shadow-black/10`}>
+              <div className="w-14 h-14 rounded-full bg-secondary flex items-center justify-center text-xl transition-all duration-200 hover:bg-secondary/80">
                 {config.icon}
               </div>
-              <span className="text-xs font-medium text-center text-foreground/80 line-clamp-1 w-16">
+              <span className="text-xs font-medium text-center text-muted-foreground line-clamp-1 w-14">
                 {category}
               </span>
             </button>
