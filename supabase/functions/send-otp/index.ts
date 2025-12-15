@@ -5,16 +5,16 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Fonction pour normaliser et valider un mobile CG
+// Normalisation et validation mobile Congo
 function normalizeCongoMobile(raw: string): string {
-  const p = raw.replace(/[\s\-\(\)]/g, ""); // supprime espaces, tirets, parenthèses
+  const p = raw.replace(/[\s\-\(\)]/g, ""); // Supprime espaces, tirets, parenthèses
 
   // Valider mobile : doit commencer par 04, 05 ou 06 et avoir 8 chiffres
   if (!p.match(/^0(4|5|6)\d{7}$/)) {
     throw new Error("Seuls les numéros mobiles sont acceptés (04xxxxxxx, 05xxxxxxx, 06xxxxxxx)");
   }
 
-  // On garde le 0 initial après le +242
+  // Garder le 0 initial après +242
   return "+242" + p;
 }
 
@@ -45,7 +45,6 @@ serve(async (req) => {
       });
     }
 
-    // Normaliser et valider
     let formattedPhone: string;
     try {
       formattedPhone = normalizeCongoMobile(phone);
@@ -84,7 +83,7 @@ serve(async (req) => {
       JSON.stringify({
         success: true,
         status: data.status,
-        message: "Code envoyé par SMS",
+        message: `Code envoyé par SMS à ${formattedPhone}`,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
