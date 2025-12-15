@@ -58,35 +58,12 @@ const Index = () => {
       <LocationModal />
 
       <main className="min-h-screen bg-background pb-24">
-        {/* HEADER (structure moderne, couleurs conservées) */}
-        <div className="px-4 pt-4 space-y-4">
+        {/* HEADER */}
+        <div className="px-4 pt-4 space-y-5">
           <HomeHeader />
-
-          {/* SEARCH */}
-          {/* <div className="relative">
-            <input
-              type="text"
-              placeholder="Rechercher un plat ou un restaurant"
-              className="w-full h-12 rounded-full bg-muted px-5 text-sm outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div> */}
-
-          {/* PROMO BANNER */}
-          {/* <Card className="border-none rounded-2xl overflow-hidden bg-primary text-primary-foreground">
-            <CardContent className="p-4 flex items-center justify-between">
-              <div className="space-y-1">
-                <p className="text-xs opacity-90">Jusqu’à -35%</p>
-                <h3 className="font-bold text-base leading-tight">Sur votre première commande</h3>
-                <Button size="sm" variant="secondary" className="mt-2 rounded-full">
-                  Commander
-                </Button>
-              </div>
-              <img src="/delivery-illustration.png" alt="" className="h-20 object-contain" />
-            </CardContent>
-          </Card> */}
         </div>
 
-        {/* SERVICES */}
+        {/* PROMO BANNER */}
         <div className="mt-6">
           <ServiceTypes />
         </div>
@@ -96,26 +73,20 @@ const Index = () => {
           <FoodCategories />
         </div>
 
-        {/* PICKS FOR YOU */}
-        {/* <div className="mt-6 px-4">
-          <PopularDishes />
-        </div> */}
-
         {/* ORDER AGAIN */}
-        <section className="px-4 mt-6 space-y-3">
+        <section className="px-4 mt-4">
           {hasAddress && (
-            <div className="mt-6">
-              <OrderAgainSection />
-            </div>
+            <OrderAgainSection />
           )}
         </section>
-        {/* RESTAURANTS */}
-        <section className="px-4 mt-6 space-y-3">
+
+        {/* RESTAURANTS - Picks For You */}
+        <section className="px-4 mt-6 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="font-bold text-base">{hasAddress ? "Restaurants populaires" : "Restaurants"}</h2>
+            <h2 className="font-bold text-base text-foreground">{hasAddress ? "Picks For You" : "Restaurants"}</h2>
             <Button
               variant="link"
-              className="p-0 text-primary text-sm"
+              className="p-0 text-primary text-sm font-medium"
               onClick={() => (hasAddress ? navigate("/restaurants") : openModal())}
             >
               Voir tout <ArrowRight className="w-3 h-3 ml-1" />
@@ -123,16 +94,16 @@ const Index = () => {
           </div>
 
           {loading ? (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-4">
               {[...Array(4)].map((_, i) => (
-                <Skeleton key={i} className="h-48 rounded-2xl" />
+                <Skeleton key={i} className="h-52 rounded-2xl bg-secondary" />
               ))}
             </div>
           ) : restaurants.length === 0 ? (
-            <Card className="border-none rounded-2xl text-center py-10">
+            <Card className="border border-border/50 rounded-2xl text-center py-10 bg-card">
               <CardContent>
-                <Truck className="mx-auto mb-3 text-primary" />
-                <p className="text-sm font-semibold">{hasAddress ? "Bientôt disponible" : "Choisissez votre ville"}</p>
+                <Truck className="mx-auto mb-3 text-primary h-8 w-8" />
+                <p className="text-sm font-semibold text-foreground">{hasAddress ? "Bientôt disponible" : "Choisissez votre ville"}</p>
                 {!hasAddress && (
                   <Button size="sm" className="mt-3 rounded-full" onClick={openModal}>
                     Définir ma localisation
@@ -141,19 +112,23 @@ const Index = () => {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid grid-cols-2 gap-3">
-              {restaurants.map((r, i) => (
+            <div className="grid grid-cols-2 gap-4">
+              {restaurants.map((r) => (
                 <Card
                   key={r.id}
-                  className="border-none rounded-2xl overflow-hidden shadow-soft active:scale-[0.98] transition"
+                  className="group border-none rounded-2xl overflow-hidden bg-card hover:bg-card/80 active:scale-[0.98] transition-all duration-200 cursor-pointer"
                   onClick={() => (hasAddress ? navigate(`/restaurant/${r.id}`) : openModal())}
                 >
-                  <div className="relative h-28">
+                  <div className="relative h-32">
                     <LazyImage
                       src={r.image_url || "/placeholder.svg"}
                       alt={r.name}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />
+                    {/* Online indicator */}
+                    <div className="absolute top-3 left-3">
+                      <span className="w-2.5 h-2.5 rounded-full bg-primary inline-block animate-pulse" />
+                    </div>
                     {hasAddress && (
                       <div className="absolute top-2 right-2" onClick={(e) => e.stopPropagation()}>
                         <FavoritesButton restaurantId={r.id} />
@@ -161,17 +136,22 @@ const Index = () => {
                     )}
                   </div>
 
-                  <CardContent className="p-3 space-y-1">
-                    <h3 className="text-sm font-bold line-clamp-1">{r.name}</h3>
+                  <CardContent className="p-3 space-y-1.5">
+                    <div className="flex items-start justify-between gap-2">
+                      <h3 className="text-sm font-bold text-primary line-clamp-1">{r.name}</h3>
+                      <span className="text-sm font-bold text-foreground whitespace-nowrap">
+                        {r.delivery_fee ? `${r.delivery_fee.toLocaleString()} FC` : "Gratuit"}
+                      </span>
+                    </div>
                     <p className="text-xs text-muted-foreground line-clamp-1">{r.cuisine_type}</p>
-                    <div className="flex justify-between text-xs mt-1">
-                      <span className="flex items-center gap-1 font-medium">
+                    <div className="flex items-center gap-3 text-xs pt-1">
+                      <span className="flex items-center gap-1 font-medium text-foreground">
                         <Star className="w-3 h-3 fill-primary text-primary" />
-                        {r.rating?.toFixed(1)}
+                        {r.rating?.toFixed(1) || "4.5"}
                       </span>
                       <span className="flex items-center gap-1 text-muted-foreground">
                         <Clock className="w-3 h-3" />
-                        {r.delivery_time || "20-30"}’
+                        {r.delivery_time || "20-30"} min
                       </span>
                     </div>
                   </CardContent>

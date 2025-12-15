@@ -42,29 +42,29 @@ export const BottomNav = () => {
     const active = isActive(to);
 
     return (
-      <Link to={to} className={`flex flex-col items-center justify-center flex-1 relative ${NAV_SIZE.gap}`}>
-        <div
-          className={`relative flex items-center justify-center rounded-full transition-all duration-300
-            ${NAV_SIZE.iconWrap}
-            ${active ? "bg-primary text-primary-foreground shadow-glow scale-105" : "text-muted-foreground"}
-          `}
-        >
-          <Icon className={NAV_SIZE.icon} strokeWidth={active ? 2.5 : 2} />
+      <Link to={to} className={`flex items-center justify-center gap-2 px-4 py-2 relative transition-all duration-300 ${
+        active ? "bg-primary rounded-full" : ""
+      }`}>
+        <div className="relative flex items-center justify-center">
+          <Icon 
+            className={`h-5 w-5 transition-colors duration-200 ${
+              active ? "text-primary-foreground" : "text-muted-foreground"
+            }`} 
+            strokeWidth={active ? 2.5 : 2} 
+          />
 
-          {badge && badge > 0 && (
-            <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center font-bold">
+          {badge && badge > 0 && !active && (
+            <span className="absolute -top-2 -right-2 h-4 w-4 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center font-bold">
               {badge > 9 ? "9+" : badge}
             </span>
           )}
         </div>
 
-        <span
-          className={`${NAV_SIZE.label} transition-all ${
-            active ? "font-semibold text-primary" : "font-medium text-muted-foreground"
-          }`}
-        >
-          {label}
-        </span>
+        {active && (
+          <span className="text-xs font-semibold text-primary-foreground">
+            {label}
+          </span>
+        )}
       </Link>
     );
   };
@@ -72,12 +72,12 @@ export const BottomNav = () => {
   const NavContainer = ({ children }: { children: React.ReactNode }) => (
     <nav className="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 safe-area-bottom">
       <div
-        className={`flex items-center justify-between gap-2
+        className={`flex items-center justify-between gap-1
           ${NAV_SIZE.bar}
-          min-w-[260px] max-w-[340px]
+          min-w-[280px] max-w-[360px]
           rounded-full
-          bg-card/95 backdrop-blur-xl
-          border border-border/40
+          bg-secondary/95 backdrop-blur-xl
+          border border-border/30
           shadow-float
         `}
       >

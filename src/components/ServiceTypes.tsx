@@ -50,49 +50,23 @@ export const ServiceTypes = () => {
 
   return (
     <section className="px-4">
-      <div className="grid grid-cols-3 gap-3 sm:gap-4">
-        {serviceTypes.map((service) => {
-          const disabled = !service.available;
-
-          return (
-            <button
-              key={service.id}
-              onClick={() => handleClick(service)}
-              disabled={disabled}
-              className={`
-              relative
-              aspect-square
-              rounded-2xl
-              flex
-              flex-col
-              items-center
-              justify-center
-              gap-2
-              transition-all
-              text-center
-
-              ${
-                disabled
-                  ? "bg-muted text-muted-foreground opacity-70 cursor-not-allowed"
-                  : "bg-primary/10 text-foreground active:scale-95 hover:bg-primary/15"
-              }
-            `}
-            >
-              {/* Badge Bientôt */}
-              {disabled && (
-                <span className="absolute top-2 right-2 text-[10px] font-medium bg-background px-2 py-0.5 rounded-full">
-                  Bientôt
-                </span>
-              )}
-
-              {/* Icon */}
-              <span className="text-3xl leading-none">{service.icon}</span>
-
-              {/* Label */}
-              <span className="text-sm font-semibold leading-tight">{service.name}</span>
-            </button>
-          );
-        })}
+      {/* Promo Banner - Premium Green Gradient */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary via-primary to-primary/90 p-5 mb-6">
+        <div className="relative z-10">
+          <p className="text-primary-foreground/80 text-sm font-medium mb-1">Jusqu'à -35%</p>
+          <h3 className="text-primary-foreground font-bold text-xl leading-tight mb-3">
+            Sur votre première<br />commande
+          </h3>
+          <button 
+            onClick={() => hasAddress ? navigate("/restaurants") : openModal()}
+            className="bg-background text-foreground px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-background/90 transition-all duration-200 shadow-soft"
+          >
+            Commander
+          </button>
+        </div>
+        {/* Decorative circles */}
+        <div className="absolute -right-4 -top-4 w-32 h-32 rounded-full bg-primary-foreground/10" />
+        <div className="absolute -right-8 bottom-0 w-24 h-24 rounded-full bg-primary-foreground/5" />
       </div>
     </section>
   );
