@@ -83,16 +83,15 @@ const Index = () => {
         {/* Restaurants */}
         <section className="px-4 mt-6 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="font-bold text-base text-foreground">
+            <h2 className="font-semibold text-sm text-foreground">
               {hasAddress ? "Restaurants populaires" : "Restaurants"}
             </h2>
-            <Button
-              variant="link"
-              className="p-0 text-primary text-sm font-medium"
-              onClick={() => (hasAddress ? navigate("/restaurants") : openModal())}
+            <button
+              onClick={() => navigate("/restaurants")}
+              className="text-primary text-xs font-medium flex items-center gap-1"
             >
-              Voir tout <ArrowRight className="w-3 h-3 ml-1" />
-            </Button>
+              Voir tout <ArrowRight className="w-3 h-3" />
+            </button>
           </div>
 
           {loading ? (
@@ -102,26 +101,26 @@ const Index = () => {
               ))}
             </div>
           ) : restaurants.length === 0 ? (
-            <Card className="border border-border/50 rounded-2xl text-center py-10 bg-card">
-              <CardContent>
-                <Truck className="mx-auto mb-3 text-primary h-8 w-8" />
-                <p className="text-sm font-semibold text-foreground">
+            <Card className="border border-border/50 rounded-2xl text-center py-8 bg-card">
+              <CardContent className="p-0">
+                <Truck className="mx-auto mb-2 text-primary h-6 w-6" />
+                <p className="text-xs font-medium text-foreground mb-2">
                   {hasAddress ? "Bientôt disponible" : "Choisissez votre ville"}
                 </p>
                 {!hasAddress && (
-                  <Button size="sm" className="mt-3 rounded-full" onClick={openModal}>
+                  <button onClick={openModal} className="text-xs text-primary font-medium">
                     Définir ma localisation
-                  </Button>
+                  </button>
                 )}
               </CardContent>
             </Card>
           ) : (
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3">
               {restaurants.map((r) => (
                 <Card
                   key={r.id}
                   className="group border-none rounded-2xl overflow-hidden bg-card hover:bg-card/80 active:scale-[0.98] transition-all duration-200 cursor-pointer"
-                  onClick={() => (hasAddress ? navigate(`/restaurant/${r.id}`) : openModal())}
+                  onClick={() => navigate(`/restaurant/${r.id}`)}
                 >
                   <div className="relative h-28">
                     <LazyImage

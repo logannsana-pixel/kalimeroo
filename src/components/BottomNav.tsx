@@ -55,8 +55,8 @@ export const BottomNav = () => {
   };
 
   const NavContainer = ({ children }: { children: React.ReactNode }) => (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-xl border-t border-border/30 safe-area-bottom">
-      <div className="flex items-center justify-around px-2 py-1">
+    <nav className="md:hidden fixed bottom-4 left-4 right-4 z-50 bg-card/90 backdrop-blur-xl border border-border/20 rounded-2xl shadow-lg safe-area-bottom">
+      <div className="flex items-center justify-around px-2 py-2">
         {children}
       </div>
     </nav>

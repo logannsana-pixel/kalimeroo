@@ -35,11 +35,11 @@ export default function Cart() {
       <div className="min-h-screen flex flex-col pb-20 md:pb-0 bg-background">
         <Navbar />
         <main className="flex-1 container mx-auto px-4 py-4 md:py-8 max-w-2xl">
-          <div className="flex items-center gap-3 mb-6">
-            <Button variant="ghost" size="icon" className="rounded-full" onClick={() => navigate(-1)}>
+          <div className="flex items-center gap-3 mb-4">
+            <button onClick={() => navigate(-1)} className="w-8 h-8 flex items-center justify-center">
               <ChevronLeft className="h-5 w-5" />
-            </Button>
-            <h1 className="text-xl md:text-2xl font-bold">Mon panier</h1>
+            </button>
+            <h1 className="text-lg font-semibold">Mon panier</h1>
           </div>
           <div className="space-y-4">
             {[...Array(3)].map((_, i) => (
@@ -69,11 +69,11 @@ export default function Cart() {
       <div className="min-h-screen flex flex-col pb-20 md:pb-0 bg-background">
         <Navbar />
         <main className="flex-1 container mx-auto px-4 py-4 md:py-8 max-w-2xl">
-          <div className="flex items-center gap-3 mb-6">
-            <Button variant="ghost" size="icon" className="rounded-full" onClick={() => navigate(-1)}>
+          <div className="flex items-center gap-3 mb-4">
+            <button onClick={() => navigate(-1)} className="w-8 h-8 flex items-center justify-center">
               <ChevronLeft className="h-5 w-5" />
-            </Button>
-            <h1 className="text-xl md:text-2xl font-bold">Mon panier</h1>
+            </button>
+            <h1 className="text-lg font-semibold">Mon panier</h1>
           </div>
           <Card className="text-center border-none shadow-soft rounded-3xl overflow-hidden">
             <CardContent className="py-16">
@@ -106,12 +106,12 @@ export default function Cart() {
       <Navbar />
       <main className="flex-1 container mx-auto px-4 py-4 md:py-8 max-w-2xl">
         {/* Header */}
-        <div className="flex items-center gap-3 mb-6">
-          <Button variant="ghost" size="icon" className="rounded-full" onClick={() => navigate(-1)}>
+        <div className="flex items-center gap-3 mb-4">
+          <button onClick={() => navigate(-1)} className="w-8 h-8 flex items-center justify-center">
             <ChevronLeft className="h-5 w-5" />
-          </Button>
-          <h1 className="text-xl md:text-2xl font-bold">Mon panier</h1>
-          <span className="ml-auto text-sm text-muted-foreground">{cartItems.length} article(s)</span>
+          </button>
+          <h1 className="text-lg font-semibold">Mon panier</h1>
+          <span className="ml-auto text-xs text-muted-foreground">{cartItems.length} article(s)</span>
         </div>
 
         {/* Cart Items */}

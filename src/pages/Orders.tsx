@@ -219,15 +219,15 @@ export default function Orders() {
       <div className="min-h-screen flex flex-col pb-20 md:pb-0 bg-background">
         <Navbar />
         <main className="flex-1 container mx-auto px-4 py-4 md:py-8">
-          <div className="flex items-center justify-between gap-3 mb-6">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <button
                 onClick={() => navigate("/")}
-                className="w-10 h-10 rounded-full bg-muted/50 flex items-center justify-center text-foreground hover:bg-muted transition-colors md:hidden"
+                className="w-8 h-8 flex items-center justify-center md:hidden"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
               </button>
-              <h1 className="text-xl md:text-2xl font-bold">Mes commandes</h1>
+              <h1 className="text-lg font-semibold">Mes commandes</h1>
             </div>
             <RefreshButton onClick={() => fetchOrders(true)} loading={refreshing} />
           </div>
@@ -258,16 +258,16 @@ export default function Orders() {
     <div className="min-h-screen flex flex-col pb-20 md:pb-0 bg-background">
       <Navbar />
       <main className="flex-1 container mx-auto px-4 py-4 md:py-8">
-        {/* Header with back */}
-        <div className="flex items-center justify-between gap-3 mb-6">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate("/")}
-              className="w-10 h-10 rounded-full bg-muted/50 flex items-center justify-center text-foreground hover:bg-muted transition-colors md:hidden"
+              className="w-8 h-8 flex items-center justify-center md:hidden"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
             </button>
-            <h1 className="text-xl md:text-2xl font-bold">Mes commandes</h1>
+            <h1 className="text-lg font-semibold">Mes commandes</h1>
           </div>
           <RefreshButton onClick={() => fetchOrders(true)} loading={refreshing} />
         </div>

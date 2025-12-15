@@ -1,9 +1,9 @@
-import { Search, Menu, ChevronDown, SlidersHorizontal } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Search, ChevronDown, SlidersHorizontal } from "lucide-react";
 import { useLocation } from "@/contexts/LocationContext";
 import { useNavigate } from "react-router-dom";
 import { NotificationBell } from "@/components/NotificationBell";
 import { useAuth } from "@/hooks/useAuth";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export const HomeHeader = () => {
   const { city, openModal } = useLocation();
@@ -13,38 +13,28 @@ export const HomeHeader = () => {
   return (
     <header className="bg-background text-foreground">
       {/* Top Row */}
-      <div className="flex items-center justify-between mb-4">
-        {/* Menu Button */}
-        <Button
-          size="icon"
-          variant="ghost"
-          className="h-11 w-11 rounded-full bg-secondary hover:bg-secondary/80 transition-all"
-        >
-          <Menu className="h-5 w-5 text-foreground" />
-        </Button>
+      <div className="flex items-center justify-between mb-3">
+        {/* Theme Toggle */}
+        <ThemeToggle />
 
         {/* Location - Center */}
         <button
           onClick={openModal}
-          className="flex items-center gap-2 px-3 py-2 text-sm font-medium transition-all hover:opacity-80"
+          className="flex items-center gap-1.5 px-2 py-1.5 text-sm font-medium transition-all hover:opacity-80"
         >
-          <span className="w-2 h-2 rounded-full bg-primary" />
-          <span className="text-foreground">{city || "Choisir une ville"}</span>
-          <ChevronDown className="h-4 w-4 text-muted-foreground" />
+          <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+          <span className="text-foreground text-xs">{city || "Choisir une ville"}</span>
+          <ChevronDown className="h-3 w-3 text-muted-foreground" />
         </button>
 
         {/* Right Icons */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           {user ? (
             <NotificationBell />
           ) : (
-            <Button 
-              size="icon" 
-              variant="ghost" 
-              className="h-11 w-11 rounded-full bg-secondary hover:bg-secondary/80 transition-all"
-            >
-              <SlidersHorizontal className="h-5 w-5 text-foreground" />
-            </Button>
+            <button className="h-9 w-9 rounded-full bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors">
+              <SlidersHorizontal className="h-4 w-4 text-foreground" />
+            </button>
           )}
         </div>
       </div>
@@ -52,12 +42,12 @@ export const HomeHeader = () => {
       {/* Search Bar */}
       <button
         onClick={() => navigate("/restaurants")}
-        className="w-full flex items-center gap-3 bg-secondary hover:bg-secondary/80 px-4 py-3 rounded-full text-muted-foreground transition-all"
+        className="w-full flex items-center gap-2 bg-secondary hover:bg-secondary/80 px-3 py-2.5 rounded-full text-muted-foreground transition-all"
       >
-        <Search className="h-5 w-5" />
-        <span className="flex-1 text-left text-sm">Rechercher</span>
-        <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
-          <SlidersHorizontal className="h-4 w-4" />
+        <Search className="h-4 w-4" />
+        <span className="flex-1 text-left text-xs">Rechercher</span>
+        <div className="h-7 w-7 rounded-full bg-muted flex items-center justify-center">
+          <SlidersHorizontal className="h-3.5 w-3.5" />
         </div>
       </button>
     </header>
