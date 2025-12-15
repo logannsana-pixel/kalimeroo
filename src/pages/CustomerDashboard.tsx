@@ -185,64 +185,63 @@ export default function CustomerDashboard() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col pb-16 md:pb-0">
+    <div className="min-h-screen flex flex-col pb-20 md:pb-0 bg-background">
       <Navbar />
-      <main className="flex-1 container mx-auto px-4 py-4 md:py-8">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-xl md:text-3xl font-bold">Mon espace</h1>
+      <main className="flex-1 container mx-auto px-4 py-4 max-w-2xl">
+        {/* Header compact */}
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-lg font-semibold">Mon espace</h1>
           <RefreshButton onClick={() => fetchData(true)} loading={refreshing} />
         </div>
         
         <Tabs defaultValue="orders" className="w-full">
-          <TabsList className="grid w-full max-w-md grid-cols-2 mb-6">
-            <TabsTrigger value="orders" className="gap-2">
-              <Package className="w-4 h-4" />
-              <span className="hidden sm:inline">Commandes</span>
+          <TabsList className="grid w-full grid-cols-2 mb-4 h-10 rounded-full bg-muted/50 p-1">
+            <TabsTrigger value="orders" className="gap-1.5 rounded-full text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <Package className="w-3.5 h-3.5" />
+              Commandes
             </TabsTrigger>
-            <TabsTrigger value="profile" className="gap-2">
-              <User className="w-4 h-4" />
-              <span className="hidden sm:inline">Profil</span>
+            <TabsTrigger value="profile" className="gap-1.5 rounded-full text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <User className="w-3.5 h-3.5" />
+              Profil
             </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="orders" className="space-y-6">
+          <TabsContent value="orders" className="space-y-4">
             {/* Active orders */}
             {activeOrders.length > 0 && (
-              <div>
-                <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                  <ShoppingBag className="h-5 w-5 text-primary" />
+              <div className="space-y-3">
+                <h2 className="text-sm font-semibold flex items-center gap-2">
+                  <ShoppingBag className="h-4 w-4 text-primary" />
                   En cours ({activeOrders.length})
                 </h2>
-                <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-3">
                   {activeOrders.map((order) => {
                     const status = statusConfig[order.status];
                     return (
-                      <Card key={order.id}>
-                        <CardHeader className="p-4">
+                      <Card key={order.id} className="border-none shadow-soft rounded-2xl overflow-hidden">
+                        <CardContent className="p-4 space-y-3">
                           <div className="flex justify-between items-start gap-2">
-                            <CardTitle className="text-base truncate flex-1">
-                              {order.restaurants?.name}
-                            </CardTitle>
-                            <Badge className={`${status.color} gap-1 shrink-0`}>
+                            <div className="min-w-0">
+                              <p className="font-semibold text-sm truncate">{order.restaurants?.name}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {new Date(order.created_at).toLocaleDateString('fr-FR', {
+                                  day: 'numeric',
+                                  month: 'short',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </p>
+                            </div>
+                            <Badge className={`${status.color} gap-1 shrink-0 text-xs`}>
                               {status.icon}
-                              <span className="text-xs">{status.label}</span>
+                              {status.label}
                             </Badge>
                           </div>
-                        </CardHeader>
-                        <CardContent className="p-4 pt-0 space-y-3">
-                          <p className="text-xs text-muted-foreground">
-                            {new Date(order.created_at).toLocaleDateString('fr-FR', {
-                              day: 'numeric',
-                              month: 'short',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </p>
-                          <p className="text-sm truncate">
+                          <p className="text-xs text-muted-foreground truncate">
                             📍 {order.delivery_address}
                           </p>
-                          <div className="flex items-center justify-between">
-                            <p className="font-bold text-lg">
+                          <div className="flex items-center justify-between pt-2 border-t border-border/30">
+                            <p className="font-bold text-primary">
                               {order.total.toFixed(0)} FCFA
                             </p>
                             <div className="flex gap-2">
@@ -271,35 +270,35 @@ export default function CustomerDashboard() {
             )}
 
             {/* Past orders */}
-            <div>
-              <h2 className="text-lg font-semibold mb-4">Historique</h2>
+            <div className="space-y-3">
+              <h2 className="text-sm font-semibold">Historique</h2>
               {pastOrders.length === 0 ? (
-                <Card>
-                  <CardContent className="text-center py-12">
-                    <Package className="w-10 h-10 mx-auto mb-3 text-muted-foreground opacity-50" />
-                    <p className="text-muted-foreground">Aucune commande passée</p>
+                <Card className="border-none shadow-soft rounded-2xl">
+                  <CardContent className="text-center py-10">
+                    <Package className="w-8 h-8 mx-auto mb-2 text-muted-foreground opacity-50" />
+                    <p className="text-sm text-muted-foreground">Aucune commande passée</p>
                   </CardContent>
                 </Card>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {pastOrders.slice(0, 10).map((order) => {
                     const status = statusConfig[order.status];
                     return (
-                      <Card key={order.id}>
-                        <CardContent className="p-4">
-                          <div className="flex justify-between items-center gap-4">
+                      <Card key={order.id} className="border-none shadow-soft rounded-xl">
+                        <CardContent className="p-3">
+                          <div className="flex justify-between items-center gap-3">
                             <div className="min-w-0 flex-1">
-                              <p className="font-medium truncate">{order.restaurants?.name}</p>
+                              <p className="font-medium text-sm truncate">{order.restaurants?.name}</p>
                               <p className="text-xs text-muted-foreground">
                                 {new Date(order.created_at).toLocaleDateString('fr-FR')}
                               </p>
                             </div>
-                            <div className="text-right shrink-0">
-                              <Badge className={`${status.color} text-xs mb-1`}>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <Badge className={`${status.color} text-xs`}>
                                 {status.label}
                               </Badge>
-                              <p className="font-semibold">
-                                {order.total.toFixed(0)} FCFA
+                              <p className="font-semibold text-sm">
+                                {order.total.toFixed(0)} F
                               </p>
                             </div>
                           </div>
@@ -313,40 +312,40 @@ export default function CustomerDashboard() {
           </TabsContent>
           
           <TabsContent value="profile">
-            <Card className="max-w-lg">
-              <CardHeader>
-                <CardTitle className="text-lg">Informations personnelles</CardTitle>
+            <Card className="border-none shadow-soft rounded-2xl">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-semibold">Informations personnelles</CardTitle>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleUpdateProfile} className="space-y-4">
-                  <div>
-                    <Label htmlFor="full_name">Nom complet</Label>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="full_name" className="text-xs text-muted-foreground">Nom complet</Label>
                     <Input
                       id="full_name"
                       value={formData.full_name}
                       onChange={(e) => setFormData({...formData, full_name: e.target.value})}
-                      className="mt-1"
+                      className="h-10 rounded-xl bg-muted/30 border-0"
                     />
                   </div>
 
-                  <div>
-                    <Label htmlFor="phone">Téléphone</Label>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="phone" className="text-xs text-muted-foreground">Téléphone</Label>
                     <Input
                       id="phone"
                       type="tel"
                       value={formData.phone}
                       onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                      className="mt-1"
+                      className="h-10 rounded-xl bg-muted/30 border-0"
                     />
                   </div>
 
-                  <div>
-                    <Label htmlFor="district">Quartier</Label>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="district" className="text-xs text-muted-foreground">Quartier</Label>
                     <Select
                       value={formData.district}
                       onValueChange={(value) => setFormData({...formData, district: value})}
                     >
-                      <SelectTrigger id="district" className="mt-1">
+                      <SelectTrigger id="district" className="h-10 rounded-xl bg-muted/30 border-0">
                         <SelectValue placeholder="Sélectionnez votre quartier" />
                       </SelectTrigger>
                       <SelectContent>
@@ -359,18 +358,18 @@ export default function CustomerDashboard() {
                     </Select>
                   </div>
 
-                  <div>
-                    <Label htmlFor="address">Adresse complète</Label>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="address" className="text-xs text-muted-foreground">Adresse complète</Label>
                     <Input
                       id="address"
                       value={formData.address}
                       onChange={(e) => setFormData({...formData, address: e.target.value})}
                       placeholder="Numéro, rue, repère..."
-                      className="mt-1"
+                      className="h-10 rounded-xl bg-muted/30 border-0"
                     />
                   </div>
 
-                  <Button type="submit" className="w-full" disabled={saving}>
+                  <Button type="submit" className="w-full h-11 rounded-xl" disabled={saving}>
                     {saving ? <ButtonLoader /> : "Enregistrer"}
                   </Button>
                 </form>

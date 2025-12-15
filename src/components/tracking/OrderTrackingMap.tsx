@@ -316,21 +316,48 @@ export const OrderTrackingMap: React.FC<OrderTrackingMapProps> = ({
         <div ref={mapRef} className="w-full h-full" />
       </div>
 
-      {/* Légende */}
-      <div className="flex flex-wrap gap-4 text-sm">
-        <div className="flex items-center gap-2">
-          <span className="text-lg">🛵</span>
-          <span className="text-muted-foreground">Livreur</span>
+      {/* Légende améliorée */}
+      <Card className="p-3 bg-card/50 backdrop-blur-sm">
+        <div className="space-y-3">
+          {/* Marqueurs */}
+          <div className="flex flex-wrap gap-4 text-xs">
+            <div className="flex items-center gap-1.5">
+              <span className="text-base">🛵</span>
+              <span className="text-muted-foreground">Livreur</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-base">🍽️</span>
+              <span className="text-muted-foreground">Restaurant</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-base">📍</span>
+              <span className="text-muted-foreground">Client</span>
+            </div>
+          </div>
+          
+          {/* Itinéraires */}
+          <div className="flex flex-wrap gap-4 text-xs border-t pt-2">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-1 rounded-full bg-green-500" style={{ backgroundImage: 'repeating-linear-gradient(90deg, #22c55e 0, #22c55e 4px, transparent 4px, transparent 8px)' }} />
+              <span className="text-muted-foreground">Restaurant → Livreur</span>
+              {restaurantToDriverRoute && (
+                <span className="font-medium text-foreground">
+                  {restaurantToDriverRoute.distance.toFixed(1)} km
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-1 rounded-full bg-primary" />
+              <span className="text-muted-foreground">Livreur → Client</span>
+              {route && route.distance > 0 && (
+                <span className="font-medium text-foreground">
+                  {route.distance.toFixed(1)} km • ~{route.duration} min
+                </span>
+              )}
+            </div>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-lg">🍽️</span>
-          <span className="text-muted-foreground">Restaurant</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-lg">📍</span>
-          <span className="text-muted-foreground">Client</span>
-        </div>
-      </div>
+      </Card>
     </div>
   );
 };

@@ -3,7 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Package, CheckCircle, MapPin, Phone, User, X, RefreshCw, Volume2, AlertTriangle } from "lucide-react";
+import { Clock, Package, CheckCircle, MapPin, Phone, User, X, AlertTriangle } from "lucide-react";
+import { VoiceNotePlayer } from "@/components/voice/VoiceNotePlayer";
 import { Database } from "@/integrations/supabase/types";
 import { toast } from "sonner";
 import { ChatInterface } from "@/components/ChatInterface";
@@ -192,17 +193,16 @@ export const OrdersTab = () => {
   const completedOrders = orders.filter(o => ['delivered', 'cancelled'].includes(o.status));
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* GPS Warning */}
       {!hasGPS && (
-        <Card className="border-amber-500 bg-amber-50 dark:bg-amber-950/20">
-          <CardContent className="p-4 flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
+        <Card className="border-amber-500/50 bg-amber-50/50 dark:bg-amber-950/20 rounded-2xl">
+          <CardContent className="p-3 flex items-start gap-3">
+            <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
             <div>
-              <p className="font-medium text-amber-800 dark:text-amber-200">Position GPS non configurée</p>
-              <p className="text-sm text-amber-700 dark:text-amber-300">
-                Vous devez configurer la position GPS de votre restaurant dans l'onglet <strong>Profil</strong> avant de pouvoir accepter des commandes. 
-                Cette position est nécessaire pour le suivi des livraisons.
+              <p className="font-medium text-sm text-amber-800 dark:text-amber-200">Position GPS non configurée</p>
+              <p className="text-xs text-amber-700 dark:text-amber-300">
+                Configurez votre position GPS dans l'onglet <strong>Profil</strong> pour accepter des commandes.
               </p>
             </div>
           </CardContent>
@@ -214,19 +214,19 @@ export const OrdersTab = () => {
       </div>
 
       {/* Pending orders */}
-      <div>
-        <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-          <Clock className="h-5 w-5" />
-          Commandes à traiter ({pendingOrders.length})
+      <div className="space-y-3">
+        <h2 className="text-sm font-semibold flex items-center gap-2">
+          <Clock className="h-4 w-4" />
+          À traiter ({pendingOrders.length})
         </h2>
         {pendingOrders.length === 0 ? (
-          <Card>
-            <CardContent className="text-center py-8 text-muted-foreground">
+          <Card className="border-none shadow-soft rounded-2xl">
+            <CardContent className="text-center py-8 text-muted-foreground text-sm">
               Aucune commande en attente
             </CardContent>
           </Card>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-2">
             {pendingOrders.map((order) => {
               const nextStatus = getNextStatus(order.status);
               const config = statusConfig[order.status];
@@ -234,48 +234,44 @@ export const OrdersTab = () => {
               const isLoading = actionLoading === order.id;
               
               return (
-                <Card key={order.id} className="border-l-4 border-l-primary">
-                  <CardHeader className="pb-2">
+              <Card key={order.id} className="border-none shadow-soft rounded-2xl overflow-hidden border-l-4 border-l-primary">
+                  <CardHeader className="p-3 pb-2">
                     <div className="flex justify-between items-start">
-                      <CardTitle className="text-lg">Commande #{order.id.slice(0, 8)}</CardTitle>
-                      <Badge className={config.color}>
+                      <CardTitle className="text-sm">#{order.id.slice(0, 8)}</CardTitle>
+                      <Badge className={`${config.color} text-xs`}>
                         <StatusIcon className="w-3 h-3 mr-1" />
                         {config.label}
                       </Badge>
                     </div>
                   </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2 text-sm">
-                        <User className="w-4 h-4 text-muted-foreground" />
+                  <CardContent className="p-3 pt-0">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-xs">
+                        <User className="w-3.5 h-3.5 text-muted-foreground" />
                         <span className="font-medium">{order.profiles?.full_name || 'Client'}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-sm">
-                        <Phone className="w-4 h-4 text-muted-foreground" />
+                      <div className="flex items-center gap-2 text-xs">
+                        <Phone className="w-3.5 h-3.5 text-muted-foreground" />
                         <a href={`tel:${order.phone}`} className="text-primary">{order.phone}</a>
                       </div>
-                      <div className="flex items-start gap-2 text-sm">
-                        <MapPin className="w-4 h-4 text-muted-foreground mt-0.5" />
-                        <span>{order.delivery_address}</span>
+                      <div className="flex items-start gap-2 text-xs">
+                        <MapPin className="w-3.5 h-3.5 text-muted-foreground mt-0.5" />
+                        <span className="line-clamp-2">{order.delivery_address}</span>
                       </div>
                       {order.notes && (
-                        <p className="text-sm bg-muted p-2 rounded">
+                        <p className="text-xs bg-muted/50 p-2 rounded-xl">
                           <strong>Note:</strong> {order.notes}
                         </p>
                       )}
                       {order.voice_note_url && (
-                        <div className="flex items-center gap-2 bg-primary/10 p-2 rounded">
-                          <Volume2 className="w-4 h-4 text-primary" />
-                          <audio 
-                            controls 
-                            src={order.voice_note_url} 
-                            className="h-8 flex-1"
-                            preload="metadata"
-                          />
-                        </div>
+                        <VoiceNotePlayer
+                          audioUrl={order.voice_note_url}
+                          duration={30}
+                          showDelete={false}
+                        />
                       )}
-                      <div className="flex items-center justify-between pt-3 border-t">
-                        <span className="font-bold text-lg">{order.total.toFixed(0)} FCFA</span>
+                      <div className="flex items-center justify-between pt-2 border-t border-border/30">
+                        <span className="font-bold text-primary">{order.total.toFixed(0)} FCFA</span>
                         <div className="flex gap-2">
                           <ChatInterface
                             orderId={order.id}
@@ -286,6 +282,7 @@ export const OrdersTab = () => {
                             <Button 
                               variant="destructive" 
                               size="sm"
+                              className="h-8 rounded-xl text-xs"
                               onClick={() => openConfirmDialog(order.id, 'cancelled', 'Refuser cette commande')}
                               disabled={isLoading}
                             >
@@ -294,6 +291,8 @@ export const OrdersTab = () => {
                           )}
                           {nextStatus && (
                             <Button 
+                              size="sm"
+                              className="h-8 rounded-xl text-xs"
                               onClick={() => openConfirmDialog(order.id, nextStatus.next, nextStatus.label)}
                               disabled={isLoading || (!hasGPS && nextStatus.next === 'accepted')}
                               title={!hasGPS && nextStatus.next === 'accepted' ? "Configurez le GPS d'abord" : ""}
@@ -314,34 +313,32 @@ export const OrdersTab = () => {
 
       {/* Ready/In transit orders */}
       {readyOrders.length > 0 && (
-        <div>
-          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <Package className="h-5 w-5" />
-            En cours de livraison ({readyOrders.length})
+        <div className="space-y-3">
+          <h2 className="text-sm font-semibold flex items-center gap-2">
+            <Package className="h-4 w-4" />
+            En livraison ({readyOrders.length})
           </h2>
-          <div className="space-y-4">
+          <div className="space-y-2">
             {readyOrders.map((order) => {
               const config = statusConfig[order.status];
               const StatusIcon = config.icon;
               
               return (
-                <Card key={order.id} className="opacity-80">
-                  <CardHeader className="pb-2">
-                    <div className="flex justify-between items-start">
-                      <CardTitle className="text-lg">Commande #{order.id.slice(0, 8)}</CardTitle>
-                      <Badge className={config.color}>
+                <Card key={order.id} className="border-none shadow-soft rounded-xl opacity-80">
+                  <CardContent className="p-3">
+                    <div className="flex justify-between items-start mb-2">
+                      <span className="text-xs font-medium">#{order.id.slice(0, 8)}</span>
+                      <Badge className={`${config.color} text-xs`}>
                         <StatusIcon className="w-3 h-3 mr-1" />
                         {config.label}
                       </Badge>
                     </div>
-                  </CardHeader>
-                  <CardContent>
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-sm">
-                        <User className="w-4 h-4 text-muted-foreground" />
+                      <div className="flex items-center gap-2 text-xs">
+                        <User className="w-3.5 h-3.5 text-muted-foreground" />
                         <span>{order.profiles?.full_name || 'Client'}</span>
                       </div>
-                      <span className="font-semibold">{order.total.toFixed(0)} FCFA</span>
+                      <span className="font-semibold text-sm">{order.total.toFixed(0)} F</span>
                     </div>
                   </CardContent>
                 </Card>
@@ -352,11 +349,11 @@ export const OrdersTab = () => {
       )}
 
       {/* Completed orders */}
-      <div>
-        <h2 className="text-xl font-bold mb-4">Historique récent</h2>
+      <div className="space-y-3">
+        <h2 className="text-sm font-semibold">Historique récent</h2>
         {completedOrders.length === 0 ? (
-          <Card>
-            <CardContent className="text-center py-8 text-muted-foreground">
+          <Card className="border-none shadow-soft rounded-2xl">
+            <CardContent className="text-center py-8 text-muted-foreground text-sm">
               Aucune commande terminée
             </CardContent>
           </Card>
@@ -366,20 +363,20 @@ export const OrdersTab = () => {
               const config = statusConfig[order.status];
               
               return (
-                <Card key={order.id} className="opacity-60">
-                  <CardContent className="py-3">
+                <Card key={order.id} className="border-none shadow-soft rounded-xl opacity-60">
+                  <CardContent className="p-3">
                     <div className="flex items-center justify-between">
                       <div>
-                        <span className="font-medium">#{order.id.slice(0, 8)}</span>
-                        <span className="text-sm text-muted-foreground ml-2">
+                        <span className="font-medium text-xs">#{order.id.slice(0, 8)}</span>
+                        <span className="text-xs text-muted-foreground ml-2">
                           {order.profiles?.full_name || 'Client'}
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Badge className={config.color} variant="outline">
+                        <Badge className={`${config.color} text-xs`} variant="outline">
                           {config.label}
                         </Badge>
-                        <span className="font-semibold">{order.total.toFixed(0)} FCFA</span>
+                        <span className="font-semibold text-xs">{order.total.toFixed(0)} F</span>
                       </div>
                     </div>
                   </CardContent>
