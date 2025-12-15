@@ -70,18 +70,26 @@ export const PhoneOTPInput = ({ phone, onPhoneChange, onVerified, disabled }: Ph
 
     setIsLoading(true);
     try {
-      const { error } = await supabase.functions.invoke("send-otp", {
+      const { data, error } = await supabase.functions.invoke("send-otp", {
         body: { phone: normalizedPhone },
       });
 
-      if (error) throw error;
+      if (error) {
+        toast.error(error.message || "Impossible d'envoyer le code");
+        return;
+      }
+
+      if (!data?.success) {
+        toast.error(data?.error || "Impossible d'envoyer le code");
+        return;
+      }
 
       toast.success("Code envoyé par SMS");
       setStep("otp");
       startCountdown();
     } catch (error: any) {
       console.error("Send OTP error:", error);
-      toast.error(error.message || "Impossible d'envoyer le code");
+      toast.error(error?.message || "Impossible d'envoyer le code");
     } finally {
       setIsLoading(false);
     }
@@ -111,19 +119,26 @@ export const PhoneOTPInput = ({ phone, onPhoneChange, onVerified, disabled }: Ph
         },
       });
 
-      if (error) throw error;
+      // On ne traite PAS ça comme un crash: on affiche un message clair
+      if (error) {
+        toast.error(error.message || "Code incorrect ou expiré");
+        setOtp("");
+        return;
+      }
 
       if (data?.verified) {
         toast.success("Numéro vérifié !");
         setStep("verified");
         onVerified();
-      } else {
-        toast.error("Code incorrect");
-        setOtp("");
+        return;
       }
+
+      toast.error(data?.message || "Code incorrect ou expiré");
+      setOtp("");
     } catch (error: any) {
       console.error("Verify OTP error:", error);
-      toast.error(error.message || "Erreur de vérification");
+      toast.error(error?.message || "Erreur de vérification");
+      setOtp("");
     } finally {
       setIsLoading(false);
     }
@@ -162,11 +177,18 @@ export const PhoneOTPInput = ({ phone, onPhoneChange, onVerified, disabled }: Ph
      ÉTAT : SAISIE OTP
      ======================= */
   if (step === "otp") {
+    let prettyPhone = phone;
+    try {
+      prettyPhone = normalizePhone(phone);
+    } catch {
+      // ne casse pas l'UI si le format est temporairement invalide
+    }
+
     return (
       <div className="space-y-4">
         <div className="text-center space-y-2">
           <p className="text-sm text-muted-foreground">
-            Code envoyé au <strong>{normalizePhone(phone)}</strong>
+            Code envoyé au <strong>{prettyPhone}</strong>
           </p>
           <Button type="button" variant="link" size="sm" onClick={() => setStep("phone")} className="text-xs">
             Modifier le numéro

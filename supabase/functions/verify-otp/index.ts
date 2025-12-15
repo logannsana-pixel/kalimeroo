@@ -13,15 +13,16 @@ const corsHeaders = {
 // - +2424xxxxxxx | +2425xxxxxxx | +2426xxxxxxx
 // - 2424xxxxxxx  | 2425xxxxxxx  | 2426xxxxxxx
 // Sortie (E.164) : +2420XXXXXXXX (9 chiffres après +242)
-// NB: pour le Congo, le "0" (04/05/06) est généralement conservé dans le format international.
 function normalizeCongoMobile(raw: string): string {
   const digits = raw.replace(/\D/g, "");
   let national = digits.startsWith("242") ? digits.slice(3) : digits;
 
+  // si 8 chiffres (sans 0) : 4/5/6 + 7 digits → on préfixe 0
   if (/^[456]\d{7}$/.test(national)) {
     national = "0" + national;
   }
 
+  // format local complet (9 chiffres) : 0[456] + 7 digits
   if (!/^0[456]\d{7}$/.test(national)) {
     throw new Error("Seuls les numéros mobiles sont acceptés (04xxxxxxx, 05xxxxxxx, 06xxxxxxx)");
   }
@@ -37,9 +38,10 @@ serve(async (req) => {
   try {
     const { phone, code } = await req.json();
 
+    // IMPORTANT UX: ne pas renvoyer 4xx pour "code incorrect" ou erreurs utilisateur
     if (!phone || !code) {
-      return new Response(JSON.stringify({ error: "Phone number and code are required" }), {
-        status: 400,
+      return new Response(JSON.stringify({ success: false, verified: false, message: "Phone number and code are required" }), {
+        status: 200,
         headers: corsHeaders,
       });
     }
@@ -49,7 +51,7 @@ serve(async (req) => {
     const serviceSid = Deno.env.get("TWILIO_VERIFY_SERVICE_SID");
 
     if (!accountSid || !authToken || !serviceSid) {
-      return new Response(JSON.stringify({ error: "Server configuration error" }), {
+      return new Response(JSON.stringify({ success: false, verified: false, message: "Server configuration error" }), {
         status: 500,
         headers: corsHeaders,
       });
@@ -59,8 +61,8 @@ serve(async (req) => {
     try {
       formattedPhone = normalizeCongoMobile(phone);
     } catch (err: any) {
-      return new Response(JSON.stringify({ error: err.message }), {
-        status: 400,
+      return new Response(JSON.stringify({ success: false, verified: false, message: err.message }), {
+        status: 200,
         headers: corsHeaders,
       });
     }
@@ -81,12 +83,18 @@ serve(async (req) => {
 
     const data = await response.json();
 
+    // Même en erreur Twilio, on renvoie 200 pour éviter "Edge function returned 400" côté client
     if (!response.ok) {
       console.error("Twilio error:", data);
-      return new Response(JSON.stringify({ error: data.message || "Failed to verify OTP" }), {
-        status: response.status,
-        headers: corsHeaders,
-      });
+      return new Response(
+        JSON.stringify({
+          success: false,
+          verified: false,
+          message: data?.message || "Code incorrect ou expiré",
+          twilio_status: data?.status ?? null,
+        }),
+        { status: 200, headers: corsHeaders },
+      );
     }
 
     if (data.status !== "approved") {
@@ -95,11 +103,9 @@ serve(async (req) => {
           success: false,
           verified: false,
           message: "Code incorrect ou expiré",
+          twilio_status: data.status,
         }),
-        {
-          status: 400,
-          headers: corsHeaders,
-        },
+        { status: 200, headers: corsHeaders },
       );
     }
 
@@ -108,15 +114,13 @@ serve(async (req) => {
         success: true,
         verified: true,
         message: "Numéro vérifié avec succès",
+        twilio_status: data.status,
       }),
-      {
-        status: 200,
-        headers: corsHeaders,
-      },
+      { status: 200, headers: corsHeaders },
     );
   } catch (error) {
     console.error("Error in verify-otp:", error);
-    return new Response(JSON.stringify({ error: "Internal server error" }), {
+    return new Response(JSON.stringify({ success: false, verified: false, message: "Internal server error" }), {
       status: 500,
       headers: corsHeaders,
     });
