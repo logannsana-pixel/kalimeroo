@@ -40,11 +40,7 @@ export default function Checkout() {
   useEffect(() => {
     const fetchDeliveryFee = async () => {
       if (restaurantId && user) {
-        const { data } = await supabase
-          .from("restaurants")
-          .select("delivery_fee")
-          .eq("id", restaurantId)
-          .single();
+        const { data } = await supabase.from("restaurants").select("delivery_fee").eq("id", restaurantId).single();
 
         if (data) {
           setDeliveryFee(Number(data.delivery_fee));
@@ -107,12 +103,8 @@ export default function Checkout() {
       if (orderError) throw orderError;
 
       if (promoCodeId) {
-        const { data: promo } = await supabase
-          .from("promo_codes")
-          .select("uses_count")
-          .eq("id", promoCodeId)
-          .single();
-        
+        const { data: promo } = await supabase.from("promo_codes").select("uses_count").eq("id", promoCodeId).single();
+
         if (promo) {
           await supabase
             .from("promo_codes")
@@ -129,9 +121,7 @@ export default function Checkout() {
         selected_options: item.selected_options || [],
       }));
 
-      const { error: itemsError } = await supabase
-        .from("order_items")
-        .insert(orderItems);
+      const { error: itemsError } = await supabase.from("order_items").insert(orderItems);
 
       if (itemsError) throw itemsError;
 
@@ -171,7 +161,7 @@ export default function Checkout() {
                     <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-2">
                       <ShieldCheck className="w-5 h-5 text-primary" />
                     </div>
-                    <span className="text-xs font-medium">Paiement sécurisé</span>
+                    <span className="text-xs font-medium">Paiement à la livraison</span>
                   </CardContent>
                 </Card>
                 <Card className="border-none shadow-soft rounded-2xl">
@@ -196,12 +186,12 @@ export default function Checkout() {
               <Card className="border-none shadow-soft rounded-3xl">
                 <CardContent className="p-4 md:p-6">
                   <h3 className="font-bold mb-4">Code promo</h3>
-                  <PromoCodeInput 
-                    subtotal={subtotal} 
+                  <PromoCodeInput
+                    subtotal={subtotal}
                     onPromoApplied={(discountAmount, promoId) => {
                       setDiscount(discountAmount);
                       setPromoCodeId(promoId);
-                    }} 
+                    }}
                   />
                 </CardContent>
               </Card>
@@ -222,13 +212,13 @@ export default function Checkout() {
               <Card className="border-none shadow-soft rounded-3xl sticky top-4">
                 <CardContent className="p-4 md:p-6">
                   <h3 className="font-bold text-lg mb-4">Votre commande</h3>
-                  
+
                   {/* Cart Items Preview */}
                   <div className="space-y-3 mb-4 max-h-60 overflow-y-auto">
                     {cartItems.map((item) => (
                       <div key={item.id} className="flex gap-3">
-                        <img 
-                          src={item.menu_items?.image_url || "/placeholder.svg"} 
+                        <img
+                          src={item.menu_items?.image_url || "/placeholder.svg"}
                           alt={item.menu_items?.name}
                           className="w-12 h-12 rounded-xl object-cover"
                         />
@@ -279,12 +269,8 @@ export default function Checkout() {
       </main>
       <Footer className="hidden md:block" />
       <BottomNav />
-      
-      <GuestCheckoutModal
-        isOpen={showGuestModal}
-        onClose={() => navigate("/")}
-        onSuccess={handleGuestAuthSuccess}
-      />
+
+      <GuestCheckoutModal isOpen={showGuestModal} onClose={() => navigate("/")} onSuccess={handleGuestAuthSuccess} />
     </div>
   );
 }
