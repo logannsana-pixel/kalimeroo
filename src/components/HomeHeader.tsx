@@ -29,13 +29,7 @@ export const HomeHeader = () => {
 
         {/* Right Icons */}
         <div className="flex items-center gap-1">
-          {user ? (
-            <NotificationBell />
-          ) : (
-            <button className="h-9 w-9 rounded-full bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors">
-              <SlidersHorizontal className="h-4 w-4 text-foreground" />
-            </button>
-          )}
+          {user && <NotificationBell />}
         </div>
       </div>
 
