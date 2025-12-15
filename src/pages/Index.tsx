@@ -58,32 +58,34 @@ const Index = () => {
       <LocationModal />
 
       <main className="min-h-screen bg-background pb-24">
-        {/* HEADER */}
+        {/* Header */}
         <div className="px-4 pt-4 space-y-5">
           <HomeHeader />
         </div>
 
-        {/* PROMO BANNER */}
+        {/* Services */}
         <div className="mt-6">
           <ServiceTypes />
         </div>
 
-        {/* CATEGORIES */}
-        <div className="mt-2">
+        {/* Categories */}
+        <div className="mt-4">
           <FoodCategories />
         </div>
 
-        {/* ORDER AGAIN */}
-        <section className="px-4 mt-4">
-          {hasAddress && (
+        {/* Order Again */}
+        {hasAddress && (
+          <section className="px-4 mt-4">
             <OrderAgainSection />
-          )}
-        </section>
+          </section>
+        )}
 
-        {/* RESTAURANTS - Picks For You */}
+        {/* Restaurants */}
         <section className="px-4 mt-6 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="font-bold text-base text-foreground">{hasAddress ? "Picks For You" : "Restaurants"}</h2>
+            <h2 className="font-bold text-base text-foreground">
+              {hasAddress ? "Restaurants populaires" : "Restaurants"}
+            </h2>
             <Button
               variant="link"
               className="p-0 text-primary text-sm font-medium"
@@ -103,7 +105,9 @@ const Index = () => {
             <Card className="border border-border/50 rounded-2xl text-center py-10 bg-card">
               <CardContent>
                 <Truck className="mx-auto mb-3 text-primary h-8 w-8" />
-                <p className="text-sm font-semibold text-foreground">{hasAddress ? "Bientôt disponible" : "Choisissez votre ville"}</p>
+                <p className="text-sm font-semibold text-foreground">
+                  {hasAddress ? "Bientôt disponible" : "Choisissez votre ville"}
+                </p>
                 {!hasAddress && (
                   <Button size="sm" className="mt-3 rounded-full" onClick={openModal}>
                     Définir ma localisation
@@ -119,15 +123,15 @@ const Index = () => {
                   className="group border-none rounded-2xl overflow-hidden bg-card hover:bg-card/80 active:scale-[0.98] transition-all duration-200 cursor-pointer"
                   onClick={() => (hasAddress ? navigate(`/restaurant/${r.id}`) : openModal())}
                 >
-                  <div className="relative h-32">
+                  <div className="relative h-28">
                     <LazyImage
                       src={r.image_url || "/placeholder.svg"}
                       alt={r.name}
                       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />
-                    {/* Online indicator */}
-                    <div className="absolute top-3 left-3">
-                      <span className="w-2.5 h-2.5 rounded-full bg-primary inline-block animate-pulse" />
+                    {/* Status indicator */}
+                    <div className="absolute top-2.5 left-2.5">
+                      <span className="w-2 h-2 rounded-full bg-primary inline-block" />
                     </div>
                     {hasAddress && (
                       <div className="absolute top-2 right-2" onClick={(e) => e.stopPropagation()}>
@@ -136,15 +140,15 @@ const Index = () => {
                     )}
                   </div>
 
-                  <CardContent className="p-3 space-y-1.5">
+                  <CardContent className="p-3 space-y-1">
                     <div className="flex items-start justify-between gap-2">
                       <h3 className="text-sm font-bold text-primary line-clamp-1">{r.name}</h3>
-                      <span className="text-sm font-bold text-foreground whitespace-nowrap">
+                      <span className="text-xs font-semibold text-foreground whitespace-nowrap">
                         {r.delivery_fee ? `${r.delivery_fee.toLocaleString()} FC` : "Gratuit"}
                       </span>
                     </div>
                     <p className="text-xs text-muted-foreground line-clamp-1">{r.cuisine_type}</p>
-                    <div className="flex items-center gap-3 text-xs pt-1">
+                    <div className="flex items-center gap-3 text-xs pt-0.5">
                       <span className="flex items-center gap-1 font-medium text-foreground">
                         <Star className="w-3 h-3 fill-primary text-primary" />
                         {r.rating?.toFixed(1) || "4.5"}

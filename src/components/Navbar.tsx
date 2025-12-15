@@ -61,48 +61,45 @@ export const Navbar = () => {
   };
 
   return (
-    <nav className="sticky top-0 z-50 w-full bg-card/80 backdrop-blur-xl border-b border-border/50">
-      <div className="container flex h-16 md:h-18 items-center justify-between px-4">
-        {/* Logo - Playful KALIMERO */}
+    <nav className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur-xl border-b border-border/30">
+      <div className="container flex h-16 items-center justify-between px-4">
+        {/* Logo */}
         <Link to="/" className="flex items-center gap-2 group">
           <div className="relative">
-            <div className="flex items-center justify-center w-10 h-10 bg-gradient-primary rounded-2xl shadow-glow transition-transform group-hover:scale-105 group-hover:rotate-3">
+            <div className="flex items-center justify-center w-10 h-10 bg-gradient-primary rounded-xl shadow-glow transition-transform group-hover:scale-105">
               <span className="text-primary-foreground font-bold text-xl">K</span>
             </div>
-            {/* Playful dot */}
-            <div className="absolute -top-1 -right-1 w-3 h-3 bg-secondary rounded-full animate-bounce-soft" />
           </div>
           <div className="hidden sm:block">
-            <span className="font-bold text-xl tracking-tight">
+            <span className="font-bold text-lg tracking-tight">
               <span className="text-gradient-primary">KALI</span>
               <span className="text-foreground">MERO</span>
             </span>
-            <p className="text-[10px] text-muted-foreground -mt-1">Livraison rapide 🚀</p>
           </div>
         </Link>
 
         {/* Location Selector - Center (Desktop) */}
         <button 
           onClick={openModal}
-          className="hidden md:flex items-center gap-2 px-4 py-2 bg-muted/50 hover:bg-muted rounded-full transition-all hover:shadow-soft group"
+          className="hidden md:flex items-center gap-2 px-4 py-2 bg-secondary hover:bg-secondary/80 rounded-full transition-all group"
         >
           <MapPin className="h-4 w-4 text-primary" />
-          <span className="text-sm font-medium">
+          <span className="text-sm font-medium text-foreground">
             {district ? `${district}, ${city}` : "Choisir une adresse"}
           </span>
-          <span className="text-xs text-muted-foreground group-hover:text-primary transition-colors">▼</span>
+          <span className="text-xs text-muted-foreground">▼</span>
         </button>
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-2">
           <Link to="/">
-            <Button variant="ghost" size="sm" className="rounded-full gap-2 hover:bg-primary/10 hover:text-primary">
+            <Button variant="ghost" size="sm" className="rounded-full gap-2 hover:bg-secondary">
               <Home className="h-4 w-4" />
               Accueil
             </Button>
           </Link>
           <Link to="/restaurants">
-            <Button variant="ghost" size="sm" className="rounded-full gap-2 hover:bg-primary/10 hover:text-primary">
+            <Button variant="ghost" size="sm" className="rounded-full gap-2 hover:bg-secondary">
               <Utensils className="h-4 w-4" />
               Restaurants
             </Button>
