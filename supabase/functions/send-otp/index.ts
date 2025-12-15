@@ -7,14 +7,16 @@ const corsHeaders = {
 
 // Normalisation et validation mobile Congo
 function normalizeCongoMobile(raw: string): string {
-  const p = raw.replace(/[\s\-\(\)]/g, ""); // Supprime espaces, tirets, parenthèses
+  let p = raw.replace(/[\s\-\(\)]/g, ""); // Supprime espaces, tirets, parenthèses
 
-  // Valider mobile : doit commencer par 04, 05 ou 06 et avoir 8 chiffres
+  // Vérifier format Congo : doit commencer par 0 + (4|5|6) + 7 chiffres
   if (!p.match(/^0(4|5|6)\d{7}$/)) {
     throw new Error("Seuls les numéros mobiles sont acceptés (04xxxxxxx, 05xxxxxxx, 06xxxxxxx)");
   }
 
-  // Garder le 0 initial après +242
+  // **Supprimer le 0 initial pour Twilio**
+  p = p.slice(1);
+
   return "+242" + p;
 }
 
