@@ -232,16 +232,16 @@ export default function Orders() {
             <RefreshButton onClick={() => fetchOrders(true)} loading={refreshing} />
           </div>
           <div className="max-w-4xl mx-auto">
-            <Card className="text-center border-none shadow-soft rounded-3xl overflow-hidden">
-              <CardContent className="py-12 md:py-16">
-                <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Package className="w-10 h-10 text-primary" />
+            <Card className="text-center border-none shadow-soft rounded-2xl overflow-hidden">
+              <CardContent className="py-10">
+                <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Package className="w-7 h-7 text-primary" />
                 </div>
-                <h3 className="text-lg font-semibold mb-2">Aucune commande</h3>
-                <p className="text-sm text-muted-foreground mb-6">
+                <h3 className="text-base font-semibold mb-1">Aucune commande</h3>
+                <p className="text-sm text-muted-foreground mb-5">
                   Vos commandes apparaîtront ici
                 </p>
-                <Button onClick={() => navigate("/restaurants")} className="rounded-full">
+                <Button onClick={() => navigate("/restaurants")} className="rounded-full text-sm">
                   Découvrir les restaurants
                 </Button>
               </CardContent>

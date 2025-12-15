@@ -165,19 +165,19 @@ export default function Profile() {
                     currentImage={formData.avatar_url}
                   />
 
-                  <div className="space-y-2">
-                    <Label htmlFor="full_name" className="text-sm font-medium">Nom complet</Label>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="full_name" className="text-xs font-medium">Nom complet</Label>
                     <Input
                       id="full_name"
                       value={formData.full_name}
                       onChange={(e) => setFormData({...formData, full_name: e.target.value})}
                       placeholder="Votre nom complet"
-                      className="h-12 rounded-xl"
+                      className="h-10 rounded-lg text-sm"
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="phone" className="text-sm font-medium">Téléphone</Label>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="phone" className="text-xs font-medium">Téléphone</Label>
                     <div className="relative">
                       <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
@@ -186,52 +186,52 @@ export default function Profile() {
                         value={formData.phone}
                         onChange={(e) => setFormData({...formData, phone: e.target.value})}
                         placeholder="06 XXX XX XX"
-                        className="h-12 pl-10 rounded-xl"
+                        className="h-10 pl-10 rounded-lg text-sm"
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-2">
-                      <Label htmlFor="city" className="text-sm font-medium">Ville</Label>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="city" className="text-xs font-medium">Ville</Label>
                       <Input
                         id="city"
                         value={formData.city}
                         onChange={(e) => setFormData({...formData, city: e.target.value})}
                         placeholder="Brazzaville"
-                        className="h-12 rounded-xl"
+                        className="h-10 rounded-lg text-sm"
                       />
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="district" className="text-sm font-medium">Quartier</Label>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="district" className="text-xs font-medium">Quartier</Label>
                       <Input
                         id="district"
                         value={formData.district}
                         onChange={(e) => setFormData({...formData, district: e.target.value})}
                         placeholder="Moungali"
-                        className="h-12 rounded-xl"
+                        className="h-10 rounded-lg text-sm"
                       />
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="address" className="text-sm font-medium">Adresse complète</Label>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="address" className="text-xs font-medium">Adresse complète</Label>
                     <div className="relative">
-                      <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <MapPin className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                       <Textarea
                         id="address"
                         value={formData.address}
                         onChange={(e) => setFormData({...formData, address: e.target.value})}
                         placeholder="Numéro, rue, repères..."
-                        rows={3}
-                        className="pl-10 rounded-xl resize-none"
+                        rows={2}
+                        className="pl-10 rounded-lg resize-none text-sm"
                       />
                     </div>
                   </div>
 
-                  <Button type="submit" className="w-full h-12 rounded-2xl btn-playful">
-                    Enregistrer les modifications
+                  <Button type="submit" className="w-full h-10 rounded-xl text-sm">
+                    Enregistrer
                   </Button>
                 </form>
               </div>

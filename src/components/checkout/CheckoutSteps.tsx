@@ -407,7 +407,7 @@ export function CheckoutSteps({
               <span>-{discount.toFixed(0)} FCFA</span>
             </div>
           )}
-          <div className="flex justify-between font-bold text-xl pt-3 border-t">
+          <div className="flex justify-between font-semibold pt-3 border-t">
             <span>Total</span>
             <span className="text-primary">{effectiveTotal.toFixed(0)} FCFA</span>
           </div>
@@ -415,7 +415,7 @@ export function CheckoutSteps({
           <Button
             onClick={handleSubmit}
             disabled={loading || uploadingVoiceNote || (formData.deliveryMode === "delivery" && !hasAddress)}
-            className="w-full h-14 rounded-2xl text-lg font-semibold btn-playful"
+            className="w-full h-11 rounded-xl text-sm font-medium"
           >
             {loading || uploadingVoiceNote ? (
               <span className="flex items-center gap-2">

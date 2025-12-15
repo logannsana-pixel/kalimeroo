@@ -190,7 +190,7 @@ export function MenuItemDetailModal({ item, isOpen, onClose, onAddToCart }: Menu
 
         {/* Image */}
         {item.image_url && (
-          <div className="relative h-48 sm:h-64 md:h-80 w-full">
+          <div className="relative h-40 sm:h-48 w-full">
             <img
               src={item.image_url}
               alt={item.name}
@@ -199,11 +199,11 @@ export function MenuItemDetailModal({ item, isOpen, onClose, onAddToCart }: Menu
           </div>
         )}
 
-        <div className="p-4 sm:p-6">
-          <DialogHeader className="mb-4">
-            <DialogTitle className="text-2xl sm:text-3xl">{item.name}</DialogTitle>
-            <p className="text-muted-foreground text-sm sm:text-base mt-2">{item.description}</p>
-            <p className="text-xl sm:text-2xl font-bold mt-3">{Number(item.price).toFixed(0)} FCFA</p>
+        <div className="p-4">
+          <DialogHeader className="mb-3">
+            <DialogTitle className="text-lg">{item.name}</DialogTitle>
+            <p className="text-muted-foreground text-sm mt-1">{item.description}</p>
+            <p className="text-base font-bold text-primary mt-2">{Number(item.price).toFixed(0)} FCFA</p>
           </DialogHeader>
 
           {loading ? (
@@ -280,36 +280,36 @@ export function MenuItemDetailModal({ item, isOpen, onClose, onAddToCart }: Menu
           )}
 
           {/* Quantity and Add to Cart */}
-          <div className="mt-6 pt-6 border-t space-y-4">
+          <div className="mt-4 pt-4 border-t space-y-3">
             <div className="flex items-center justify-between">
-              <span className="font-semibold text-base sm:text-lg">Quantité</span>
-              <div className="flex items-center gap-3">
+              <span className="font-medium text-sm">Quantité</span>
+              <div className="flex items-center gap-2">
                 <Button
                   size="sm"
                   variant="outline"
-                  className="h-9 w-9 p-0"
+                  className="h-8 w-8 p-0"
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
                 >
-                  <Minus className="w-4 h-4" />
+                  <Minus className="w-3.5 h-3.5" />
                 </Button>
-                <span className="w-8 text-center font-semibold">{quantity}</span>
+                <span className="w-6 text-center font-medium text-sm">{quantity}</span>
                 <Button
                   size="sm"
                   variant="outline"
-                  className="h-9 w-9 p-0"
+                  className="h-8 w-8 p-0"
                   onClick={() => setQuantity(quantity + 1)}
                 >
-                  <Plus className="w-4 h-4" />
+                  <Plus className="w-3.5 h-3.5" />
                 </Button>
               </div>
             </div>
 
             <Button
-              className="w-full h-12 text-base sm:text-lg"
+              className="w-full h-10 text-sm"
               onClick={handleAddToCart}
               disabled={!isValidSelection() || submitting}
             >
-              Ajouter au panier - {calculateTotalPrice().toFixed(0)} FCFA
+              Ajouter - {calculateTotalPrice().toFixed(0)} FCFA
             </Button>
           </div>
         </div>
