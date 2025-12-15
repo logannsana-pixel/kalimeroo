@@ -12,6 +12,7 @@ import { AlertEngine } from "@/components/alerts/AlertEngine";
 import { FloatingCart } from "@/components/FloatingCart";
 import { NetworkStatus } from "@/components/NetworkStatus";
 import { Skeleton } from "@/components/ui/skeleton";
+import FloatingChatButton from "@/components/FloatingChatButton";
 
 // Lazy loaded pages for code splitting
 const Index = lazy(() => import("./pages/Index"));
@@ -28,6 +29,7 @@ const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const EnableAlerts = lazy(() => import("./pages/EnableAlerts"));
 const AlertPlayground = lazy(() => import("./pages/AlertPlayground"));
 const Affiliate = lazy(() => import("./pages/Affiliate"));
+const Help = lazy(() => import("./pages/Help"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Auth pages
@@ -65,6 +67,7 @@ const App = () => (
               <NetworkStatus />
               <AlertEngine />
               <FloatingCart />
+              <FloatingChatButton />
               <Suspense fallback={<PageLoader />}>
                   <Routes>
                     <Route path="/" element={<Index />} />
@@ -80,6 +83,7 @@ const App = () => (
                     <Route path="/restaurant/:id" element={<RestaurantDetail />} />
                     <Route path="/enable-alerts" element={<EnableAlerts />} />
                     <Route path="/dev/alerts" element={<AlertPlayground />} />
+                    <Route path="/help" element={<Help />} />
                     <Route 
                       path="/affiliate" 
                       element={

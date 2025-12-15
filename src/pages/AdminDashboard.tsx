@@ -15,6 +15,8 @@ import { AdminPaymentsTab } from "@/components/admin/AdminPaymentsTab";
 import { AdminAnalyticsTab } from "@/components/admin/AdminAnalyticsTab";
 import { AdminAdvancedAnalyticsTab } from "@/components/admin/AdminAdvancedAnalyticsTab";
 import { AdminSupportTab } from "@/components/admin/AdminSupportTab";
+import AdminSupportInboxTab from "@/components/admin/AdminSupportInboxTab";
+import AdminFAQTab from "@/components/admin/AdminFAQTab";
 import { AdminMarketingTab } from "@/components/admin/AdminMarketingTab";
 import { AdminSettingsTab } from "@/components/admin/AdminSettingsTab";
 import { AdminAdminsTab } from "@/components/admin/AdminAdminsTab";
@@ -31,6 +33,8 @@ const tabTitles: Record<AdminTab, string> = {
   analytics: 'Analytics',
   'advanced-analytics': 'Analytics Avancés',
   support: 'Support',
+  'support-inbox': 'Inbox Support',
+  faq: 'Gestion FAQ',
   marketing: 'Marketing',
   settings: 'Paramètres',
   admins: 'Équipe Admin',
@@ -120,6 +124,10 @@ export default function AdminDashboard() {
         return <AdminAdvancedAnalyticsTab />;
       case 'support':
         return <AdminSupportTab />;
+      case 'support-inbox':
+        return <AdminSupportInboxTab />;
+      case 'faq':
+        return <AdminFAQTab />;
       case 'marketing':
         return <AdminMarketingTab />;
       case 'settings':

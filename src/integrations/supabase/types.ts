@@ -432,6 +432,80 @@ export type Database = {
         }
         Relationships: []
       }
+      faq_categories: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      faq_items: {
+        Row: {
+          answer: string
+          category_id: string
+          created_at: string | null
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          question: string
+          updated_at: string | null
+        }
+        Insert: {
+          answer: string
+          category_id: string
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          question: string
+          updated_at?: string | null
+        }
+        Update: {
+          answer?: string
+          category_id?: string
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          question?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "faq_items_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "faq_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       favorites: {
         Row: {
           created_at: string
@@ -1374,6 +1448,7 @@ export type Database = {
           subject: string
           updated_at: string | null
           user_id: string | null
+          user_type: string | null
         }
         Insert: {
           assigned_to?: string | null
@@ -1387,6 +1462,7 @@ export type Database = {
           subject: string
           updated_at?: string | null
           user_id?: string | null
+          user_type?: string | null
         }
         Update: {
           assigned_to?: string | null
@@ -1400,6 +1476,7 @@ export type Database = {
           subject?: string
           updated_at?: string | null
           user_id?: string | null
+          user_type?: string | null
         }
         Relationships: [
           {
