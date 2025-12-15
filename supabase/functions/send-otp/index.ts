@@ -3,20 +3,19 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Content-Type": "application/json",
 };
 
-// Normalisation et validation mobile Congo
+// 🔹 Normalisation et validation mobile Congo
 function normalizeCongoMobile(raw: string): string {
-  let p = raw.replace(/[\s\-\(\)]/g, ""); // Supprime espaces, tirets, parenthèses
+  const p = raw.replace(/[\s\-\(\)]/g, ""); // Supprime espaces, tirets, parenthèses
 
-  // Vérifier format Congo : doit commencer par 0 + (4|5|6) + 7 chiffres
+  // Vérifier format Congo : 04xxxxxxx, 05xxxxxxx, 06xxxxxxx
   if (!p.match(/^0(4|5|6)\d{7}$/)) {
     throw new Error("Seuls les numéros mobiles sont acceptés (04xxxxxxx, 05xxxxxxx, 06xxxxxxx)");
   }
 
-  // **Supprimer le 0 initial pour Twilio**
-  p = p.slice(1);
-
+  // On garde le 0 initial pour Twilio
   return "+242" + p;
 }
 
@@ -29,10 +28,7 @@ serve(async (req) => {
     const { phone } = await req.json();
 
     if (!phone) {
-      return new Response(JSON.stringify({ error: "Phone number is required" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(JSON.stringify({ error: "Phone number is required" }), { status: 400, headers: corsHeaders });
     }
 
     const accountSid = Deno.env.get("TWILIO_ACCOUNT_SID");
@@ -43,7 +39,7 @@ serve(async (req) => {
       console.error("Missing Twilio credentials");
       return new Response(JSON.stringify({ error: "Server configuration error" }), {
         status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: corsHeaders,
       });
     }
 
@@ -51,14 +47,11 @@ serve(async (req) => {
     try {
       formattedPhone = normalizeCongoMobile(phone);
     } catch (err: any) {
-      return new Response(JSON.stringify({ error: err.message }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(JSON.stringify({ error: err.message }), { status: 400, headers: corsHeaders });
     }
 
+    // ✅ Envoi du SMS OTP via Twilio Verify
     const twilioUrl = `https://verify.twilio.com/v2/Services/${serviceSid}/Verifications`;
-
     const response = await fetch(twilioUrl, {
       method: "POST",
       headers: {
@@ -77,7 +70,7 @@ serve(async (req) => {
       console.error("Twilio error:", data);
       return new Response(JSON.stringify({ error: data.message || "Failed to send OTP" }), {
         status: response.status,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: corsHeaders,
       });
     }
 
@@ -87,13 +80,10 @@ serve(async (req) => {
         status: data.status,
         message: `Code envoyé par SMS à ${formattedPhone}`,
       }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      { headers: corsHeaders },
     );
   } catch (error) {
     console.error("Error in send-otp:", error);
-    return new Response(JSON.stringify({ error: "Internal server error" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(JSON.stringify({ error: "Internal server error" }), { status: 500, headers: corsHeaders });
   }
 });
