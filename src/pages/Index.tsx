@@ -103,12 +103,13 @@ const Index = () => {
         </div> */}
 
         {/* ORDER AGAIN */}
-        {hasAddress && (
-          <div className="mt-6">
-            <OrderAgainSection />
-          </div>
-        )}
-
+        <section className="px-4 mt-6 space-y-3">
+          {hasAddress && (
+            <div className="mt-6">
+              <OrderAgainSection />
+            </div>
+          )}
+        </section>
         {/* RESTAURANTS */}
         <section className="px-4 mt-6 space-y-3">
           <div className="flex items-center justify-between">
