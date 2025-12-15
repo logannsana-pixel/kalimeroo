@@ -119,16 +119,16 @@ const Index = () => {
           </div>
 
           {loading ? (
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3">
               {[...Array(4)].map((_, i) => (
-                <Skeleton key={i} className="h-52 rounded-2xl bg-secondary" />
+                <Skeleton key={i} className="h-40 rounded-xl bg-secondary" />
               ))}
             </div>
           ) : restaurants.length === 0 ? (
-            <Card className="border border-border/50 rounded-2xl text-center py-8 bg-card">
+            <Card className="border border-border/50 rounded-xl text-center py-6 bg-card">
               <CardContent className="p-0">
-                <Truck className="mx-auto mb-2 text-primary h-6 w-6" />
-                <p className="text-xs font-medium text-foreground mb-2">
+                <Truck className="mx-auto mb-1.5 text-primary h-5 w-5" />
+                <p className="text-xs font-medium text-foreground mb-1.5">
                   {hasAddress ? "Bientôt disponible" : "Choisissez votre ville"}
                 </p>
                 {!hasAddress && (
@@ -143,41 +143,41 @@ const Index = () => {
               {restaurants.map((r) => (
                 <Card
                   key={r.id}
-                  className="group border-none rounded-2xl overflow-hidden bg-card hover:bg-card/80 active:scale-[0.98] transition-all duration-200 cursor-pointer"
+                  className="group border-none rounded-xl overflow-hidden bg-card hover:bg-card/80 active:scale-[0.98] transition-all duration-200 cursor-pointer"
                   onClick={() => navigate(`/restaurant/${r.id}`)}
                 >
-                  <div className="relative h-28">
+                  <div className="relative h-24">
                     <LazyImage
                       src={r.image_url || "/placeholder.svg"}
                       alt={r.name}
                       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                     {/* Status indicator */}
-                    <div className="absolute top-2.5 left-2.5">
-                      <span className="w-2 h-2 rounded-full bg-primary inline-block" />
+                    <div className="absolute top-2 left-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary inline-block" />
                     </div>
                     {hasAddress && (
-                      <div className="absolute top-2 right-2" onClick={(e) => e.stopPropagation()}>
+                      <div className="absolute top-1.5 right-1.5" onClick={(e) => e.stopPropagation()}>
                         <FavoritesButton restaurantId={r.id} />
                       </div>
                     )}
                   </div>
 
-                  <CardContent className="p-3 space-y-1">
-                    <div className="flex items-start justify-between gap-2">
-                      <h3 className="text-sm font-bold text-primary line-clamp-1">{r.name}</h3>
-                      <span className="text-xs font-semibold text-foreground whitespace-nowrap">
+                  <CardContent className="p-2.5 space-y-0.5">
+                    <div className="flex items-start justify-between gap-1">
+                      <h3 className="text-xs font-semibold text-primary line-clamp-1">{r.name}</h3>
+                      <span className="text-[10px] font-medium text-foreground whitespace-nowrap">
                         {r.delivery_fee ? `${r.delivery_fee.toLocaleString()} FC` : "Gratuit"}
                       </span>
                     </div>
-                    <p className="text-xs text-muted-foreground line-clamp-1">{r.cuisine_type}</p>
-                    <div className="flex items-center gap-3 text-xs pt-0.5">
-                      <span className="flex items-center gap-1 font-medium text-foreground">
-                        <Star className="w-3 h-3 fill-primary text-primary" />
+                    <p className="text-[10px] text-muted-foreground line-clamp-1">{r.cuisine_type}</p>
+                    <div className="flex items-center gap-2 text-[10px] pt-0.5">
+                      <span className="flex items-center gap-0.5 font-medium text-foreground">
+                        <Star className="w-2.5 h-2.5 fill-primary text-primary" />
                         {r.rating?.toFixed(1) || "4.5"}
                       </span>
-                      <span className="flex items-center gap-1 text-muted-foreground">
-                        <Clock className="w-3 h-3" />
+                      <span className="flex items-center gap-0.5 text-muted-foreground">
+                        <Clock className="w-2.5 h-2.5" />
                         {r.delivery_time || "20-30"} min
                       </span>
                     </div>

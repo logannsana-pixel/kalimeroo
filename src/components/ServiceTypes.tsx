@@ -60,13 +60,13 @@ export const ServiceTypes = () => {
               disabled={disabled}
               className={`
                 relative
-                py-6
-                rounded-2xl
+                py-4
+                rounded-xl
                 flex
                 flex-col
                 items-center
                 justify-center
-                gap-2
+                gap-1.5
                 transition-all
                 duration-200
                 text-center
@@ -79,16 +79,16 @@ export const ServiceTypes = () => {
             >
               {/* Badge Bientôt */}
               {disabled && (
-                <span className="absolute top-2 right-2 text-[9px] font-medium bg-secondary px-1.5 py-0.5 rounded-full text-muted-foreground">
+                <span className="absolute top-1.5 right-1.5 text-[8px] font-medium bg-secondary px-1 py-0.5 rounded-full text-muted-foreground">
                   Bientôt
                 </span>
               )}
 
               {/* Icon */}
-              <span className="text-2xl leading-none">{service.icon}</span>
+              <span className="text-xl leading-none">{service.icon}</span>
 
               {/* Label */}
-              <span className="text-xs font-semibold leading-tight">{service.name}</span>
+              <span className="text-[11px] font-medium leading-tight">{service.name}</span>
             </button>
           );
         })}
