@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { 
   Store, Search, CheckCircle, XCircle, Eye, Edit, 
-  MoreHorizontal, FileText, Clock, MapPin, Phone
+  MoreHorizontal, FileText, Clock, MapPin, Phone, Settings
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -26,6 +26,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
+import { RestaurantDetailModal } from "./RestaurantDetailModal";
+import { PaymentSettingsModal } from "./PaymentSettingsModal";
 
 interface Restaurant {
   id: string;
@@ -49,6 +51,8 @@ export function AdminRestaurantsTab() {
   const [filter, setFilter] = useState<'all' | 'pending' | 'validated' | 'rejected'>('all');
   const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
   const [showValidationModal, setShowValidationModal] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [validationNotes, setValidationNotes] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
 
@@ -298,13 +302,19 @@ export function AdminRestaurantsTab() {
                           <FileText className="w-4 h-4 mr-2" />
                           Valider/Rejeter
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => {
+                          setSelectedRestaurant(restaurant);
+                          setShowDetailModal(true);
+                        }}>
                           <Eye className="w-4 h-4 mr-2" />
                           Voir détails
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <Edit className="w-4 h-4 mr-2" />
-                          Modifier
+                        <DropdownMenuItem onClick={() => {
+                          setSelectedRestaurant(restaurant);
+                          setShowPaymentModal(true);
+                        }}>
+                          <Settings className="w-4 h-4 mr-2" />
+                          Config. paiement
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -394,6 +404,27 @@ export function AdminRestaurantsTab() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <RestaurantDetailModal
+        restaurantId={selectedRestaurant?.id || null}
+        isOpen={showDetailModal}
+        onClose={() => {
+          setShowDetailModal(false);
+          setSelectedRestaurant(null);
+        }}
+        onUpdate={fetchRestaurants}
+      />
+
+      <PaymentSettingsModal
+        entityId={selectedRestaurant?.owner_id || null}
+        entityType="restaurant"
+        entityName={selectedRestaurant?.name || ""}
+        isOpen={showPaymentModal}
+        onClose={() => {
+          setShowPaymentModal(false);
+          setSelectedRestaurant(null);
+        }}
+      />
     </div>
   );
 }

@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { 
   Users, Search, MoreHorizontal, Phone, MapPin, 
-  ShoppingBag, User, Store, Truck, Shield
+  ShoppingBag, User, Store, Truck, Shield, Eye
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -17,6 +17,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { UserDetailModal } from "./UserDetailModal";
 
 interface UserWithRole {
   id: string;
@@ -41,6 +42,8 @@ export function AdminUsersTab() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -260,8 +263,13 @@ export function AdminUsersTab() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem>Voir profil</DropdownMenuItem>
-                          <DropdownMenuItem>Voir commandes</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => {
+                            setSelectedUserId(user.id);
+                            setShowDetailModal(true);
+                          }}>
+                            <Eye className="w-4 h-4 mr-2" />
+                            Voir détails
+                          </DropdownMenuItem>
                           <DropdownMenuItem className="text-destructive">Suspendre</DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -273,6 +281,16 @@ export function AdminUsersTab() {
           })
         )}
       </div>
+
+      <UserDetailModal
+        userId={selectedUserId}
+        isOpen={showDetailModal}
+        onClose={() => {
+          setShowDetailModal(false);
+          setSelectedUserId(null);
+        }}
+        onUpdate={fetchUsers}
+      />
     </div>
   );
 }

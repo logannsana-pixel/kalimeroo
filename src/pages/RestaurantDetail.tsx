@@ -52,6 +52,7 @@ export default function RestaurantDetail() {
   const [pendingAction, setPendingAction] = useState<{ itemId: string; quantity: number; options: any[] } | null>(null);
   const [deliveryMode, setDeliveryMode] = useState<'delivery' | 'takeaway'>('delivery');
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   useEffect(() => {
     fetchRestaurantData();
@@ -112,12 +113,17 @@ export default function RestaurantDetail() {
     await handleAddToCart(itemId, 1);
   };
 
-  // Filter menu items by search
-  const filteredMenuItems = menuItems.filter(item => 
-    !searchQuery || 
-    item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.description?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter menu items by search and category
+  const filteredMenuItems = menuItems.filter(item => {
+    const matchesSearch = !searchQuery || 
+      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.description?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = !selectedCategory || item.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
+
+  // Get unique categories
+  const categories = [...new Set(menuItems.map(item => item.category || "Autres"))];
 
   const groupedMenuItems = filteredMenuItems.reduce((acc, item) => {
     const category = item.category || "Autres";
@@ -237,6 +243,37 @@ export default function RestaurantDetail() {
             className="pl-9 pr-4 h-10 rounded-full bg-muted/50 border-0 text-sm focus-visible:ring-1"
           />
         </div>
+
+        {/* Category Filter Chips */}
+        {categories.length > 1 && (
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+            <button
+              onClick={() => setSelectedCategory(null)}
+              className={cn(
+                "px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all",
+                !selectedCategory 
+                  ? "bg-primary text-primary-foreground" 
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
+              )}
+            >
+              Tous
+            </button>
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={cn(
+                  "px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all",
+                  selectedCategory === cat 
+                    ? "bg-primary text-primary-foreground" 
+                    : "bg-muted text-muted-foreground hover:bg-muted/80"
+                )}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Menu Items */}

@@ -357,6 +357,39 @@ export type Database = {
           },
         ]
       }
+      driver_reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          driver_id: string
+          id: string
+          order_id: string
+          rating: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          driver_id: string
+          id?: string
+          order_id: string
+          rating: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          driver_id?: string
+          id?: string
+          order_id?: string
+          rating?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       favorites: {
         Row: {
           created_at: string
@@ -955,6 +988,8 @@ export type Database = {
           city: string | null
           created_at: string
           district: string | null
+          driver_rating: number | null
+          driver_reviews_count: number | null
           full_name: string | null
           id: string
           is_available: boolean | null
@@ -977,6 +1012,8 @@ export type Database = {
           city?: string | null
           created_at?: string
           district?: string | null
+          driver_rating?: number | null
+          driver_reviews_count?: number | null
           full_name?: string | null
           id: string
           is_available?: boolean | null
@@ -999,6 +1036,8 @@ export type Database = {
           city?: string | null
           created_at?: string
           district?: string | null
+          driver_rating?: number | null
+          driver_reviews_count?: number | null
           full_name?: string | null
           id?: string
           is_available?: boolean | null

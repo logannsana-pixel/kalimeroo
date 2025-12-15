@@ -8,7 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { 
   Truck, Search, CheckCircle, XCircle, Eye, 
-  MoreHorizontal, FileText, Clock, Phone, MapPin, Car
+  MoreHorizontal, FileText, Clock, Phone, MapPin, Car, Settings
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -24,6 +24,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { DriverDetailModal } from "./DriverDetailModal";
+import { PaymentSettingsModal } from "./PaymentSettingsModal";
 
 interface Driver {
   id: string;
@@ -47,6 +49,8 @@ export function AdminDriversTab() {
   const [filter, setFilter] = useState<'all' | 'pending' | 'validated' | 'rejected'>('all');
   const [selectedDriver, setSelectedDriver] = useState<Driver | null>(null);
   const [showValidationModal, setShowValidationModal] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [validationNotes, setValidationNotes] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
 
@@ -317,9 +321,19 @@ export function AdminDriversTab() {
                           <FileText className="w-4 h-4 mr-2" />
                           Valider/Rejeter
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => {
+                          setSelectedDriver(driver);
+                          setShowDetailModal(true);
+                        }}>
                           <Eye className="w-4 h-4 mr-2" />
                           Voir profil
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => {
+                          setSelectedDriver(driver);
+                          setShowPaymentModal(true);
+                        }}>
+                          <Settings className="w-4 h-4 mr-2" />
+                          Config. paiement
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -410,6 +424,27 @@ export function AdminDriversTab() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <DriverDetailModal
+        driverId={selectedDriver?.id || null}
+        isOpen={showDetailModal}
+        onClose={() => {
+          setShowDetailModal(false);
+          setSelectedDriver(null);
+        }}
+        onUpdate={fetchDrivers}
+      />
+
+      <PaymentSettingsModal
+        entityId={selectedDriver?.id || null}
+        entityType="driver"
+        entityName={selectedDriver?.full_name || "Livreur"}
+        isOpen={showPaymentModal}
+        onClose={() => {
+          setShowPaymentModal(false);
+          setSelectedDriver(null);
+        }}
+      />
     </div>
   );
 }
