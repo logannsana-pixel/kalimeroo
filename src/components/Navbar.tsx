@@ -104,6 +104,14 @@ export const Navbar = () => {
               Restaurants
             </Button>
           </Link>
+          <Button variant="ghost" size="sm" className="rounded-full gap-2 hover:bg-secondary opacity-50 cursor-not-allowed" disabled>
+            🛒 Magasins
+            <span className="text-[10px] bg-muted px-1.5 py-0.5 rounded-full">Bientôt</span>
+          </Button>
+          <Button variant="ghost" size="sm" className="rounded-full gap-2 hover:bg-secondary opacity-50 cursor-not-allowed" disabled>
+            💊 Pharmacies
+            <span className="text-[10px] bg-muted px-1.5 py-0.5 rounded-full">Bientôt</span>
+          </Button>
         </div>
 
         {/* Right Section */}
