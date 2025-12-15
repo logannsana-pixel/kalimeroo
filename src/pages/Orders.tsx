@@ -7,12 +7,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Package, Clock, CheckCircle, XCircle, Star, ChevronDown, ChevronUp, Truck, MapPin } from "lucide-react";
+import { Package, Clock, CheckCircle, XCircle, Star, ChevronDown, ChevronUp, Truck, MapPin, User } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { ReviewForm } from "@/components/ReviewForm";
+import { DriverRatingForm } from "@/components/DriverRatingForm";
 import { ChatInterface } from "@/components/ChatInterface";
 import { RefreshButton } from "@/components/RefreshButton";
 import { Database } from "@/integrations/supabase/types";
@@ -59,9 +60,11 @@ interface Order {
   };
   order_items: OrderItem[];
   reviews: { id: string }[];
+  driver_reviews: { id: string }[];
   driver_profile?: {
     full_name: string | null;
     phone: string | null;
+    driver_rating?: number | null;
   } | null;
 }
 
@@ -88,6 +91,7 @@ export default function Orders() {
   const [refreshing, setRefreshing] = useState(false);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [reviewingOrder, setReviewingOrder] = useState<Order | null>(null);
+  const [ratingDriverOrder, setRatingDriverOrder] = useState<Order | null>(null);
   const [trackingOrder, setTrackingOrder] = useState<Order | null>(null);
 
   const fetchOrders = async (showRefresh = false) => {
@@ -134,14 +138,26 @@ export default function Orders() {
       
       if (error) throw error;
       
+      // Fetch driver reviews by user
+      const { data: driverReviews } = await supabase
+        .from("driver_reviews")
+        .select("id, order_id")
+        .eq("user_id", user.id);
+      
+      const driverReviewsByOrder = new Map(driverReviews?.map(r => [r.order_id, r]) || []);
+      
       // Fetch driver profiles for orders with drivers
-      let data = ordersData || [];
+      let data = (ordersData || []).map(order => ({
+        ...order,
+        driver_reviews: driverReviewsByOrder.has(order.id) ? [{ id: driverReviewsByOrder.get(order.id)!.id }] : []
+      }));
+      
       if (data.length > 0) {
         const driverIds = [...new Set(data.filter(o => o.delivery_driver_id).map(o => o.delivery_driver_id!))];
         if (driverIds.length > 0) {
           const { data: driversData } = await supabase
             .from("profiles")
-            .select("id, full_name, phone, latitude, longitude")
+            .select("id, full_name, phone, latitude, longitude, driver_rating")
             .in("id", driverIds);
           
           const driversMap = new Map(driversData?.map(d => [d.id, d]) || []);
@@ -151,13 +167,14 @@ export default function Orders() {
             driver_longitude: order.delivery_driver_id ? driversMap.get(order.delivery_driver_id)?.longitude : null,
             driver_profile: order.delivery_driver_id ? {
               full_name: driversMap.get(order.delivery_driver_id)?.full_name || null,
-              phone: driversMap.get(order.delivery_driver_id)?.phone || null
+              phone: driversMap.get(order.delivery_driver_id)?.phone || null,
+              driver_rating: driversMap.get(order.delivery_driver_id)?.driver_rating || null
             } : null
           }));
         }
       }
 
-      setOrders(data);
+      setOrders(data as Order[]);
     } catch (error) {
       console.error("Error fetching orders:", error);
     } finally {
@@ -191,6 +208,12 @@ export default function Orders() {
 
   const canReview = (order: Order) => {
     return order.status === "delivered" && order.reviews.length === 0;
+  };
+
+  const canRateDriver = (order: Order) => {
+    return order.status === "delivered" && 
+           order.delivery_driver_id && 
+           order.driver_reviews.length === 0;
   };
 
   if (loading) {
@@ -373,7 +396,18 @@ export default function Orders() {
                         className="w-full rounded-full"
                       >
                         <Star className="w-4 h-4 mr-2" />
-                        Laisser un avis
+                        Avis restaurant
+                      </Button>
+                    )}
+
+                    {canRateDriver(order) && (
+                      <Button
+                        onClick={() => setRatingDriverOrder(order)}
+                        variant="outline"
+                        className="w-full rounded-full"
+                      >
+                        <User className="w-4 h-4 mr-2" />
+                        Noter le livreur
                       </Button>
                     )}
                   </CardContent>
@@ -398,6 +432,27 @@ export default function Orders() {
                   fetchOrders();
                 }}
                 onCancel={() => setReviewingOrder(null)}
+              />
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Driver Rating Dialog */}
+        <Dialog open={!!ratingDriverOrder} onOpenChange={(open) => !open && setRatingDriverOrder(null)}>
+          <DialogContent className="mx-4 max-w-md rounded-3xl">
+            <DialogHeader>
+              <DialogTitle>Noter le livreur</DialogTitle>
+            </DialogHeader>
+            {ratingDriverOrder && ratingDriverOrder.delivery_driver_id && (
+              <DriverRatingForm
+                driverId={ratingDriverOrder.delivery_driver_id}
+                orderId={ratingDriverOrder.id}
+                driverName={ratingDriverOrder.driver_profile?.full_name || "Livreur"}
+                onSuccess={() => {
+                  setRatingDriverOrder(null);
+                  fetchOrders();
+                }}
+                onCancel={() => setRatingDriverOrder(null)}
               />
             )}
           </DialogContent>
