@@ -21,17 +21,18 @@ interface PhoneOTPInputProps {
  *  - 4xxxxxxx  | 5xxxxxxx  | 6xxxxxxx
  *  - +2424xxxxxxx | +2425xxxxxxx | +2426xxxxxxx
  *  - 2424xxxxxxx  | 2425xxxxxxx  | 2426xxxxxxx
- * Sortie : +242XXXXXXXX (8 chiffres après +242)
+ * Sortie (E.164) : +2420XXXXXXXX (9 chiffres après +242)
  */
 const normalizePhone = (raw: string): string => {
   const digits = raw.replace(/\D/g, "");
   let national = digits.startsWith("242") ? digits.slice(3) : digits;
 
-  if (national.startsWith("0") && national.length === 9) {
-    national = national.slice(1);
+  // si l'utilisateur tape sans le 0 (ex: 61234567)
+  if (/^[456]\d{7}$/.test(national)) {
+    national = "0" + national;
   }
 
-  if (!/^[456]\d{7}$/.test(national)) {
+  if (!/^0[456]\d{7}$/.test(national)) {
     throw new Error("Numéro congolais invalide");
   }
 

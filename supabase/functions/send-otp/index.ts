@@ -12,20 +12,21 @@ const corsHeaders = {
 // - 4xxxxxxx  | 5xxxxxxx  | 6xxxxxxx
 // - +2424xxxxxxx | +2425xxxxxxx | +2426xxxxxxx
 // - 2424xxxxxxx  | 2425xxxxxxx  | 2426xxxxxxx
-// Sortie : +242XXXXXXXX (8 chiffres après +242)
+// Sortie (E.164) : +2420XXXXXXXX (9 chiffres après +242)
+// NB: pour le Congo, le "0" (04/05/06) est généralement conservé dans le format international.
 function normalizeCongoMobile(raw: string): string {
   const digits = raw.replace(/\D/g, "");
 
   // retire l'indicatif si présent
   let national = digits.startsWith("242") ? digits.slice(3) : digits;
 
-  // retire le 0 de tête si l'utilisateur l'a saisi (format local 0[456]xxxxxxx)
-  if (national.startsWith("0") && national.length === 9) {
-    national = national.slice(1);
+  // si 8 chiffres (sans 0) : 4/5/6 + 7 digits → on préfixe 0
+  if (/^[456]\d{7}$/.test(national)) {
+    national = "0" + national;
   }
 
-  // au Congo : 8 chiffres significatifs, commencent par 4/5/6
-  if (!/^[456]\d{7}$/.test(national)) {
+  // format local complet (9 chiffres) : 0[456] + 7 digits
+  if (!/^0[456]\d{7}$/.test(national)) {
     throw new Error("Numéro mobile invalide (04xxxxxxx, 05xxxxxxx, 06xxxxxxx)");
   }
 
@@ -41,7 +42,10 @@ serve(async (req) => {
     const { phone } = await req.json();
 
     if (!phone) {
-      return new Response(JSON.stringify({ error: "Phone number is required" }), { status: 400, headers: corsHeaders });
+      return new Response(JSON.stringify({ error: "Phone number is required" }), {
+        status: 400,
+        headers: corsHeaders,
+      });
     }
 
     const accountSid = Deno.env.get("TWILIO_ACCOUNT_SID");
@@ -55,28 +59,28 @@ serve(async (req) => {
       });
     }
 
-    // ✅ NORMALISATION UNIQUE
     let formattedPhone: string;
     try {
       formattedPhone = normalizeCongoMobile(phone);
     } catch (err: any) {
-      return new Response(JSON.stringify({ error: err.message }), { status: 400, headers: corsHeaders });
+      return new Response(JSON.stringify({ error: err.message }), {
+        status: 400,
+        headers: corsHeaders,
+      });
     }
 
-    // 🔍 DEBUG (À GARDER JUSQU’À VALIDATION)
-    console.log("📞 PHONE SENT TO TWILIO =", formattedPhone);
-
-    // ✅ APPEL TWILIO VERIFY (FormData recommandé)
-    const form = new FormData();
-    form.append("To", formattedPhone);
-    form.append("Channel", "sms");
-
-    const response = await fetch(`https://verify.twilio.com/v2/Services/${serviceSid}/Verifications`, {
+    // ✅ APPEL TWILIO VERIFY (x-www-form-urlencoded)
+    const twilioUrl = `https://verify.twilio.com/v2/Services/${serviceSid}/Verifications`;
+    const response = await fetch(twilioUrl, {
       method: "POST",
       headers: {
         Authorization: "Basic " + btoa(`${accountSid}:${authToken}`),
+        "Content-Type": "application/x-www-form-urlencoded",
       },
-      body: form,
+      body: new URLSearchParams({
+        To: formattedPhone,
+        Channel: "sms",
+      }),
     });
 
     const data = await response.json();
@@ -98,7 +102,10 @@ serve(async (req) => {
       { status: 200, headers: corsHeaders },
     );
   } catch (error) {
-    console.error("🔥 Edge error:", error);
-    return new Response(JSON.stringify({ error: "Internal server error" }), { status: 500, headers: corsHeaders });
+    console.error("🔥 send-otp error:", error);
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
+      status: 500,
+      headers: corsHeaders,
+    });
   }
 });
