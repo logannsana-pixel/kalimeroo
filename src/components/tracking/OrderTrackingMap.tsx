@@ -4,7 +4,6 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Clock, Phone, Navigation } from "lucide-react";
 import { useRoute } from "@/hooks/useRoute";
-
 interface OrderTrackingMapProps {
   orderId: string;
   driverLocation?: { lat: number; lng: number } | null;
@@ -122,12 +121,37 @@ export const OrderTrackingMap: React.FC<OrderTrackingMapProps> = ({
     };
   }, []);
 
-  // Fetch real route when locations change
+  // Fetch real routes when locations change
   useEffect(() => {
-    if (driverLocation && customerLocation) {
-      fetchRoute(driverLocation, customerLocation);
-    }
+    const fetchRoutes = async () => {
+      // First fetch route from driver to customer
+      if (driverLocation && customerLocation) {
+        await fetchRoute(driverLocation, customerLocation);
+      }
+    };
+    fetchRoutes();
   }, [driverLocation, customerLocation, fetchRoute]);
+
+  // Fetch route from restaurant to driver for complete visualization
+  const [restaurantToDriverRoute, setRestaurantToDriverRoute] = useState<{coordinates: [number, number][], distance: number, duration: number} | null>(null);
+  
+  useEffect(() => {
+    const fetchRestaurantRoute = async () => {
+      if (restaurantLocation && driverLocation) {
+        try {
+          const { data, error } = await supabase.functions.invoke("get-route", {
+            body: { start: restaurantLocation, end: driverLocation },
+          });
+          if (!error && data && !data.error) {
+            setRestaurantToDriverRoute(data);
+          }
+        } catch (err) {
+          console.log("Could not fetch restaurant to driver route");
+        }
+      }
+    };
+    fetchRestaurantRoute();
+  }, [restaurantLocation, driverLocation]);
 
   // Mise à jour des marqueurs et du tracé
   useEffect(() => {
@@ -178,10 +202,22 @@ export const OrderTrackingMap: React.FC<OrderTrackingMapProps> = ({
       points.push(pos);
     }
 
-    // Draw route from OpenRouteService if available
+    // Draw route from Restaurant to Driver (if driver not yet at restaurant)
+    if (restaurantToDriverRoute && restaurantToDriverRoute.coordinates && restaurantToDriverRoute.coordinates.length > 0) {
+      const polyline = L.polyline(restaurantToDriverRoute.coordinates as [number, number][], {
+        color: "#22c55e", // Green for restaurant to driver
+        weight: 4,
+        opacity: 0.7,
+        lineJoin: "round",
+        dashArray: "8, 8",
+      });
+      routeLayerRef.current.addLayer(polyline);
+    }
+
+    // Draw route from Driver to Customer
     if (route && route.coordinates && route.coordinates.length > 0) {
       const polyline = L.polyline(route.coordinates as [number, number][], {
-        color: "#FF8A00",
+        color: "#FF8A00", // Orange for driver to customer
         weight: 5,
         opacity: 0.9,
         lineJoin: "round",
@@ -207,7 +243,7 @@ export const OrderTrackingMap: React.FC<OrderTrackingMapProps> = ({
       const bounds = L.latLngBounds(points);
       mapInstanceRef.current.fitBounds(bounds, { padding: [40, 40], maxZoom: 16 });
     }
-  }, [leaflet, driverLocation, restaurantLocation, customerLocation, route]);
+  }, [leaflet, driverLocation, restaurantLocation, customerLocation, route, restaurantToDriverRoute]);
 
   const statusConfig: Record<string, { label: string; color: string }> = {
     pending: { label: "En attente", color: "bg-yellow-500" },

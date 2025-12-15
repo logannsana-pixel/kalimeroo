@@ -49,10 +49,21 @@ export default function Checkout() {
     try {
       const subtotal = getCartTotal();
       const total = subtotal + deliveryFee - discount;
-      const fullAddress = `${checkoutData.city} - ${checkoutData.district}${checkoutData.addressComplement ? `, ${checkoutData.addressComplement}` : ""}`;
+      const fullAddress = `${checkoutData.city || ''} - ${checkoutData.district || ''}${checkoutData.addressComplement ? `, ${checkoutData.addressComplement}` : ""}`.replace(/^[\s-]+/, '');
 
       const { data: order, error: orderError } = await supabase.from("orders").insert({
-        user_id: user.id, restaurant_id: restaurantId, phone: checkoutData.phone, delivery_address: fullAddress, notes: checkoutData.notes, subtotal, delivery_fee: deliveryFee, promo_code_id: promoCodeId || null, discount_amount: discount, total, status: "pending",
+        user_id: user.id, 
+        restaurant_id: restaurantId, 
+        phone: checkoutData.phone, 
+        delivery_address: fullAddress || checkoutData.address, 
+        notes: checkoutData.notes, 
+        subtotal, 
+        delivery_fee: deliveryFee, 
+        promo_code_id: promoCodeId || null, 
+        discount_amount: discount, 
+        total, 
+        status: "pending",
+        voice_note_url: checkoutData.voiceNoteUrl || null,
       }).select().single();
 
       if (orderError) throw orderError;

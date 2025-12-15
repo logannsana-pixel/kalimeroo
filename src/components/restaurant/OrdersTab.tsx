@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Package, CheckCircle, MapPin, Phone, User, X, RefreshCw } from "lucide-react";
+import { Clock, Package, CheckCircle, MapPin, Phone, User, X, RefreshCw, Volume2, AlertTriangle } from "lucide-react";
 import { Database } from "@/integrations/supabase/types";
 import { toast } from "sonner";
 import { ChatInterface } from "@/components/ChatInterface";
@@ -22,10 +22,17 @@ interface Order {
   delivery_address: string;
   phone: string;
   notes: string | null;
+  voice_note_url: string | null;
   user_id: string;
   profiles: {
     full_name: string | null;
   } | null;
+}
+
+interface Restaurant {
+  id: string;
+  latitude: number | null;
+  longitude: number | null;
 }
 
 const statusConfig: Record<OrderStatus, { label: string; color: string; icon: any }> = {
@@ -44,6 +51,7 @@ const statusConfig: Record<OrderStatus, { label: string; color: string; icon: an
 
 export const OrdersTab = () => {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -54,6 +62,9 @@ export const OrdersTab = () => {
     action: string;
   }>({ open: false, orderId: '', newStatus: null, action: '' });
 
+  // Check if restaurant has GPS configured
+  const hasGPS = restaurant?.latitude && restaurant?.longitude;
+
   const fetchOrders = useCallback(async (showRefresh = false) => {
     try {
       if (showRefresh) setRefreshing(true);
@@ -63,11 +74,12 @@ export const OrdersTab = () => {
 
       const { data: restaurantData } = await supabase
         .from('restaurants')
-        .select('id')
+        .select('id, latitude, longitude')
         .eq('owner_id', user.id)
         .single();
 
       if (!restaurantData) return;
+      setRestaurant(restaurantData);
 
       const { data: ordersData, error } = await supabase
         .from('orders')
@@ -145,6 +157,11 @@ export const OrdersTab = () => {
   };
 
   const openConfirmDialog = (orderId: string, newStatus: OrderStatus, action: string) => {
+    // Block order acceptance if GPS not configured
+    if (!hasGPS && newStatus === 'accepted') {
+      toast.error("Configurez d'abord la position GPS de votre restaurant dans l'onglet Profil pour pouvoir accepter des commandes.");
+      return;
+    }
     setConfirmDialog({ open: true, orderId, newStatus, action });
   };
 
@@ -176,6 +193,22 @@ export const OrdersTab = () => {
 
   return (
     <div className="space-y-6">
+      {/* GPS Warning */}
+      {!hasGPS && (
+        <Card className="border-amber-500 bg-amber-50 dark:bg-amber-950/20">
+          <CardContent className="p-4 flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
+            <div>
+              <p className="font-medium text-amber-800 dark:text-amber-200">Position GPS non configurée</p>
+              <p className="text-sm text-amber-700 dark:text-amber-300">
+                Vous devez configurer la position GPS de votre restaurant dans l'onglet <strong>Profil</strong> avant de pouvoir accepter des commandes. 
+                Cette position est nécessaire pour le suivi des livraisons.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="flex justify-end">
         <RefreshButton onClick={() => fetchOrders(true)} loading={refreshing} />
       </div>
@@ -230,6 +263,17 @@ export const OrdersTab = () => {
                           <strong>Note:</strong> {order.notes}
                         </p>
                       )}
+                      {order.voice_note_url && (
+                        <div className="flex items-center gap-2 bg-primary/10 p-2 rounded">
+                          <Volume2 className="w-4 h-4 text-primary" />
+                          <audio 
+                            controls 
+                            src={order.voice_note_url} 
+                            className="h-8 flex-1"
+                            preload="metadata"
+                          />
+                        </div>
+                      )}
                       <div className="flex items-center justify-between pt-3 border-t">
                         <span className="font-bold text-lg">{order.total.toFixed(0)} FCFA</span>
                         <div className="flex gap-2">
@@ -251,7 +295,8 @@ export const OrdersTab = () => {
                           {nextStatus && (
                             <Button 
                               onClick={() => openConfirmDialog(order.id, nextStatus.next, nextStatus.label)}
-                              disabled={isLoading}
+                              disabled={isLoading || (!hasGPS && nextStatus.next === 'accepted')}
+                              title={!hasGPS && nextStatus.next === 'accepted' ? "Configurez le GPS d'abord" : ""}
                             >
                               {isLoading ? <ButtonLoader /> : nextStatus.label}
                             </Button>
