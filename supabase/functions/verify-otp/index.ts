@@ -12,16 +12,17 @@ const corsHeaders = {
 // - 4xxxxxxx  | 5xxxxxxx  | 6xxxxxxx
 // - +2424xxxxxxx | +2425xxxxxxx | +2426xxxxxxx
 // - 2424xxxxxxx  | 2425xxxxxxx  | 2426xxxxxxx
-// Sortie : +242XXXXXXXX (8 chiffres après +242)
+// Sortie (E.164) : +2420XXXXXXXX (9 chiffres après +242)
+// NB: pour le Congo, le "0" (04/05/06) est généralement conservé dans le format international.
 function normalizeCongoMobile(raw: string): string {
   const digits = raw.replace(/\D/g, "");
   let national = digits.startsWith("242") ? digits.slice(3) : digits;
 
-  if (national.startsWith("0") && national.length === 9) {
-    national = national.slice(1);
+  if (/^[456]\d{7}$/.test(national)) {
+    national = "0" + national;
   }
 
-  if (!/^[456]\d{7}$/.test(national)) {
+  if (!/^0[456]\d{7}$/.test(national)) {
     throw new Error("Seuls les numéros mobiles sont acceptés (04xxxxxxx, 05xxxxxxx, 06xxxxxxx)");
   }
 
@@ -35,6 +36,7 @@ serve(async (req) => {
 
   try {
     const { phone, code } = await req.json();
+
     if (!phone || !code) {
       return new Response(JSON.stringify({ error: "Phone number and code are required" }), {
         status: 400,
