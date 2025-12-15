@@ -32,22 +32,22 @@ export function DriverHeader({
 
   return (
     <header className="sticky top-0 z-50 bg-background border-b safe-area-top">
-      <div className="px-4 h-16 flex items-center justify-between">
+      <div className="px-4 h-14 flex items-center justify-between">
         {/* Left - Status Toggle */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <div 
-            className={`w-3 h-3 rounded-full ${isOnline ? 'bg-primary animate-pulse-soft' : 'bg-muted-foreground'}`} 
+            className={`w-2.5 h-2.5 rounded-full ${isOnline ? 'bg-primary animate-pulse-soft' : 'bg-muted-foreground'}`} 
           />
           <div>
-            <p className="font-semibold text-sm">{driverName}</p>
-            <div className="flex items-center gap-2">
-              <span className={`text-xs ${isOnline ? 'text-primary' : 'text-muted-foreground'}`}>
+            <p className="font-medium text-xs">{driverName}</p>
+            <div className="flex items-center gap-1.5">
+              <span className={`text-[10px] ${isOnline ? 'text-primary' : 'text-muted-foreground'}`}>
                 {isOnline ? 'En ligne' : 'Hors ligne'}
               </span>
               <Switch 
                 checked={isOnline} 
                 onCheckedChange={onToggleOnline}
-                className="data-[state=checked]:bg-primary h-5 w-9"
+                className="data-[state=checked]:bg-primary h-4 w-7 scale-90"
               />
             </div>
           </div>

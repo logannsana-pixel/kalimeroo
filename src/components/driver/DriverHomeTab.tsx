@@ -78,12 +78,12 @@ export function DriverHomeTab({
         
         {availableOrders.length === 0 ? (
           <Card className="border-none shadow-soft rounded-2xl">
-            <div className="p-8 text-center">
-              <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-muted/50 flex items-center justify-center">
-                <Package className="h-7 w-7 text-muted-foreground" />
+            <div className="p-6 text-center">
+              <div className="w-11 h-11 mx-auto mb-2 rounded-full bg-muted/50 flex items-center justify-center">
+                <Package className="h-5 w-5 text-muted-foreground" />
               </div>
-              <p className="text-sm text-muted-foreground">Aucune commande disponible</p>
-              <p className="text-xs text-muted-foreground mt-1">Restez en ligne pour recevoir des commandes</p>
+              <p className="text-xs text-muted-foreground">Aucune commande disponible</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">Restez en ligne pour recevoir des commandes</p>
             </div>
           </Card>
         ) : (

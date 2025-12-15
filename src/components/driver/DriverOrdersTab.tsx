@@ -21,15 +21,15 @@ export function DriverOrdersTab({ orders }: DriverOrdersTabProps) {
   const sortedDates = Object.keys(groupedOrders).sort((a, b) => b.localeCompare(a));
 
   return (
-    <div className="p-4 space-y-6">
-      <h2 className="text-lg font-bold">Historique des livraisons</h2>
+    <div className="p-4 space-y-4 pb-20">
+      <h2 className="text-sm font-semibold">Historique des livraisons</h2>
 
       {orders.length === 0 ? (
-        <Card className="p-8 text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
-            <Package className="h-8 w-8 text-muted-foreground" />
+        <Card className="p-6 text-center">
+          <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-muted flex items-center justify-center">
+            <Package className="h-5 w-5 text-muted-foreground" />
           </div>
-          <p className="text-muted-foreground">Aucune livraison terminée</p>
+          <p className="text-sm text-muted-foreground">Aucune livraison terminée</p>
         </Card>
       ) : (
         sortedDates.map((date) => (

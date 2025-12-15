@@ -162,11 +162,11 @@ export const MenuTab = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Gestion du menu</h2>
-        <Button onClick={() => setIsDialogOpen(true)}>
-          <Plus className="w-4 h-4 mr-2" />
+        <h2 className="text-base font-semibold">Gestion du menu</h2>
+        <Button size="sm" onClick={() => setIsDialogOpen(true)}>
+          <Plus className="w-3.5 h-3.5 mr-1.5" />
           Ajouter un plat
         </Button>
 
@@ -200,47 +200,48 @@ export const MenuTab = () => {
 
       {menuItems.length === 0 ? (
         <Card>
-          <CardContent className="text-center py-12">
-            <p className="text-muted-foreground mb-4">Aucun plat dans votre menu</p>
-            <Button onClick={() => setIsDialogOpen(true)}>
-              <Plus className="w-4 h-4 mr-2" />
+          <CardContent className="text-center py-8">
+            <p className="text-sm text-muted-foreground mb-3">Aucun plat dans votre menu</p>
+            <Button size="sm" onClick={() => setIsDialogOpen(true)}>
+              <Plus className="w-3.5 h-3.5 mr-1.5" />
               Ajouter votre premier plat
             </Button>
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {menuItems.map((item) => (
-            <Card key={item.id}>
-              <CardHeader>
-                <CardTitle className="text-lg flex justify-between items-start">
-                  <span>{item.name}</span>
+            <Card key={item.id} className="overflow-hidden">
+              <CardHeader className="p-3 pb-2">
+                <CardTitle className="text-sm flex justify-between items-start">
+                  <span className="truncate pr-2">{item.name}</span>
                   <Switch
                     checked={item.is_available}
                     onCheckedChange={() => toggleAvailability(item.id, item.is_available)}
+                    className="scale-90"
                   />
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-3 pt-0">
                 {item.image_url && (
                   <img
                     src={item.image_url}
                     alt={item.name}
-                    className="w-full h-32 object-cover rounded mb-3"
+                    className="w-full h-24 object-cover rounded-lg mb-2"
                   />
                 )}
-                <p className="text-sm text-muted-foreground mb-2">{item.description}</p>
+                <p className="text-xs text-muted-foreground mb-1 line-clamp-2">{item.description}</p>
                 {item.category && (
-                  <p className="text-xs text-muted-foreground mb-2">Catégorie: {item.category}</p>
+                  <p className="text-[10px] text-muted-foreground mb-2">Catégorie: {item.category}</p>
                 )}
-                <div className="flex justify-between items-center pt-3 border-t">
-                  <span className="font-semibold">{item.price.toFixed(2)} FCFA</span>
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" onClick={() => handleEdit(item)}>
-                      <Edit className="w-4 h-4" />
+                <div className="flex justify-between items-center pt-2 border-t">
+                  <span className="font-semibold text-xs">{item.price.toFixed(0)} F</span>
+                  <div className="flex gap-1">
+                    <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => handleEdit(item)}>
+                      <Edit className="w-3.5 h-3.5" />
                     </Button>
-                    <Button size="sm" variant="destructive" onClick={() => handleDelete(item.id)}>
-                      <Trash2 className="w-4 h-4" />
+                    <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-destructive" onClick={() => handleDelete(item.id)}>
+                      <Trash2 className="w-3.5 h-3.5" />
                     </Button>
                   </div>
                 </div>

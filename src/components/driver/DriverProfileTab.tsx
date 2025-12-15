@@ -57,17 +57,17 @@ export function DriverProfileTab() {
   };
 
   return (
-    <div className="p-4 space-y-6">
-      <h2 className="text-lg font-bold">Mon profil</h2>
+    <div className="p-4 space-y-4 pb-20">
+      <h2 className="text-sm font-semibold">Mon profil</h2>
 
       {/* Avatar */}
       <div className="flex justify-center">
         <div className="relative">
-          <div className="w-24 h-24 rounded-full bg-secondary flex items-center justify-center">
-            <User className="h-12 w-12 text-secondary-foreground" />
+          <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center">
+            <User className="h-7 w-7 text-secondary-foreground" />
           </div>
-          <button className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
-            <Camera className="h-4 w-4" />
+          <button className="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
+            <Camera className="h-3 w-3" />
           </button>
         </div>
       </div>
