@@ -9,10 +9,9 @@ import { CartProvider } from "@/hooks/useCart";
 import { LocationProvider } from "@/contexts/LocationContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AlertEngine } from "@/components/alerts/AlertEngine";
-import { FloatingCart } from "@/components/FloatingCart";
 import { NetworkStatus } from "@/components/NetworkStatus";
 import { Skeleton } from "@/components/ui/skeleton";
-import FloatingChatButton from "@/components/FloatingChatButton";
+import FloatingActionButton from "@/components/FloatingActionButton";
 
 // Lazy loaded pages for code splitting
 const Index = lazy(() => import("./pages/Index"));
@@ -66,8 +65,7 @@ const App = () => (
             <CartProvider>
               <NetworkStatus />
               <AlertEngine />
-              <FloatingCart />
-              <FloatingChatButton />
+              <FloatingActionButton />
               <Suspense fallback={<PageLoader />}>
                   <Routes>
                     <Route path="/" element={<Index />} />
