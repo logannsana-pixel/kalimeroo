@@ -121,54 +121,6 @@ export function CheckoutSteps({
 
   return (
     <div className="space-y-4">
-      {/* SECTION B: Mode de livraison */}
-      <Card className="rounded-3xl border-none shadow-soft">
-        <CardContent className="p-4 space-y-3">
-          <h3 className="font-semibold flex items-center gap-2">
-            <Bike className="w-5 h-5 text-primary" />
-            Mode de réception
-          </h3>
-
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              onClick={() => setFormData({ ...formData, deliveryMode: "delivery" })}
-              className={`p-4 rounded-2xl border-2 transition-all ${
-                formData.deliveryMode === "delivery"
-                  ? "border-primary bg-primary/5"
-                  : "border-border hover:border-primary/50"
-              }`}
-            >
-              <Bike
-                className={`w-6 h-6 mx-auto mb-2 ${
-                  formData.deliveryMode === "delivery" ? "text-primary" : "text-muted-foreground"
-                }`}
-              />
-              <p className="font-medium text-sm">Livraison</p>
-              <p className="text-xs text-muted-foreground">{deliveryFee.toFixed(0)} FCFA</p>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setFormData({ ...formData, deliveryMode: "pickup" })}
-              className={`p-4 rounded-2xl border-2 transition-all ${
-                formData.deliveryMode === "pickup"
-                  ? "border-primary bg-primary/5"
-                  : "border-border hover:border-primary/50"
-              }`}
-            >
-              <Package
-                className={`w-6 h-6 mx-auto mb-2 ${
-                  formData.deliveryMode === "pickup" ? "text-primary" : "text-muted-foreground"
-                }`}
-              />
-              <p className="font-medium text-sm">À emporter</p>
-              <p className="text-xs text-muted-foreground">Gratuit</p>
-            </button>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* SECTION A: Adresse de livraison - Pre-filled from GPS/Manual */}
       {formData.deliveryMode === "delivery" && (
         <Card className="rounded-3xl border-none shadow-soft overflow-hidden">
@@ -282,6 +234,54 @@ export function CheckoutSteps({
           </CardContent>
         </Card>
       )}
+
+      {/* SECTION B: Mode de livraison */}
+      <Card className="rounded-3xl border-none shadow-soft">
+        <CardContent className="p-4 space-y-3">
+          <h3 className="font-semibold flex items-center gap-2">
+            <Bike className="w-5 h-5 text-primary" />
+            Mode de réception
+          </h3>
+
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, deliveryMode: "delivery" })}
+              className={`p-4 rounded-2xl border-2 transition-all ${
+                formData.deliveryMode === "delivery"
+                  ? "border-primary bg-primary/5"
+                  : "border-border hover:border-primary/50"
+              }`}
+            >
+              <Bike
+                className={`w-6 h-6 mx-auto mb-2 ${
+                  formData.deliveryMode === "delivery" ? "text-primary" : "text-muted-foreground"
+                }`}
+              />
+              <p className="font-medium text-sm">Livraison</p>
+              <p className="text-xs text-muted-foreground">{deliveryFee.toFixed(0)} FCFA</p>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, deliveryMode: "pickup" })}
+              className={`p-4 rounded-2xl border-2 transition-all ${
+                formData.deliveryMode === "pickup"
+                  ? "border-primary bg-primary/5"
+                  : "border-border hover:border-primary/50"
+              }`}
+            >
+              <Package
+                className={`w-6 h-6 mx-auto mb-2 ${
+                  formData.deliveryMode === "pickup" ? "text-primary" : "text-muted-foreground"
+                }`}
+              />
+              <p className="font-medium text-sm">À emporter</p>
+              <p className="text-xs text-muted-foreground">Gratuit</p>
+            </button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* SECTION C: Notes / Instructions avec VoiceNoteInput */}
       <Card className="rounded-3xl border-none shadow-soft">
