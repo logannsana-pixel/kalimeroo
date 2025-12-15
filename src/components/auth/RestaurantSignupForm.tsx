@@ -5,13 +5,15 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { congoDistricts, cities } from "@/data/congoLocations";
-import { ChevronLeft, ChevronRight, Upload, Store, User, MapPin, Image } from "lucide-react";
+import { ChevronLeft, ChevronRight, Upload, Store, User, MapPin, Image, Mail } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Card } from "@/components/ui/card";
-import { PhoneOTPInput } from "./PhoneOTPInput";
+import { PhoneInput, isValidCongoPhone } from "./PhoneInput";
+import { AuthMethodToggle } from "./AuthMethodToggle";
 
 interface RestaurantData {
   fullName: string;
+  email: string;
   phone: string;
   password: string;
   confirmPassword: string;
@@ -37,9 +39,10 @@ const cuisineTypes = [
 
 export function RestaurantSignupForm({ onSubmit, onBack }: RestaurantSignupFormProps) {
   const [step, setStep] = useState(1);
-  const [phoneVerified, setPhoneVerified] = useState(false);
+  const [authMethod, setAuthMethod] = useState<"email" | "phone">("phone");
   const [formData, setFormData] = useState<RestaurantData>({
     fullName: "",
+    email: "",
     phone: "",
     password: "",
     confirmPassword: "",
@@ -57,7 +60,19 @@ export function RestaurantSignupForm({ onSubmit, onBack }: RestaurantSignupFormP
   const validateStep1 = () => {
     const newErrors: Partial<Record<keyof RestaurantData, string>> = {};
     if (!formData.fullName.trim()) newErrors.fullName = "Le nom est requis";
-    if (!phoneVerified) newErrors.phone = "Veuillez vérifier votre numéro";
+    
+    if (authMethod === "email") {
+      if (!formData.email.trim()) newErrors.email = "L'email est requis";
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+        newErrors.email = "Email invalide";
+      }
+    } else {
+      if (!formData.phone.trim()) newErrors.phone = "Le numéro est requis";
+      else if (!isValidCongoPhone(formData.phone)) {
+        newErrors.phone = "Numéro congolais invalide";
+      }
+    }
+    
     if (formData.password.length < 6) newErrors.password = "Minimum 6 caractères";
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Les mots de passe ne correspondent pas";
@@ -131,12 +146,32 @@ export function RestaurantSignupForm({ onSubmit, onBack }: RestaurantSignupFormP
               {errors.fullName && <p className="text-sm text-destructive">{errors.fullName}</p>}
             </div>
 
-            <PhoneOTPInput
-              phone={formData.phone}
-              onPhoneChange={(phone) => setFormData({ ...formData, phone })}
-              onVerified={() => setPhoneVerified(true)}
-            />
-            {errors.phone && !phoneVerified && <p className="text-sm text-destructive">{errors.phone}</p>}
+            <div className="space-y-3">
+              <Label>Méthode de connexion *</Label>
+              <AuthMethodToggle method={authMethod} onMethodChange={setAuthMethod} />
+              
+              {authMethod === "email" ? (
+                <div className="space-y-2">
+                  <div className="relative">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      placeholder="votre@email.com"
+                      className="h-12 rounded-xl pl-12"
+                    />
+                  </div>
+                  {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
+                </div>
+              ) : (
+                <PhoneInput
+                  phone={formData.phone}
+                  onPhoneChange={(phone) => setFormData({ ...formData, phone })}
+                  error={errors.phone}
+                />
+              )}
+            </div>
 
             <div className="space-y-2">
               <Label htmlFor="password">Mot de passe *</Label>
@@ -150,7 +185,7 @@ export function RestaurantSignupForm({ onSubmit, onBack }: RestaurantSignupFormP
               {errors.confirmPassword && <p className="text-sm text-destructive">{errors.confirmPassword}</p>}
             </div>
 
-            <Button type="button" onClick={handleNext} className="w-full h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600" disabled={!phoneVerified}>
+            <Button type="button" onClick={handleNext} className="w-full h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600">
               Suivant <ChevronRight className="w-4 h-4 ml-2" />
             </Button>
           </div>

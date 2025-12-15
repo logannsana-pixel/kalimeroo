@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Utensils } from "lucide-react";
+import { Utensils, Mail } from "lucide-react";
 import { RoleSelector } from "@/components/auth/RoleSelector";
 import { CustomerSignupForm } from "@/components/auth/CustomerSignupForm";
 import { RestaurantSignupForm } from "@/components/auth/RestaurantSignupForm";
@@ -11,6 +11,8 @@ import { DeliverySignupForm } from "@/components/auth/DeliverySignupForm";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { AuthMethodToggle } from "@/components/auth/AuthMethodToggle";
+import { PhoneInput, isValidCongoPhone, normalizeCongoPhone } from "@/components/auth/PhoneInput";
 
 type AuthStep = "login" | "role-select" | "customer-signup" | "restaurant-signup" | "delivery-signup";
 
@@ -18,7 +20,8 @@ const Auth = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState<AuthStep>("login");
   const [isLoading, setIsLoading] = useState(false);
-  const [loginData, setLoginData] = useState({ email: "", password: "" });
+  const [authMethod, setAuthMethod] = useState<"email" | "phone">("phone");
+  const [loginData, setLoginData] = useState({ identifier: "", password: "" });
 
   useEffect(() => {
     const checkSession = async () => {
@@ -52,19 +55,40 @@ const Auth = () => {
     }
   };
 
+  // Convert phone to email format for Supabase auth
+  const phoneToEmail = (phone: string): string => {
+    const normalized = normalizeCongoPhone(phone).replace("+", "");
+    return `${normalized}@kalimero.cg`;
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
+      let email = loginData.identifier;
+      
+      // If using phone method, validate and convert to email
+      if (authMethod === "phone") {
+        if (!isValidCongoPhone(loginData.identifier)) {
+          toast.error("Numéro congolais invalide");
+          setIsLoading(false);
+          return;
+        }
+        email = phoneToEmail(loginData.identifier);
+      }
+
       const { error, data } = await supabase.auth.signInWithPassword({
-        email: loginData.email,
+        email,
         password: loginData.password,
       });
 
       if (error) {
         if (error.message.includes("Invalid login credentials")) {
-          toast.error("Email ou mot de passe incorrect");
+          toast.error(authMethod === "phone" 
+            ? "Numéro ou mot de passe incorrect" 
+            : "Email ou mot de passe incorrect"
+          );
         } else {
           toast.error(error.message);
         }
@@ -91,15 +115,22 @@ const Auth = () => {
 
     try {
       const redirectUrl = `${window.location.origin}/`;
+      
+      // Determine email based on what user provided
+      let authEmail = customerData.email;
+      if (!authEmail && customerData.phone) {
+        authEmail = phoneToEmail(customerData.phone);
+      }
 
       const { error, data } = await supabase.auth.signUp({
-        email: customerData.email,
+        email: authEmail,
         password: customerData.password,
         options: {
           emailRedirectTo: redirectUrl,
           data: {
             full_name: customerData.fullName,
-            phone: customerData.phone,
+            phone: customerData.phone || null,
+            email: customerData.email || null,
             district: customerData.district,
             city: customerData.city,
             address: customerData.addressComplement 
@@ -112,7 +143,7 @@ const Auth = () => {
 
       if (error) {
         if (error.message.includes("already registered")) {
-          toast.error("Cet email est déjà utilisé");
+          toast.error("Ce compte existe déjà");
         } else {
           toast.error(error.message);
         }
@@ -150,14 +181,21 @@ const Auth = () => {
         }
       }
 
+      // Determine email based on what user provided
+      let authEmail = restaurantData.email;
+      if (!authEmail && restaurantData.phone) {
+        authEmail = phoneToEmail(restaurantData.phone);
+      }
+
       const { error, data } = await supabase.auth.signUp({
-        email: restaurantData.email,
+        email: authEmail,
         password: restaurantData.password,
         options: {
           emailRedirectTo: redirectUrl,
           data: {
             full_name: restaurantData.fullName,
-            phone: restaurantData.phone,
+            phone: restaurantData.phone || null,
+            email: restaurantData.email || null,
             role: "restaurant_owner",
             restaurant_name: restaurantData.restaurantName,
             restaurant_address: `${restaurantData.district}, ${restaurantData.address}`,
@@ -172,7 +210,7 @@ const Auth = () => {
 
       if (error) {
         if (error.message.includes("already registered")) {
-          toast.error("Cet email est déjà utilisé");
+          toast.error("Ce compte existe déjà");
         } else {
           toast.error(error.message);
         }
@@ -194,14 +232,21 @@ const Auth = () => {
     try {
       const redirectUrl = `${window.location.origin}/delivery-dashboard`;
 
+      // Determine email based on what user provided
+      let authEmail = deliveryData.email;
+      if (!authEmail && deliveryData.phone) {
+        authEmail = phoneToEmail(deliveryData.phone);
+      }
+
       const { error, data } = await supabase.auth.signUp({
-        email: deliveryData.email,
+        email: authEmail,
         password: deliveryData.password,
         options: {
           emailRedirectTo: redirectUrl,
           data: {
             full_name: deliveryData.fullName,
-            phone: deliveryData.phone,
+            phone: deliveryData.phone || null,
+            email: deliveryData.email || null,
             district: deliveryData.district,
             city: deliveryData.city,
             address: deliveryData.district,
@@ -214,7 +259,7 @@ const Auth = () => {
 
       if (error) {
         if (error.message.includes("already registered")) {
-          toast.error("Cet email est déjà utilisé");
+          toast.error("Ce compte existe déjà");
         } else {
           toast.error(error.message);
         }
@@ -256,19 +301,32 @@ const Auth = () => {
                 <p className="text-sm text-muted-foreground">Accédez à votre compte</p>
               </div>
 
+              <AuthMethodToggle method={authMethod} onMethodChange={setAuthMethod} />
+
               <form onSubmit={handleLogin} className="space-y-3">
-                <div className="space-y-1.5">
-                  <Label htmlFor="email" className="text-xs">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={loginData.email}
-                    onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
-                    placeholder="votre@email.com"
-                    className="h-10 text-sm"
-                    required
+                {authMethod === "email" ? (
+                  <div className="space-y-1.5">
+                    <Label htmlFor="email" className="text-xs">Email</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        id="email"
+                        type="email"
+                        value={loginData.identifier}
+                        onChange={(e) => setLoginData({ ...loginData, identifier: e.target.value })}
+                        placeholder="votre@email.com"
+                        className="h-10 text-sm pl-12"
+                        required
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <PhoneInput
+                    phone={loginData.identifier}
+                    onPhoneChange={(phone) => setLoginData({ ...loginData, identifier: phone })}
                   />
-                </div>
+                )}
+                
                 <div className="space-y-1.5">
                   <Label htmlFor="password" className="text-xs">Mot de passe</Label>
                   <Input

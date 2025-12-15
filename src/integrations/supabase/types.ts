@@ -990,6 +990,7 @@ export type Database = {
           district: string | null
           driver_rating: number | null
           driver_reviews_count: number | null
+          email: string | null
           full_name: string | null
           id: string
           is_available: boolean | null
@@ -1014,6 +1015,7 @@ export type Database = {
           district?: string | null
           driver_rating?: number | null
           driver_reviews_count?: number | null
+          email?: string | null
           full_name?: string | null
           id: string
           is_available?: boolean | null
@@ -1038,6 +1040,7 @@ export type Database = {
           district?: string | null
           driver_rating?: number | null
           driver_reviews_count?: number | null
+          email?: string | null
           full_name?: string | null
           id?: string
           is_available?: boolean | null
