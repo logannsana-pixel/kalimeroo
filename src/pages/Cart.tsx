@@ -75,18 +75,18 @@ export default function Cart() {
             </button>
             <h1 className="text-lg font-semibold">Mon panier</h1>
           </div>
-          <Card className="text-center border-none shadow-soft rounded-3xl overflow-hidden">
-            <CardContent className="py-16">
-              <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
-                <ShoppingCart className="w-12 h-12 text-primary" />
+          <Card className="text-center border-none shadow-soft rounded-2xl overflow-hidden">
+            <CardContent className="py-10">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+                <ShoppingCart className="w-8 h-8 text-primary" />
               </div>
-              <h3 className="text-xl font-bold mb-2">Votre panier est vide</h3>
-              <p className="text-muted-foreground mb-8 max-w-xs mx-auto">
-                Parcourez nos restaurants et ajoutez vos plats préférés !
+              <h3 className="text-base font-semibold mb-1">Votre panier est vide</h3>
+              <p className="text-sm text-muted-foreground mb-6 max-w-xs mx-auto">
+                Parcourez nos restaurants et ajoutez vos plats préférés
               </p>
-              <Button onClick={() => navigate("/restaurants")} size="lg" className="rounded-full px-8 btn-playful">
+              <Button onClick={() => navigate("/restaurants")} className="rounded-full px-6">
                 Explorer les restaurants
-                <ArrowRight className="ml-2 h-5 w-5" />
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </CardContent>
           </Card>
@@ -186,52 +186,51 @@ export default function Cart() {
         {/* Add More Items CTA */}
         <Button
           variant="outline"
-          className="w-full rounded-2xl border-dashed border-2 h-14 mb-6"
+          className="w-full rounded-xl border-dashed h-10 mb-6 text-sm"
           onClick={() => navigate("/restaurants")}
         >
-          <Plus className="mr-2 h-5 w-5" />
+          <Plus className="mr-2 h-4 w-4" />
           Ajouter d'autres articles
         </Button>
 
         {/* Order Summary - Desktop */}
-        <Card className="border-none shadow-soft rounded-3xl overflow-hidden hidden md:block">
-          <CardContent className="p-6">
-            <h3 className="font-bold text-lg mb-4">Résumé de la commande</h3>
-            <div className="space-y-3 text-sm">
+        <Card className="border-none shadow-soft rounded-2xl overflow-hidden hidden md:block">
+          <CardContent className="p-4">
+            <h3 className="font-semibold text-sm mb-3">Résumé de la commande</h3>
+            <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Sous-total</span>
-                <span className="font-medium">{subtotal.toFixed(0)} FCFA</span>
+                <span>{subtotal.toFixed(0)} FCFA</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Frais de livraison</span>
-                <span className="font-medium">{deliveryFee.toFixed(0)} FCFA</span>
+                <span>{deliveryFee.toFixed(0)} FCFA</span>
               </div>
-              <Separator className="my-3" />
-              <div className="flex justify-between text-lg">
-                <span className="font-bold">Total</span>
-                <span className="font-bold text-primary">{total.toFixed(0)} FCFA</span>
+              <Separator className="my-2" />
+              <div className="flex justify-between">
+                <span className="font-semibold">Total</span>
+                <span className="font-semibold text-primary">{total.toFixed(0)} FCFA</span>
               </div>
             </div>
-            <Button className="w-full mt-6 h-14 rounded-2xl btn-playful text-lg" onClick={() => navigate("/checkout")}>
+            <Button className="w-full mt-4 h-10 rounded-xl text-sm" onClick={() => navigate("/checkout")}>
               Passer la commande
-              <ArrowRight className="ml-2 h-5 w-5" />
+              <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </CardContent>
         </Card>
       </main>
 
       {/* Fixed Bottom CTA - Mobile */}
-      <div className="fixed bottom-20 md:bottom-0 left-0 right-0 bg-card/95 backdrop-blur-xl border-t border-border/50 p-4 md:hidden z-40">
-        <div className="flex items-center justify-between mb-3">
+      <div className="fixed bottom-20 md:bottom-0 left-0 right-0 bg-card/95 backdrop-blur-xl border-t border-border/50 p-3 md:hidden z-40">
+        <div className="flex items-center justify-between mb-2">
           <div>
             <p className="text-xs text-muted-foreground">Total</p>
-            <p className="text-xl font-bold text-primary">{total.toFixed(0)} FCFA</p>
+            <p className="text-base font-semibold text-primary">{total.toFixed(0)} FCFA</p>
           </div>
-          {/* <p className="text-xs text-muted-foreground">Frais de livraison inclus</p> */}
         </div>
-        <Button className="w-full h-14 rounded-2xl btn-playful text-lg" onClick={() => navigate("/checkout")}>
+        <Button className="w-full h-10 rounded-xl text-sm" onClick={() => navigate("/checkout")}>
           Commander maintenant
-          <ArrowRight className="ml-2 h-5 w-5" />
+          <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
       </div>
 

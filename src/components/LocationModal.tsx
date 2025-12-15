@@ -121,64 +121,62 @@ export const LocationModal = () => {
         )}
 
         {/* Header */}
-        <div className="bg-gradient-to-br from-primary via-primary to-primary/80 p-6 text-center">
-          <div className="mx-auto w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mb-4 shadow-lg">
+        <div className="bg-gradient-to-br from-primary via-primary to-primary/80 p-4 text-center">
+          <div className="mx-auto w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-3 shadow-lg">
             {step === 'loading' ? (
-              <Loader2 className="w-8 h-8 text-white animate-spin" />
+              <Loader2 className="w-5 h-5 text-white animate-spin" />
             ) : step === 'success' ? (
-              <Check className="w-8 h-8 text-white" />
+              <Check className="w-5 h-5 text-white" />
             ) : (
-              <MapPin className="w-8 h-8 text-white" />
+              <MapPin className="w-5 h-5 text-white" />
             )}
           </div>
-          <h2 className="text-xl font-bold text-white">
-            {step === 'loading' && "Localisation en cours..."}
-            {step === 'success' && "Position trouvée ! ✅"}
+          <h2 className="text-base font-semibold text-white">
+            {step === 'loading' && "Localisation..."}
+            {step === 'success' && "Position trouvée ✅"}
             {step === 'error' && "Impossible de localiser"}
           </h2>
-          <p className="text-white/80 mt-2 text-sm">
-            {step === 'loading' && "Veuillez patienter quelques secondes"}
+          <p className="text-white/80 mt-1 text-xs">
+            {step === 'loading' && "Patientez quelques secondes"}
             {step === 'success' && `📍 ${detectedCity}`}
             {step === 'error' && "Vérifiez que le GPS est activé"}
           </p>
         </div>
 
         {/* Content */}
-        <div className="p-6">
+        <div className="p-4">
           {/* Step: GPS Loading */}
           {step === 'loading' && (
-            <div className="space-y-6">
+            <div className="space-y-4">
               <div className="text-center">
-                <p className="text-3xl font-bold text-primary">{Math.round(gpsProgress)}%</p>
+                <p className="text-xl font-bold text-primary">{Math.round(gpsProgress)}%</p>
               </div>
               
-              <Progress value={gpsProgress} className="h-3 rounded-full" />
+              <Progress value={gpsProgress} className="h-2 rounded-full" />
               
-              <p className="text-center text-sm text-muted-foreground">
-                Assurez-vous que le GPS est activé sur votre appareil
+              <p className="text-center text-xs text-muted-foreground">
+                Assurez-vous que le GPS est activé
               </p>
             </div>
           )}
 
           {/* Step: GPS Success */}
           {step === 'success' && (
-            <div className="space-y-5">
-              <div className="p-4 bg-green-50 dark:bg-green-950/30 rounded-2xl border border-green-200 dark:border-green-800">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center shrink-0">
-                    <Check className="w-5 h-5 text-white" />
+            <div className="space-y-4">
+              <div className="p-3 bg-green-50 dark:bg-green-950/30 rounded-xl border border-green-200 dark:border-green-800">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center shrink-0">
+                    <Check className="w-4 h-4 text-white" />
                   </div>
                   <div>
-                    <span className="font-semibold text-green-700 dark:text-green-400 block">Position GPS enregistrée</span>
-                    <p className="text-sm text-muted-foreground">
-                      📍 {detectedCity}
-                    </p>
+                    <span className="font-medium text-sm text-green-700 dark:text-green-400 block">Position enregistrée</span>
+                    <p className="text-xs text-muted-foreground">📍 {detectedCity}</p>
                   </div>
                 </div>
               </div>
 
               <Button
-                className="w-full h-12 rounded-full bg-primary hover:bg-primary/90 text-lg font-semibold"
+                className="w-full h-10 rounded-full text-sm font-medium"
                 onClick={handleConfirmGPS}
               >
                 Confirmer ✓
@@ -188,15 +186,15 @@ export const LocationModal = () => {
 
           {/* Step: Error */}
           {step === 'error' && (
-            <div className="space-y-5">
-              <div className="p-4 bg-destructive/10 rounded-2xl border border-destructive/20">
-                <p className="text-sm text-center text-destructive">
-                  Impossible d'obtenir votre position. Vérifiez que le GPS est activé et réessayez.
+            <div className="space-y-4">
+              <div className="p-3 bg-destructive/10 rounded-xl border border-destructive/20">
+                <p className="text-xs text-center text-destructive">
+                  Impossible d'obtenir votre position. Vérifiez le GPS et réessayez.
                 </p>
               </div>
 
               <Button
-                className="w-full h-12 rounded-full"
+                className="w-full h-10 rounded-full text-sm"
                 onClick={handleRetry}
               >
                 Réessayer 🔄

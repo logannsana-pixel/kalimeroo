@@ -5,7 +5,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-semibold transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 active:scale-[0.98]",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 active:scale-[0.98]",
   {
     variants: {
       variant: {
@@ -14,7 +14,7 @@ const buttonVariants = cva(
         destructive:
           "bg-destructive text-destructive-foreground shadow-soft hover:bg-destructive/90 hover:shadow-hover",
         outline:
-          "border-2 border-primary/20 bg-transparent text-foreground hover:bg-primary/5 hover:border-primary/40",
+          "border border-primary/20 bg-transparent text-foreground hover:bg-primary/5 hover:border-primary/40",
         secondary:
           "bg-secondary text-secondary-foreground shadow-soft hover:bg-secondary/80 hover:shadow-hover",
         ghost: 
@@ -27,11 +27,11 @@ const buttonVariants = cva(
           "bg-warning text-warning-foreground shadow-soft hover:bg-warning/90 hover:shadow-hover",
       },
       size: {
-        default: "h-12 px-6 py-3 rounded-2xl",
-        sm: "h-10 rounded-xl px-4 text-sm",
-        lg: "h-14 rounded-2xl px-8 text-base",
-        xl: "h-16 rounded-3xl px-10 text-lg",
-        icon: "h-12 w-12 rounded-2xl",
+        default: "h-10 px-5 py-2 rounded-xl",
+        sm: "h-9 rounded-lg px-3 text-xs",
+        lg: "h-11 rounded-xl px-6 text-sm",
+        xl: "h-12 rounded-2xl px-8 text-base",
+        icon: "h-10 w-10 rounded-xl",
       },
     },
     defaultVariants: {
