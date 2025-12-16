@@ -535,6 +535,198 @@ export type Database = {
           },
         ]
       }
+      marketing_banners: {
+        Row: {
+          background_color: string | null
+          click_count: number | null
+          created_at: string | null
+          created_by: string | null
+          display_order: number | null
+          ends_at: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          link_text: string | null
+          link_url: string | null
+          position: string | null
+          starts_at: string | null
+          subtitle: string | null
+          target_audience: string | null
+          text_color: string | null
+          title: string
+          updated_at: string | null
+          view_count: number | null
+        }
+        Insert: {
+          background_color?: string | null
+          click_count?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          display_order?: number | null
+          ends_at?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          link_text?: string | null
+          link_url?: string | null
+          position?: string | null
+          starts_at?: string | null
+          subtitle?: string | null
+          target_audience?: string | null
+          text_color?: string | null
+          title: string
+          updated_at?: string | null
+          view_count?: number | null
+        }
+        Update: {
+          background_color?: string | null
+          click_count?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          display_order?: number | null
+          ends_at?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          link_text?: string | null
+          link_url?: string | null
+          position?: string | null
+          starts_at?: string | null
+          subtitle?: string | null
+          target_audience?: string | null
+          text_color?: string | null
+          title?: string
+          updated_at?: string | null
+          view_count?: number | null
+        }
+        Relationships: []
+      }
+      marketing_campaigns: {
+        Row: {
+          actual_metrics: Json | null
+          banner_ids: string[] | null
+          budget: number | null
+          campaign_type: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          ends_at: string | null
+          id: string
+          name: string
+          popup_ids: string[] | null
+          promo_code_ids: string[] | null
+          spent: number | null
+          starts_at: string | null
+          status: string | null
+          target_metrics: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          actual_metrics?: Json | null
+          banner_ids?: string[] | null
+          budget?: number | null
+          campaign_type?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          ends_at?: string | null
+          id?: string
+          name: string
+          popup_ids?: string[] | null
+          promo_code_ids?: string[] | null
+          spent?: number | null
+          starts_at?: string | null
+          status?: string | null
+          target_metrics?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          actual_metrics?: Json | null
+          banner_ids?: string[] | null
+          budget?: number | null
+          campaign_type?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          ends_at?: string | null
+          id?: string
+          name?: string
+          popup_ids?: string[] | null
+          promo_code_ids?: string[] | null
+          spent?: number | null
+          starts_at?: string | null
+          status?: string | null
+          target_metrics?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      marketing_popups: {
+        Row: {
+          button_text: string | null
+          button_url: string | null
+          click_count: number | null
+          content: string | null
+          created_at: string | null
+          created_by: string | null
+          display_count: number | null
+          display_frequency: string | null
+          ends_at: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          popup_type: string | null
+          starts_at: string | null
+          target_pages: string[] | null
+          title: string
+          trigger_type: string | null
+          trigger_value: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          button_text?: string | null
+          button_url?: string | null
+          click_count?: number | null
+          content?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          display_count?: number | null
+          display_frequency?: string | null
+          ends_at?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          popup_type?: string | null
+          starts_at?: string | null
+          target_pages?: string[] | null
+          title: string
+          trigger_type?: string | null
+          trigger_value?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          button_text?: string | null
+          button_url?: string | null
+          click_count?: number | null
+          content?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          display_count?: number | null
+          display_frequency?: string | null
+          ends_at?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          popup_type?: string | null
+          starts_at?: string | null
+          target_pages?: string[] | null
+          title?: string
+          trigger_type?: string | null
+          trigger_value?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       menu_item_option_groups: {
         Row: {
           created_at: string
@@ -1312,6 +1504,7 @@ export type Database = {
           id: string
           image_url: string | null
           is_active: boolean | null
+          is_sponsored: boolean | null
           is_validated: boolean | null
           latitude: number | null
           longitude: number | null
@@ -1320,6 +1513,8 @@ export type Database = {
           owner_id: string | null
           phone: string | null
           rating: number | null
+          sponsored_position: number | null
+          sponsored_until: string | null
           updated_at: string
           validated_at: string | null
           validated_by: string | null
@@ -1338,6 +1533,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean | null
+          is_sponsored?: boolean | null
           is_validated?: boolean | null
           latitude?: number | null
           longitude?: number | null
@@ -1346,6 +1542,8 @@ export type Database = {
           owner_id?: string | null
           phone?: string | null
           rating?: number | null
+          sponsored_position?: number | null
+          sponsored_until?: string | null
           updated_at?: string
           validated_at?: string | null
           validated_by?: string | null
@@ -1364,6 +1562,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean | null
+          is_sponsored?: boolean | null
           is_validated?: boolean | null
           latitude?: number | null
           longitude?: number | null
@@ -1372,6 +1571,8 @@ export type Database = {
           owner_id?: string | null
           phone?: string | null
           rating?: number | null
+          sponsored_position?: number | null
+          sponsored_until?: string | null
           updated_at?: string
           validated_at?: string | null
           validated_by?: string | null
