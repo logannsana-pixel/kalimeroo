@@ -1,5 +1,5 @@
 import { lazy, Suspense, useState, useEffect } from "react";
-import { ArrowLeft, Phone, MapPin, MessageCircle, Navigation, CheckCircle, Package } from "lucide-react";
+import { ArrowLeft, Phone, MapPin, MessageCircle, Navigation, CheckCircle, Package, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -41,6 +41,7 @@ export function DriverActiveOrder({
   const isLoading = actionLoading === order.id;
   const [driverLocation, setDriverLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [restaurantLocation, setRestaurantLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [mapError, setMapError] = useState<string | null>(null);
 
   // Enable GPS tracking for active deliveries
   useDriverLocation({
@@ -54,41 +55,48 @@ export function DriverActiveOrder({
     const fetchLocations = async () => {
       if (!user) return;
       
-      // Get driver's current location
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('latitude, longitude')
-        .eq('id', user.id)
-        .single();
-      
-      if (profile?.latitude && profile?.longitude) {
-        setDriverLocation({ lat: profile.latitude, lng: profile.longitude });
-      }
-
-      // Get restaurant location - need to fetch from restaurants table
-      if (order.restaurants) {
-        const { data: restaurant } = await supabase
-          .from('restaurants')
+      try {
+        // Get driver's current location
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
           .select('latitude, longitude')
-          .eq('name', order.restaurants.name)
-          .single();
+          .eq('id', user.id)
+          .maybeSingle();
         
-        if (restaurant?.latitude && restaurant?.longitude) {
-          setRestaurantLocation({ lat: restaurant.latitude, lng: restaurant.longitude });
+        if (profile?.latitude && profile?.longitude) {
+          setDriverLocation({ lat: profile.latitude, lng: profile.longitude });
         }
+
+        // Get restaurant location by restaurant_id from the order
+        if (order.restaurant_id) {
+          const { data: restaurant, error: restaurantError } = await supabase
+            .from('restaurants')
+            .select('latitude, longitude')
+            .eq('id', order.restaurant_id)
+            .maybeSingle();
+          
+          if (restaurant?.latitude && restaurant?.longitude) {
+            setRestaurantLocation({ lat: restaurant.latitude, lng: restaurant.longitude });
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching locations:', err);
+        setMapError('Impossible de charger les positions');
       }
     };
     
     fetchLocations();
 
     // Subscribe to profile updates for real-time location
+    if (!user?.id) return;
+
     const channel = supabase
-      .channel(`driver-location-${user?.id}`)
+      .channel(`driver-location-${user.id}`)
       .on('postgres_changes', {
         event: 'UPDATE',
         schema: 'public',
         table: 'profiles',
-        filter: `id=eq.${user?.id}`
+        filter: `id=eq.${user.id}`
       }, (payload) => {
         const data = payload.new as any;
         if (data.latitude && data.longitude) {
@@ -100,7 +108,7 @@ export function DriverActiveOrder({
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, order.restaurants]);
+  }, [user, order.restaurant_id]);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">

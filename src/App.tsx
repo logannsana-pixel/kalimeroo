@@ -11,6 +11,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AlertEngine } from "@/components/alerts/AlertEngine";
 import { NetworkStatus } from "@/components/NetworkStatus";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import FloatingActionButton from "@/components/FloatingActionButton";
 
 // Lazy loaded pages for code splitting
@@ -66,98 +67,100 @@ const App = () => (
               <NetworkStatus />
               <AlertEngine />
               <FloatingActionButton />
-              <Suspense fallback={<PageLoader />}>
-                  <Routes>
-                    <Route path="/" element={<Index />} />
-                    
-                    {/* Auth routes - role specific */}
-                    <Route path="/auth" element={<CustomerAuth />} />
-                    <Route path="/auth/customer" element={<CustomerAuth />} />
-                    <Route path="/auth/restaurant" element={<RestaurantAuth />} />
-                    <Route path="/auth/delivery" element={<DeliveryAuth />} />
-                    <Route path="/auth/admin" element={<AdminAuth />} />
-                    
-                    <Route path="/restaurants" element={<Restaurants />} />
-                    <Route path="/restaurant/:id" element={<RestaurantDetail />} />
-                    <Route path="/enable-alerts" element={<EnableAlerts />} />
-                    <Route path="/dev/alerts" element={<AlertPlayground />} />
-                    <Route path="/help" element={<Help />} />
-                    <Route 
-                      path="/affiliate" 
-                      element={
-                        <ProtectedRoute allowedRoles={["customer"]}>
-                          <Affiliate />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    <Route 
-                      path="/cart" 
-                      element={
-                        <ProtectedRoute allowedRoles={["customer"]}>
-                          <Cart />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    <Route 
-                      path="/checkout" 
-                      element={
-                        <ProtectedRoute allowedRoles={["customer"]}>
-                          <Checkout />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    <Route 
-                      path="/orders" 
-                      element={
-                        <ProtectedRoute allowedRoles={["customer"]}>
-                          <Orders />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    <Route 
-                      path="/profile" 
-                      element={
-                        <ProtectedRoute>
-                          <Profile />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    <Route 
-                      path="/customer-dashboard" 
-                      element={
-                        <ProtectedRoute allowedRoles={["customer"]}>
-                          <CustomerDashboard />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    <Route 
-                      path="/restaurant-dashboard"
-                      element={
-                        <ProtectedRoute allowedRoles={["restaurant_owner"]}>
-                          <RestaurantDashboard />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    <Route 
-                      path="/delivery-dashboard" 
-                      element={
-                        <ProtectedRoute allowedRoles={["delivery_driver"]}>
-                          <DeliveryDashboard />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    <Route 
-                      path="/admin-dashboard" 
-                      element={
-                        <ProtectedRoute allowedRoles={["admin"]}>
-                          <AdminDashboard />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-              </Suspense>
+              <ErrorBoundary>
+                <Suspense fallback={<PageLoader />}>
+                    <Routes>
+                      <Route path="/" element={<Index />} />
+                      
+                      {/* Auth routes - role specific */}
+                      <Route path="/auth" element={<CustomerAuth />} />
+                      <Route path="/auth/customer" element={<CustomerAuth />} />
+                      <Route path="/auth/restaurant" element={<RestaurantAuth />} />
+                      <Route path="/auth/delivery" element={<DeliveryAuth />} />
+                      <Route path="/auth/admin" element={<AdminAuth />} />
+                      
+                      <Route path="/restaurants" element={<Restaurants />} />
+                      <Route path="/restaurant/:id" element={<RestaurantDetail />} />
+                      <Route path="/enable-alerts" element={<EnableAlerts />} />
+                      <Route path="/dev/alerts" element={<AlertPlayground />} />
+                      <Route path="/help" element={<Help />} />
+                      <Route 
+                        path="/affiliate" 
+                        element={
+                          <ProtectedRoute allowedRoles={["customer"]}>
+                            <Affiliate />
+                          </ProtectedRoute>
+                        } 
+                      />
+                      <Route 
+                        path="/cart" 
+                        element={
+                          <ProtectedRoute allowedRoles={["customer"]}>
+                            <Cart />
+                          </ProtectedRoute>
+                        } 
+                      />
+                      <Route 
+                        path="/checkout" 
+                        element={
+                          <ProtectedRoute allowedRoles={["customer"]}>
+                            <Checkout />
+                          </ProtectedRoute>
+                        } 
+                      />
+                      <Route 
+                        path="/orders" 
+                        element={
+                          <ProtectedRoute allowedRoles={["customer"]}>
+                            <Orders />
+                          </ProtectedRoute>
+                        } 
+                      />
+                      <Route 
+                        path="/profile" 
+                        element={
+                          <ProtectedRoute>
+                            <Profile />
+                          </ProtectedRoute>
+                        } 
+                      />
+                      <Route 
+                        path="/customer-dashboard" 
+                        element={
+                          <ProtectedRoute allowedRoles={["customer"]}>
+                            <CustomerDashboard />
+                          </ProtectedRoute>
+                        } 
+                      />
+                      <Route 
+                        path="/restaurant-dashboard"
+                        element={
+                          <ProtectedRoute allowedRoles={["restaurant_owner"]}>
+                            <RestaurantDashboard />
+                          </ProtectedRoute>
+                        } 
+                      />
+                      <Route 
+                        path="/delivery-dashboard" 
+                        element={
+                          <ProtectedRoute allowedRoles={["delivery_driver"]}>
+                            <DeliveryDashboard />
+                          </ProtectedRoute>
+                        } 
+                      />
+                      <Route 
+                        path="/admin-dashboard" 
+                        element={
+                          <ProtectedRoute allowedRoles={["admin"]}>
+                            <AdminDashboard />
+                          </ProtectedRoute>
+                        } 
+                      />
+                      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                </Suspense>
+              </ErrorBoundary>
             </CartProvider>
           </LocationProvider>
         </AuthProvider>

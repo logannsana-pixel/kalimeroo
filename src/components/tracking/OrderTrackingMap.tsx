@@ -124,8 +124,8 @@ export const OrderTrackingMap: React.FC<OrderTrackingMapProps> = ({
   // Fetch real routes when locations change
   useEffect(() => {
     const fetchRoutes = async () => {
-      // First fetch route from driver to customer
-      if (driverLocation && customerLocation) {
+      // Only fetch route if both locations are valid
+      if (driverLocation?.lat && driverLocation?.lng && customerLocation?.lat && customerLocation?.lng) {
         await fetchRoute(driverLocation, customerLocation);
       }
     };
@@ -137,7 +137,8 @@ export const OrderTrackingMap: React.FC<OrderTrackingMapProps> = ({
   
   useEffect(() => {
     const fetchRestaurantRoute = async () => {
-      if (restaurantLocation && driverLocation) {
+      // Only fetch if both locations are valid
+      if (restaurantLocation?.lat && restaurantLocation?.lng && driverLocation?.lat && driverLocation?.lng) {
         try {
           const { data, error } = await supabase.functions.invoke("get-route", {
             body: { start: restaurantLocation, end: driverLocation },

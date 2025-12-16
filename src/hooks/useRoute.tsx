@@ -17,7 +17,13 @@ export const useRoute = () => {
   const [route, setRoute] = useState<RouteResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchRoute = useCallback(async (start: Location, end: Location) => {
+  const fetchRoute = useCallback(async (start: Location | null, end: Location | null) => {
+    // Early return if locations are missing
+    if (!start || !end || !start.lat || !start.lng || !end.lat || !end.lng) {
+      console.log("Missing location data for route fetch");
+      return null;
+    }
+
     setLoading(true);
     setError(null);
 
@@ -32,7 +38,7 @@ export const useRoute = () => {
         throw new Error(fnError.message);
       }
 
-      if (data.error) {
+      if (data?.error) {
         throw new Error(data.error);
       }
 

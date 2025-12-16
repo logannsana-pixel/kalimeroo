@@ -30,6 +30,7 @@ export interface DriverOrder {
   phone: string;
   user_id: string;
   delivery_driver_id: string | null;
+  restaurant_id: string;
   restaurants: {
     name: string;
     address: string;
@@ -72,15 +73,20 @@ export default function DeliveryDashboard() {
   useEffect(() => {
     const fetchProfile = async () => {
       if (!user) return;
-      const { data } = await supabase
-        .from('profiles')
-        .select('full_name, is_available, is_validated, validation_notes')
-        .eq('id', user.id)
-        .single();
-      if (data) {
-        setDriverProfile(data);
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('full_name, is_available, is_validated, validation_notes')
+          .eq('id', user.id)
+          .maybeSingle();
+        if (data) {
+          setDriverProfile(data);
+        }
+      } catch (err) {
+        console.error('Error fetching profile:', err);
+      } finally {
+        setProfileLoading(false);
       }
-      setProfileLoading(false);
     };
     fetchProfile();
 
