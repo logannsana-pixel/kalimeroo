@@ -7,6 +7,8 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { AdvancedSearch, SearchFilters } from "@/components/AdvancedSearch";
 import { FavoritesButton } from "@/components/FavoritesButton";
 import { RestaurantCard, RestaurantCardSkeleton } from "@/components/ui/restaurant-card";
+import { Badge } from "@/components/ui/badge";
+import { Sparkles } from "lucide-react";
 
 interface Restaurant {
   id: string;
@@ -97,7 +99,19 @@ export default function Restaurants() {
     });
 
     filtered = filtered.filter((r) => (r.rating || 0) >= filters.minRating);
-    filtered = [...filtered].sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    
+    // Sort: sponsored first, then by rating
+    filtered = [...filtered].sort((a: any, b: any) => {
+      // Sponsored restaurants first
+      if (a.is_sponsored && !b.is_sponsored) return -1;
+      if (!a.is_sponsored && b.is_sponsored) return 1;
+      // Then by sponsored position
+      if (a.is_sponsored && b.is_sponsored) {
+        return (a.sponsored_position || 0) - (b.sponsored_position || 0);
+      }
+      // Then by rating
+      return (b.rating || 0) - (a.rating || 0);
+    });
 
     return filtered;
   }, [restaurants, filters]);
@@ -149,11 +163,17 @@ export default function Restaurants() {
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3">
-            {filteredRestaurants.map((restaurant) => (
+            {filteredRestaurants.map((restaurant: any) => (
               <div key={restaurant.id} className="relative">
                 <div className="absolute top-2 right-2 z-10">
                   <FavoritesButton restaurantId={restaurant.id} />
                 </div>
+                {restaurant.is_sponsored && (
+                  <Badge className="absolute top-2 left-2 z-10 bg-primary/90 text-primary-foreground text-[9px] px-1.5 py-0.5">
+                    <Sparkles className="w-2.5 h-2.5 mr-0.5" />
+                    Vedette
+                  </Badge>
+                )}
                 <RestaurantCard
                   imageUrl={restaurant.image_url || "/placeholder.svg"}
                   name={restaurant.name}

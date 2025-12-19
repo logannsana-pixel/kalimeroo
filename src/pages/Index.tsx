@@ -17,6 +17,9 @@ import { useLocation } from "@/contexts/LocationContext";
 import { FavoritesButton } from "@/components/FavoritesButton";
 import { LazyImage } from "@/components/LazyImage";
 import { useAuth } from "@/hooks/useAuth";
+import { MarketingBanner } from "@/components/marketing/MarketingBanner";
+import { MarketingPopup } from "@/components/marketing/MarketingPopup";
+import { SponsoredRestaurants } from "@/components/marketing/SponsoredRestaurants";
 
 interface Restaurant {
   id: string;
@@ -61,12 +64,18 @@ const Index = () => {
   return (
     <>
       <LocationModal />
+      <MarketingPopup />
 
       <main className="min-h-screen bg-background pb-24">
         {/* Header */}
         <div className="px-4 pt-4 space-y-5">
           <HomeHeader />
         </div>
+
+        {/* Marketing Banner */}
+        <section className="px-4 mt-4">
+          <MarketingBanner />
+        </section>
 
         {/* Services (Quick Actions) */}
         <div className="mt-6">
@@ -102,6 +111,11 @@ const Index = () => {
         {/* Intention Filters */}
         <div className="mt-4">
           <IntentionFilters />
+        </div>
+
+        {/* Sponsored Restaurants */}
+        <div className="mt-4">
+          <SponsoredRestaurants />
         </div>
 
         {/* Restaurants */}
