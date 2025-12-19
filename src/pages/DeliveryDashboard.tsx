@@ -128,16 +128,27 @@ export default function DeliveryDashboard() {
       if (error) throw error;
 
       if (ordersData && ordersData.length > 0) {
-        const restaurantIds = [...new Set(ordersData.map(o => o.restaurant_id))];
-        const userIds = [...new Set(ordersData.map(o => o.user_id))];
+        const restaurantIds = [...new Set(ordersData.map(o => o.restaurant_id).filter(Boolean))];
+        const userIds = [...new Set(ordersData.map(o => o.user_id).filter(Boolean))];
         
-        const [{ data: restaurantsData }, { data: profilesData }] = await Promise.all([
-          supabase.from('restaurants').select('id, name, address, phone, owner_id').in('id', restaurantIds),
-          supabase.from('profiles').select('id, full_name').in('id', userIds)
-        ]);
-
-        const restaurantsMap = new Map(restaurantsData?.map(r => [r.id, r]) || []);
-        const profilesMap = new Map(profilesData?.map(p => [p.id, p]) || []);
+        let restaurantsMap = new Map<string, any>();
+        let profilesMap = new Map<string, any>();
+        
+        if (restaurantIds.length > 0) {
+          const { data: restaurantsData } = await supabase
+            .from('restaurants')
+            .select('id, name, address, phone, owner_id')
+            .in('id', restaurantIds);
+          restaurantsMap = new Map((restaurantsData || []).map(r => [r.id, r]));
+        }
+        
+        if (userIds.length > 0) {
+          const { data: profilesData } = await supabase
+            .from('profiles')
+            .select('id, full_name')
+            .in('id', userIds);
+          profilesMap = new Map((profilesData || []).map(p => [p.id, p]));
+        }
         
         const ordersWithDetails = ordersData
           .filter(order => 
@@ -146,8 +157,8 @@ export default function DeliveryDashboard() {
           )
           .map(order => ({
             ...order,
-            restaurants: restaurantsMap.get(order.restaurant_id) || null,
-            profiles: profilesMap.get(order.user_id) || null
+            restaurants: order.restaurant_id ? restaurantsMap.get(order.restaurant_id) || null : null,
+            profiles: order.user_id ? profilesMap.get(order.user_id) || null : null
           }));
         
         setOrders(ordersWithDetails);

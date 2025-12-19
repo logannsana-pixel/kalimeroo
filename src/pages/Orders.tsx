@@ -482,7 +482,7 @@ export default function Orders() {
                       : null
                   }
                   restaurantLocation={
-                    trackingOrder.restaurants.latitude && trackingOrder.restaurants.longitude
+                    trackingOrder.restaurants?.latitude && trackingOrder.restaurants?.longitude
                       ? { lat: trackingOrder.restaurants.latitude, lng: trackingOrder.restaurants.longitude }
                       : null
                   }

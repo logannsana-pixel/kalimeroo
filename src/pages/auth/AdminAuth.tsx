@@ -15,8 +15,12 @@ const AdminAuth = () => {
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session) {
-        const { data: roleData } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id).single();
-        if (roleData?.role === "admin") navigate("/admin-dashboard");
+        try {
+          const { data: roleData } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id).maybeSingle();
+          if (roleData?.role === "admin") navigate("/admin-dashboard");
+        } catch (err) {
+          console.error('Error checking admin role:', err);
+        }
       }
     });
   }, []);
@@ -28,7 +32,7 @@ const AdminAuth = () => {
     try {
       const { error: authError, data } = await supabase.auth.signInWithPassword({ email: loginData.email, password: loginData.password });
       if (authError) { setError("Identifiants invalides"); return; }
-      const { data: roleData } = await supabase.from("user_roles").select("role").eq("user_id", data.user?.id).single();
+      const { data: roleData } = await supabase.from("user_roles").select("role").eq("user_id", data.user?.id).maybeSingle();
       if (roleData?.role !== "admin") { setError("Accès refusé"); await supabase.auth.signOut(); return; }
       toast.success("Accès accordé"); navigate("/admin-dashboard");
     } catch { setError("Erreur"); } finally { setIsLoading(false); }

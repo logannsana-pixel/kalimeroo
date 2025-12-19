@@ -56,13 +56,15 @@ export function RestaurantOverview({ restaurantId }: RestaurantOverviewProps) {
         
         // Fetch profiles for recent orders
         const recentOrdersData = orders.slice(0, 5);
-        const userIds = [...new Set(recentOrdersData.map(o => o.user_id))];
-        const { data: profiles } = await supabase
-          .from('profiles')
-          .select('id, full_name')
-          .in('id', userIds);
-
-        const profilesMap = new Map(profiles?.map(p => [p.id, p]) || []);
+        const userIds = [...new Set(recentOrdersData.map(o => o.user_id).filter(Boolean))];
+        let profilesMap = new Map<string, any>();
+        if (userIds.length > 0) {
+          const { data: profiles } = await supabase
+            .from('profiles')
+            .select('id, full_name')
+            .in('id', userIds);
+          profilesMap = new Map((profiles || []).map(p => [p.id, p]));
+        }
         
         setRecentOrders(recentOrdersData.map(o => ({
           ...o,

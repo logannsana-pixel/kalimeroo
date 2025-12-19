@@ -40,7 +40,7 @@ export const RestaurantPaymentsTab = () => {
         .from('restaurants')
         .select('id')
         .eq('owner_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (!restaurant) return;
 

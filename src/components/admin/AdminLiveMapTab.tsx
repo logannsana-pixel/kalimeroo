@@ -84,21 +84,31 @@ export function AdminLiveMapTab() {
         .eq("role", "delivery_driver");
 
       if (driverRoles && driverRoles.length > 0) {
-        const { data: drivers } = await supabase
-          .from("profiles")
-          .select("id, full_name, is_available, phone, latitude, longitude, location_updated_at")
-          .in("id", driverRoles.map(r => r.user_id))
-          .eq("is_validated", true);
+        const driverUserIds = driverRoles.map(r => r.user_id).filter(Boolean);
+        
+        if (driverUserIds.length > 0) {
+          const { data: drivers } = await supabase
+            .from("profiles")
+            .select("id, full_name, is_available, phone, latitude, longitude, location_updated_at")
+            .in("id", driverUserIds)
+            .eq("is_validated", true);
 
-        const driversWithOrders = (drivers || []).map(driver => {
-          const order = (orders as any[])?.find(o => o.delivery_driver_id === driver.id);
-          return { ...driver, current_order: order?.id };
-        });
+          const driversWithOrders = (drivers || []).map(driver => {
+            const order = (orders || []).find((o: any) => o.delivery_driver_id === driver.id);
+            return { ...driver, current_order: order?.id };
+          });
 
-        setActiveDrivers(driversWithOrders);
+          setActiveDrivers(driversWithOrders);
+        } else {
+          setActiveDrivers([]);
+        }
+      } else {
+        setActiveDrivers([]);
       }
     } catch (error) {
       console.error("Error fetching live data:", error);
+      setActiveDrivers([]);
+      setActiveOrders([]);
     } finally {
       setLoading(false);
     }

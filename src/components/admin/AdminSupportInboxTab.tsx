@@ -100,12 +100,16 @@ const AdminSupportInboxTab = () => {
       const ticketsWithNames = await Promise.all(
         (data || []).map(async (ticket) => {
           if (ticket.user_id) {
-            const { data: profile } = await supabase
-              .from('profiles')
-              .select('full_name')
-              .eq('id', ticket.user_id)
-              .single();
-            return { ...ticket, user_name: profile?.full_name || 'Utilisateur' };
+            try {
+              const { data: profile } = await supabase
+                .from('profiles')
+                .select('full_name')
+                .eq('id', ticket.user_id)
+                .maybeSingle();
+              return { ...ticket, user_name: profile?.full_name || 'Utilisateur' };
+            } catch {
+              return { ...ticket, user_name: 'Utilisateur' };
+            }
           }
           return { ...ticket, user_name: 'Visiteur' };
         })

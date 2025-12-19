@@ -159,12 +159,12 @@ export function DriverActiveOrder({
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Restaurant</p>
-              <p className="font-semibold">{order.restaurants?.name}</p>
+              <p className="font-semibold">{order.restaurants?.name || 'Restaurant'}</p>
             </div>
           </div>
           <div className="flex items-start gap-2 text-sm text-muted-foreground mb-3">
             <MapPin className="h-4 w-4 mt-0.5 shrink-0" />
-            <span>{order.restaurants?.address}</span>
+            <span>{order.restaurants?.address || 'Adresse non disponible'}</span>
           </div>
           <div className="flex gap-2">
             {order.restaurants?.phone && (
