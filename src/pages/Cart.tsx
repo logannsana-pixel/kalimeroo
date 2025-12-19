@@ -14,10 +14,11 @@ export default function Cart() {
   const navigate = useNavigate();
   const { cartItems, loading, updateQuantity, removeFromCart, getCartTotal } = useCart();
 
-  // Group items by restaurant
+  // Group items by restaurant (safely handling null menu_items)
   const groupedItems = cartItems.reduce(
     (acc, item) => {
-      const restaurantId = item.menu_items?.restaurant_id;
+      const restaurantId = item.menu_items?.restaurant_id || 'unknown';
+      if (!restaurantId) return acc;
       if (!acc[restaurantId]) {
         acc[restaurantId] = {
           items: [],

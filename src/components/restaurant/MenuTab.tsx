@@ -38,7 +38,7 @@ export const MenuTab = () => {
         .from('restaurants')
         .select('id')
         .eq('owner_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (!restaurantData) return;
       setRestaurantId(restaurantData.id);

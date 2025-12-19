@@ -30,7 +30,7 @@ export const RestaurantPrepTimeTab = () => {
         .from('restaurants')
         .select('delivery_time, is_active')
         .eq('owner_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (data) {
         // Parse delivery time like "30-45 min" to get base value

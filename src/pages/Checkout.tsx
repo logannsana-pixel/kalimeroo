@@ -28,8 +28,12 @@ export default function Checkout() {
   useEffect(() => {
     const fetchDeliveryFee = async () => {
       if (restaurantId && user) {
-        const { data } = await supabase.from("restaurants").select("delivery_fee").eq("id", restaurantId).single();
-        if (data) setDeliveryFee(Number(data.delivery_fee));
+        try {
+          const { data } = await supabase.from("restaurants").select("delivery_fee").eq("id", restaurantId).maybeSingle();
+          if (data) setDeliveryFee(Number(data.delivery_fee) || 0);
+        } catch (error) {
+          console.error('Error fetching delivery fee:', error);
+        }
       }
     };
     fetchDeliveryFee();
