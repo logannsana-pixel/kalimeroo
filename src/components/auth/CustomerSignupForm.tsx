@@ -2,12 +2,11 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { congoDistricts, cities } from "@/data/congoLocations";
 import { ChevronLeft, ChevronRight, User, MapPin, Mail } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { PhoneInput, isValidCongoPhone } from "./PhoneInput";
 import { AuthMethodToggle } from "./AuthMethodToggle";
+import { NeighborhoodInput } from "@/components/NeighborhoodInput";
 
 interface CustomerData {
   fullName: string;
@@ -67,8 +66,7 @@ export function CustomerSignupForm({ onSubmit, onBack }: CustomerSignupFormProps
 
   const validateStep2 = () => {
     const newErrors: Partial<Record<keyof CustomerData, string>> = {};
-    if (!formData.city) newErrors.city = "La ville est requise";
-    if (!formData.district) newErrors.district = "Le quartier est requis";
+    if (!formData.district.trim()) newErrors.district = "Le quartier est requis";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -81,8 +79,6 @@ export function CustomerSignupForm({ onSubmit, onBack }: CustomerSignupFormProps
     e.preventDefault();
     if (validateStep2()) onSubmit(formData);
   };
-
-  const filteredDistricts = formData.city ? congoDistricts.filter(d => d.city === formData.city) : [];
 
   return (
     <div className="space-y-5">
@@ -174,22 +170,13 @@ export function CustomerSignupForm({ onSubmit, onBack }: CustomerSignupFormProps
 
         {step === 2 && (
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label>Ville *</Label>
-                <Select value={formData.city} onValueChange={(value) => setFormData({ ...formData, city: value, district: "" })}>
-                  <SelectTrigger className="h-12 rounded-xl"><SelectValue placeholder="Ville" /></SelectTrigger>
-                  <SelectContent>{cities.map(city => <SelectItem key={city} value={city}>{city}</SelectItem>)}</SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Quartier *</Label>
-                <Select value={formData.district} onValueChange={(value) => setFormData({ ...formData, district: value })} disabled={!formData.city}>
-                  <SelectTrigger className="h-12 rounded-xl"><SelectValue placeholder="Quartier" /></SelectTrigger>
-                  <SelectContent>{filteredDistricts.map(d => <SelectItem key={d.name} value={d.name}>{d.name}</SelectItem>)}</SelectContent>
-                </Select>
-              </div>
-            </div>
+            <NeighborhoodInput
+              value={formData.district}
+              onChange={(value) => setFormData({ ...formData, district: value })}
+              error={errors.district}
+              label="Quartier"
+              required
+            />
 
             <div className="space-y-2">
               <Label>Complément d'adresse (optionnel)</Label>

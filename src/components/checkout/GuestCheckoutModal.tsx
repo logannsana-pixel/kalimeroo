@@ -4,8 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2, User, Phone, Lock, ArrowLeft } from "lucide-react";
-import { DistrictSelector } from "@/components/DistrictSelector";
+import { Loader2, User, Phone, Lock, ArrowLeft, MapPin } from "lucide-react";
+import { NeighborhoodInput } from "@/components/NeighborhoodInput";
 
 interface GuestCheckoutModalProps {
   isOpen: boolean;
@@ -25,7 +25,7 @@ export const GuestCheckoutModal = ({ isOpen, onClose, onSuccess }: GuestCheckout
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [formData, setFormData] = useState({
-    phone: '', password: '', full_name: '', district: '', city: 'Brazzaville',
+    phone: '', password: '', full_name: '', district: '',
   });
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -44,7 +44,7 @@ export const GuestCheckoutModal = ({ isOpen, onClose, onSuccess }: GuestCheckout
     e.preventDefault();
     setError("");
     if (!validateCongoPhone(formData.phone)) { setError("Numéro invalide"); return; }
-    if (!formData.district) { setError("Sélectionnez un quartier"); return; }
+    if (!formData.district.trim()) { setError("Saisissez votre quartier"); return; }
     setLoading(true);
     try {
       const { error: authError } = await supabase.auth.signUp({
@@ -52,7 +52,7 @@ export const GuestCheckoutModal = ({ isOpen, onClose, onSuccess }: GuestCheckout
         password: formData.password,
         options: {
           emailRedirectTo: `${window.location.origin}/`,
-          data: { full_name: formData.full_name, phone: formData.phone, district: formData.district, city: formData.city, role: 'customer' },
+          data: { full_name: formData.full_name, phone: formData.phone, district: formData.district, role: 'customer' },
         },
       });
       if (authError) {
@@ -63,7 +63,7 @@ export const GuestCheckoutModal = ({ isOpen, onClose, onSuccess }: GuestCheckout
     } catch { setError("Erreur"); } finally { setLoading(false); }
   };
 
-  const resetAndClose = () => { setStep('choice'); setFormData({ phone: '', password: '', full_name: '', district: '', city: 'Brazzaville' }); setError(""); onClose(); };
+  const resetAndClose = () => { setStep('choice'); setFormData({ phone: '', password: '', full_name: '', district: '' }); setError(""); onClose(); };
 
   return (
     <Dialog open={isOpen} onOpenChange={resetAndClose}>
@@ -131,8 +131,14 @@ export const GuestCheckoutModal = ({ isOpen, onClose, onSuccess }: GuestCheckout
                 </div>
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs">Quartier</Label>
-                <DistrictSelector selectedDistrict={formData.district} onSelect={(district, city) => setFormData({ ...formData, district, city })} />
+                <Label className="text-xs flex items-center gap-1"><MapPin className="w-3 h-3" />Quartier *</Label>
+                <Input 
+                  value={formData.district} 
+                  onChange={(e) => setFormData({ ...formData, district: e.target.value })} 
+                  placeholder="Ex: Bacongo, Poto-Poto..."
+                  className="h-10 rounded-xl text-sm" 
+                  required 
+                />
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs flex items-center gap-1"><Lock className="w-3 h-3" />Mot de passe</Label>

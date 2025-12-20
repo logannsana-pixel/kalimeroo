@@ -920,6 +920,33 @@ export type Database = {
           },
         ]
       }
+      neighborhoods: {
+        Row: {
+          city: string | null
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+          usage_count: number | null
+        }
+        Insert: {
+          city?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+          usage_count?: number | null
+        }
+        Update: {
+          city?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+          usage_count?: number | null
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
@@ -1511,6 +1538,9 @@ export type Database = {
           min_order: number | null
           name: string
           owner_id: string | null
+          pause_message: string | null
+          pause_until: string | null
+          paused_at: string | null
           phone: string | null
           rating: number | null
           sponsored_position: number | null
@@ -1540,6 +1570,9 @@ export type Database = {
           min_order?: number | null
           name: string
           owner_id?: string | null
+          pause_message?: string | null
+          pause_until?: string | null
+          paused_at?: string | null
           phone?: string | null
           rating?: number | null
           sponsored_position?: number | null
@@ -1569,6 +1602,9 @@ export type Database = {
           min_order?: number | null
           name?: string
           owner_id?: string | null
+          pause_message?: string | null
+          pause_until?: string | null
+          paused_at?: string | null
           phone?: string | null
           rating?: number | null
           sponsored_position?: number | null
@@ -1930,6 +1966,7 @@ export type Database = {
       }
     }
     Functions: {
+      auto_resume_restaurants: { Args: never; Returns: undefined }
       calculate_driver_balance: { Args: { driver_id: string }; Returns: number }
       calculate_restaurant_balance: {
         Args: { restaurant_owner_id: string }

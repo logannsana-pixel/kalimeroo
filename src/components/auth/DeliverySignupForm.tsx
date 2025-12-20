@@ -3,10 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronLeft, Bike, Car, Mail } from "lucide-react";
-import { DistrictSelector } from "@/components/DistrictSelector";
+import { ChevronLeft, Bike, Car, Mail, MapPin } from "lucide-react";
 import { PhoneInput, isValidCongoPhone } from "./PhoneInput";
 import { AuthMethodToggle } from "./AuthMethodToggle";
+import { NeighborhoodInput } from "@/components/NeighborhoodInput";
 
 interface DeliverySignupFormProps {
   onSubmit: (data: {
@@ -56,7 +56,7 @@ export function DeliverySignupForm({ onSubmit, onBack }: DeliverySignupFormProps
       }
     }
     
-    if (!formData.district) newErrors.district = "Le quartier est requis";
+    if (!formData.district.trim()) newErrors.district = "Le quartier est requis";
     if (!formData.vehicleType) newErrors.vehicleType = "Le type de véhicule est requis";
     if (formData.password.length < 6) newErrors.password = "Minimum 6 caractères";
     if (formData.password !== formData.confirmPassword) {
@@ -117,11 +117,13 @@ export function DeliverySignupForm({ onSubmit, onBack }: DeliverySignupFormProps
           )}
         </div>
 
-        <DistrictSelector
-          selectedDistrict={formData.district}
-          onSelect={(district, city) => setFormData({ ...formData, district, city })}
+        <NeighborhoodInput
+          value={formData.district}
+          onChange={(value) => setFormData({ ...formData, district: value })}
+          error={errors.district}
+          label="Quartier"
+          required
         />
-        {errors.district && <p className="text-sm text-destructive">{errors.district}</p>}
 
         <div className="space-y-2">
           <Label>Type de véhicule *</Label>
