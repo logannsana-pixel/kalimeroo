@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BottomNav } from "@/components/BottomNav";
-import { LocationModal } from "@/components/LocationModal";
+import { AddressCaptureModal } from "@/components/AddressCaptureModal";
 import { HomeHeader } from "@/components/HomeHeader";
 import { ServiceTypes } from "@/components/ServiceTypes";
 import { FoodCategories } from "@/components/FoodCategories";
@@ -63,7 +63,7 @@ const Index = () => {
 
   return (
     <>
-      <LocationModal />
+      <AddressCaptureModal />
       <MarketingPopup />
 
       <main className="min-h-screen bg-background pb-24">

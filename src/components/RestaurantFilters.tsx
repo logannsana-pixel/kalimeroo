@@ -1,4 +1,4 @@
-import { Search, SlidersHorizontal, MapPin } from "lucide-react";
+import { Search, SlidersHorizontal, MapPin, Edit2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { useLocation } from "@/contexts/LocationContext";
-import { DistrictSelector } from "@/components/DistrictSelector";
 
 interface RestaurantFiltersProps {
   searchQuery: string;
@@ -31,7 +30,10 @@ export const RestaurantFilters = ({
   onSortChange,
   categories,
 }: RestaurantFiltersProps) => {
-  const { district, city, setLocation } = useLocation();
+  const { district, address, openModal } = useLocation();
+
+  const displayLocation = district || address || "Définir mon adresse";
+  const hasLocation = !!(district || address);
 
   return (
     <div className="space-y-4 mb-8">
@@ -41,13 +43,18 @@ export const RestaurantFilters = ({
           <MapPin className="w-5 h-5 text-primary" />
           <div>
             <p className="text-sm text-muted-foreground">Livraison vers</p>
-            <p className="font-semibold">{district}, {city}</p>
+            <p className="font-semibold">{displayLocation}</p>
           </div>
         </div>
-        <DistrictSelector
-          onSelect={(newDistrict, newCity) => setLocation(newDistrict, newCity)}
-          selectedDistrict={district}
-        />
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={openModal}
+          className="gap-2"
+        >
+          <Edit2 className="w-4 h-4" />
+          {hasLocation ? "Modifier" : "Définir"}
+        </Button>
       </div>
 
       {/* Search Bar */}

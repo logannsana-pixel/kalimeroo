@@ -9,6 +9,7 @@ import { FavoritesButton } from "@/components/FavoritesButton";
 import { RestaurantCard, RestaurantCardSkeleton } from "@/components/ui/restaurant-card";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles } from "lucide-react";
+import { AddressCaptureModal } from "@/components/AddressCaptureModal";
 
 interface Restaurant {
   id: string;
@@ -118,6 +119,7 @@ export default function Restaurants() {
 
   return (
     <div className="min-h-screen flex flex-col pb-20 md:pb-0 bg-background">
+      <AddressCaptureModal />
       <Navbar />
       <main className="flex-1 container mx-auto px-4 py-4">
         {/* Page Header */}

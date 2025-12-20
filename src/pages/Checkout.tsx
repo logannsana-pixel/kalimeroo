@@ -3,6 +3,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { CheckoutSteps } from "@/components/checkout/CheckoutSteps";
 import { PromoCodeInput } from "@/components/PromoCodeInput";
 import { GuestCheckoutModal } from "@/components/checkout/GuestCheckoutModal";
+import { AddressCaptureModal } from "@/components/AddressCaptureModal";
 import { useCart } from "@/hooks/useCart";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -97,6 +98,8 @@ export default function Checkout() {
         </button>
         <span className="text-sm font-medium">Checkout</span>
       </header>
+
+      <AddressCaptureModal />
 
       {user ? (
         <main className="px-4 py-4 max-w-lg mx-auto space-y-4">
