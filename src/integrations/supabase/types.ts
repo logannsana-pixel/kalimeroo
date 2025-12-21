@@ -314,6 +314,176 @@ export type Database = {
         }
         Relationships: []
       }
+      blog_articles: {
+        Row: {
+          author_id: string
+          canonical_url: string | null
+          category_id: string | null
+          content: string | null
+          cover_image_alt: string | null
+          cover_image_url: string | null
+          created_at: string | null
+          excerpt: string | null
+          id: string
+          is_indexed: boolean | null
+          keywords: string | null
+          language: Database["public"]["Enums"]["blog_language"]
+          meta_description: string | null
+          meta_title: string | null
+          parent_article_id: string | null
+          published_at: string | null
+          reading_time_minutes: number | null
+          scheduled_at: string | null
+          slug: string
+          status: Database["public"]["Enums"]["blog_article_status"] | null
+          title: string
+          updated_at: string | null
+          view_count: number | null
+        }
+        Insert: {
+          author_id: string
+          canonical_url?: string | null
+          category_id?: string | null
+          content?: string | null
+          cover_image_alt?: string | null
+          cover_image_url?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          id?: string
+          is_indexed?: boolean | null
+          keywords?: string | null
+          language?: Database["public"]["Enums"]["blog_language"]
+          meta_description?: string | null
+          meta_title?: string | null
+          parent_article_id?: string | null
+          published_at?: string | null
+          reading_time_minutes?: number | null
+          scheduled_at?: string | null
+          slug: string
+          status?: Database["public"]["Enums"]["blog_article_status"] | null
+          title: string
+          updated_at?: string | null
+          view_count?: number | null
+        }
+        Update: {
+          author_id?: string
+          canonical_url?: string | null
+          category_id?: string | null
+          content?: string | null
+          cover_image_alt?: string | null
+          cover_image_url?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          id?: string
+          is_indexed?: boolean | null
+          keywords?: string | null
+          language?: Database["public"]["Enums"]["blog_language"]
+          meta_description?: string | null
+          meta_title?: string | null
+          parent_article_id?: string | null
+          published_at?: string | null
+          reading_time_minutes?: number | null
+          scheduled_at?: string | null
+          slug?: string
+          status?: Database["public"]["Enums"]["blog_article_status"] | null
+          title?: string
+          updated_at?: string | null
+          view_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_articles_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "blog_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "blog_articles_parent_article_id_fkey"
+            columns: ["parent_article_id"]
+            isOneToOne: false
+            referencedRelation: "blog_articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      blog_categories: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          language: Database["public"]["Enums"]["blog_language"]
+          meta_description: string | null
+          meta_title: string | null
+          name: string
+          parent_category_id: string | null
+          slug: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          language?: Database["public"]["Enums"]["blog_language"]
+          meta_description?: string | null
+          meta_title?: string | null
+          name: string
+          parent_category_id?: string | null
+          slug: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          language?: Database["public"]["Enums"]["blog_language"]
+          meta_description?: string | null
+          meta_title?: string | null
+          name?: string
+          parent_category_id?: string | null
+          slug?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_categories_parent_category_id_fkey"
+            columns: ["parent_category_id"]
+            isOneToOne: false
+            referencedRelation: "blog_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      blog_permissions: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["blog_role"]
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["blog_role"]
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["blog_role"]
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       bundles: {
         Row: {
           category: string
@@ -1966,6 +2136,7 @@ export type Database = {
       }
     }
     Functions: {
+      auto_publish_scheduled_articles: { Args: never; Returns: undefined }
       auto_resume_restaurants: { Args: never; Returns: undefined }
       calculate_driver_balance: { Args: { driver_id: string }; Returns: number }
       calculate_restaurant_balance: {
@@ -1973,6 +2144,13 @@ export type Database = {
         Returns: number
       }
       generate_referral_code: { Args: never; Returns: string }
+      has_blog_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["blog_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1983,6 +2161,9 @@ export type Database = {
     }
     Enums: {
       app_role: "customer" | "restaurant_owner" | "delivery_driver" | "admin"
+      blog_article_status: "draft" | "published" | "scheduled"
+      blog_language: "fr" | "en"
+      blog_role: "admin" | "editor" | "viewer"
       order_status:
         | "pending"
         | "accepted"
@@ -2123,6 +2304,9 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["customer", "restaurant_owner", "delivery_driver", "admin"],
+      blog_article_status: ["draft", "published", "scheduled"],
+      blog_language: ["fr", "en"],
+      blog_role: ["admin", "editor", "viewer"],
       order_status: [
         "pending",
         "accepted",
