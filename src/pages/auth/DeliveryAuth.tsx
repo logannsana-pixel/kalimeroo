@@ -84,7 +84,6 @@ const DeliveryAuth = () => {
             phone: deliveryData.phone || null,
             email: deliveryData.email || null,
             district: deliveryData.district,
-            city: deliveryData.city,
             address: deliveryData.district,
             role: "delivery_driver",
             vehicle_type: deliveryData.vehicleType,

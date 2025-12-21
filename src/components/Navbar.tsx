@@ -85,7 +85,7 @@ export const Navbar = () => {
         >
           <MapPin className="h-4 w-4 text-primary" />
           <span className="text-sm font-medium text-foreground">
-            {district ? `${district}, ${city}` : "Choisir une adresse"}
+            {district || "Choisir une adresse"}
           </span>
           <span className="text-xs text-muted-foreground">▼</span>
         </button>

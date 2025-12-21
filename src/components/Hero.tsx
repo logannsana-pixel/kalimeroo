@@ -37,7 +37,7 @@ export const Hero = () => {
           {district && (
             <div className="mb-4 p-3 bg-primary/10 rounded-xl border border-primary/20 backdrop-blur-sm">
               <p className="text-xs text-muted-foreground">
-                Livraison vers : <span className="font-medium text-foreground">{district}, {city}</span>
+                Livraison vers : <span className="font-medium text-foreground">{district}</span>
               </p>
             </div>
           )}

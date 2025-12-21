@@ -4,7 +4,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { congoDistricts, cities } from "@/data/congoLocations";
 import { ChevronLeft, ChevronRight, Upload, Store, User, MapPin, Image, Mail } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Card } from "@/components/ui/card";
@@ -85,8 +84,7 @@ export function RestaurantSignupForm({ onSubmit, onBack }: RestaurantSignupFormP
     const newErrors: Partial<Record<keyof RestaurantData, string>> = {};
     if (!formData.restaurantName.trim()) newErrors.restaurantName = "Le nom du restaurant est requis";
     if (!formData.cuisineType) newErrors.cuisineType = "Le type de cuisine est requis";
-    if (!formData.city) newErrors.city = "La ville est requise";
-    if (!formData.district) newErrors.district = "Le quartier est requis";
+    if (!formData.district.trim()) newErrors.district = "Le quartier est requis";
     if (!formData.address.trim()) newErrors.address = "L'adresse est requise";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -110,8 +108,6 @@ export function RestaurantSignupForm({ onSubmit, onBack }: RestaurantSignupFormP
       reader.readAsDataURL(file);
     }
   };
-
-  const filteredDistricts = formData.city ? congoDistricts.filter(d => d.city === formData.city) : [];
 
   return (
     <div className="space-y-6">
@@ -220,21 +216,15 @@ export function RestaurantSignupForm({ onSubmit, onBack }: RestaurantSignupFormP
               {errors.cuisineType && <p className="text-sm text-destructive">{errors.cuisineType}</p>}
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label className="flex items-center gap-1"><MapPin className="w-3 h-3" /> Ville *</Label>
-                <Select value={formData.city} onValueChange={(value) => setFormData({ ...formData, city: value, district: "" })}>
-                  <SelectTrigger className="h-12 rounded-xl"><SelectValue placeholder="Ville" /></SelectTrigger>
-                  <SelectContent>{cities.map(city => <SelectItem key={city} value={city}>{city}</SelectItem>)}</SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Quartier *</Label>
-                <Select value={formData.district} onValueChange={(value) => setFormData({ ...formData, district: value })} disabled={!formData.city}>
-                  <SelectTrigger className="h-12 rounded-xl"><SelectValue placeholder="Quartier" /></SelectTrigger>
-                  <SelectContent>{filteredDistricts.map(d => <SelectItem key={d.name} value={d.name}>{d.name}</SelectItem>)}</SelectContent>
-                </Select>
-              </div>
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1"><MapPin className="w-3 h-3" /> Quartier *</Label>
+              <Input 
+                value={formData.district} 
+                onChange={(e) => setFormData({ ...formData, district: e.target.value })}
+                placeholder="Ex: Bacongo, Poto-Poto, Moungali..."
+                className="h-12 rounded-xl"
+              />
+              {errors.district && <p className="text-sm text-destructive">{errors.district}</p>}
             </div>
 
             <div className="space-y-2">

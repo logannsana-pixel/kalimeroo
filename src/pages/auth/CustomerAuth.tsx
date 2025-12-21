@@ -84,7 +84,6 @@ const CustomerAuth = () => {
             phone: customerData.phone || null,
             email: customerData.email || null,
             district: customerData.district,
-            city: customerData.city,
             address: customerData.addressComplement ? `${customerData.district}, ${customerData.addressComplement}` : customerData.district,
             role: "customer"
           },

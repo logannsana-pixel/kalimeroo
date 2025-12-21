@@ -9,8 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { allDistricts } from "@/data/congoDistricts";
+import { NeighborhoodInput } from "@/components/NeighborhoodInput";
 import { toast } from "sonner";
 import { Database } from "@/integrations/supabase/types";
 import { ShoppingBag, User, Package, Truck, Clock, CheckCircle } from "lucide-react";
@@ -341,21 +340,12 @@ export default function CustomerDashboard() {
 
                   <div className="space-y-1.5">
                     <Label htmlFor="district" className="text-xs text-muted-foreground">Quartier</Label>
-                    <Select
+                    <NeighborhoodInput
                       value={formData.district}
-                      onValueChange={(value) => setFormData({...formData, district: value})}
-                    >
-                      <SelectTrigger id="district" className="h-10 rounded-xl bg-muted/30 border-0">
-                        <SelectValue placeholder="Sélectionnez votre quartier" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {allDistricts.map((item) => (
-                          <SelectItem key={`${item.city}-${item.district}`} value={`${item.city} - ${item.district}`}>
-                            {item.city} - {item.district}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      onChange={(value) => setFormData({...formData, district: value})}
+                      placeholder="Saisissez votre quartier"
+                      className="h-10 rounded-xl bg-muted/30 border-0"
+                    />
                   </div>
 
                   <div className="space-y-1.5">
