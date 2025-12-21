@@ -10,6 +10,7 @@ import { RestaurantCard, RestaurantCardSkeleton } from "@/components/ui/restaura
 import { Badge } from "@/components/ui/badge";
 import { Sparkles } from "lucide-react";
 import { AddressCaptureModal } from "@/components/AddressCaptureModal";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 interface Restaurant {
   id: string;
@@ -24,6 +25,7 @@ interface Restaurant {
 }
 
 export default function Restaurants() {
+  useDocumentTitle("Restaurants", "Découvrez tous les restaurants disponibles pour la livraison à Brazzaville et Pointe-Noire");
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);

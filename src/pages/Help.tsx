@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 
 interface FAQCategory {
   id: string;
@@ -32,6 +33,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 };
 
 const Help = () => {
+  useDocumentTitle("Aide & FAQ", "Trouvez les réponses à vos questions sur la livraison de repas Kalimero");
   const navigate = useNavigate();
   const [categories, setCategories] = useState<FAQCategory[]>([]);
   const [items, setItems] = useState<FAQItem[]>([]);

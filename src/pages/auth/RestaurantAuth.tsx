@@ -97,7 +97,6 @@ const RestaurantAuth = () => {
             cuisine_type: restaurantData.cuisineType,
             restaurant_description: restaurantData.description,
             restaurant_image_url: logoUrl,
-            restaurant_city: restaurantData.city,
             restaurant_district: restaurantData.district
           },
         },

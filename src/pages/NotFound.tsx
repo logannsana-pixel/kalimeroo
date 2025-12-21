@@ -4,8 +4,10 @@ import { Navbar } from "@/components/Navbar";
 import { BottomNav } from "@/components/BottomNav";
 import { Button } from "@/components/ui/button";
 import { Home } from "lucide-react";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 const NotFound = () => {
+  useDocumentTitle("Page introuvable", "La page demandée n'existe pas");
   const location = useLocation();
 
   useEffect(() => {
