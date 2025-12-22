@@ -6,12 +6,16 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Calendar, Clock, ArrowLeft, Globe, User } from "lucide-react";
+import { Calendar, Clock, ArrowLeft, Globe } from "lucide-react";
 import { format } from "date-fns";
-import { fr, enUS } from "date-fns/locale";
+import { fr as frLocale, enUS } from "date-fns/locale";
+import type { Database } from "@/integrations/supabase/types";
+
+type BlogLanguage = Database["public"]["Enums"]["blog_language"];
 
 export default function BlogArticle() {
-  const { lang = "fr", slug } = useParams<{ lang: string; slug: string }>();
+  const { lang: langParam = "fr", slug } = useParams<{ lang: string; slug: string }>();
+  const lang = (langParam === "en" ? "en" : "fr") as BlogLanguage;
   const [article, setArticle] = useState<any>(null);
   const [relatedArticles, setRelatedArticles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -66,7 +70,7 @@ export default function BlogArticle() {
     }
   };
 
-  const dateLocale = lang === "fr" ? fr : enUS;
+  const dateLocale = lang === "fr" ? frLocale : enUS;
 
   // Convert markdown to basic HTML
   const renderContent = (content: string) => {

@@ -9,10 +9,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Calendar, Clock, ArrowRight, Globe } from "lucide-react";
 import { format } from "date-fns";
-import { fr, enUS } from "date-fns/locale";
+import { fr as frLocale, enUS } from "date-fns/locale";
+import type { Database } from "@/integrations/supabase/types";
+
+type BlogLanguage = Database["public"]["Enums"]["blog_language"];
 
 export default function BlogList() {
-  const { lang = "fr" } = useParams<{ lang: string }>();
+  const { lang: langParam = "fr" } = useParams<{ lang: string }>();
+  const lang = (langParam === "en" ? "en" : "fr") as BlogLanguage;
   const [articles, setArticles] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -63,7 +67,7 @@ export default function BlogList() {
     }
   };
 
-  const dateLocale = lang === "fr" ? fr : enUS;
+  const dateLocale = lang === "fr" ? frLocale : enUS;
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
