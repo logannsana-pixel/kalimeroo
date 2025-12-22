@@ -8,6 +8,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { CartProvider } from "@/hooks/useCart";
 import { LocationProvider } from "@/contexts/LocationContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { CityGate } from "@/components/CityGate";
 import { AlertEngine } from "@/components/alerts/AlertEngine";
 import { NetworkStatus } from "@/components/NetworkStatus";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -16,6 +17,7 @@ import FloatingActionButton from "@/components/FloatingActionButton";
 
 // Lazy loaded pages for code splitting
 const Index = lazy(() => import("./pages/Index"));
+const Welcome = lazy(() => import("./pages/Welcome"));
 const Restaurants = lazy(() => import("./pages/Restaurants"));
 const RestaurantDetail = lazy(() => import("./pages/RestaurantDetail"));
 const Cart = lazy(() => import("./pages/Cart"));
@@ -69,9 +71,10 @@ const App = () => (
               <FloatingActionButton />
               <ErrorBoundary>
                 <Suspense fallback={<PageLoader />}>
+                  <CityGate>
                     <Routes>
+                      <Route path="/welcome" element={<Welcome />} />
                       <Route path="/" element={<Index />} />
-                      
                       {/* Auth routes - role specific */}
                       <Route path="/auth" element={<CustomerAuth />} />
                       <Route path="/auth/customer" element={<CustomerAuth />} />
@@ -159,6 +162,7 @@ const App = () => (
                       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                       <Route path="*" element={<NotFound />} />
                     </Routes>
+                  </CityGate>
                 </Suspense>
               </ErrorBoundary>
             </CartProvider>

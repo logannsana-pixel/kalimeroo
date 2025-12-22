@@ -39,7 +39,8 @@ const Index = () => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const hasAddress = district && city;
+  const hasAddress = !!district && !!city;
+  const hasCity = !!city;
   const isConnected = !!user;
 
   useEffect(() => {
@@ -122,7 +123,7 @@ const Index = () => {
         <section className="px-4 mt-6 space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="font-semibold text-sm text-foreground">
-              {hasAddress ? "Restaurants populaires" : "Restaurants"}
+              {hasCity ? "Restaurants populaires" : "Restaurants"}
             </h2>
             <button
               onClick={() => navigate("/restaurants")}
@@ -143,10 +144,10 @@ const Index = () => {
               <CardContent className="p-0">
                 <Truck className="mx-auto mb-1.5 text-primary h-5 w-5" />
                 <p className="text-xs font-medium text-foreground mb-1.5">
-                  {hasAddress ? "Bientôt disponible" : "Choisissez votre ville"}
+                  {hasCity ? "Bientôt disponible" : "Choisissez votre ville"}
                 </p>
-                {!hasAddress && (
-                  <button onClick={openModal} className="text-xs text-primary font-medium">
+                {!hasCity && (
+                  <button onClick={() => navigate('/welcome')} className="text-xs text-primary font-medium">
                     Définir ma localisation
                   </button>
                 )}

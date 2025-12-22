@@ -13,6 +13,8 @@ interface LocationContextType {
   coordinates: Coordinates | null;
   isModalOpen: boolean;
   hasGPS: boolean;
+  setCity: (city: string) => void;
+  setDistrict: (district: string) => void;
   setLocation: (district: string, city: string) => void;
   setFullAddress: (address: string, complement?: string) => void;
   setCoordinates: (coords: Coordinates | null) => void;
@@ -44,7 +46,17 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
 
   const hasGPS = coordinates !== null;
 
-  const setLocation = (newDistrict: string, newCity: string) => {
+  const updateCity = (newCity: string) => {
+    setCity(newCity);
+    localStorage.setItem("userCity", newCity);
+  };
+
+  const updateDistrict = (newDistrict: string) => {
+    setDistrict(newDistrict);
+    localStorage.setItem("userDistrict", newDistrict);
+  };
+
+  const setLocationBoth = (newDistrict: string, newCity: string) => {
     setDistrict(newDistrict);
     setCity(newCity);
     localStorage.setItem("userDistrict", newDistrict);
@@ -94,7 +106,9 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
       coordinates,
       hasGPS,
       isModalOpen,
-      setLocation, 
+      setCity: updateCity,
+      setDistrict: updateDistrict,
+      setLocation: setLocationBoth, 
       setFullAddress,
       setCoordinates,
       clearLocation,
