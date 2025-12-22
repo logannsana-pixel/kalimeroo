@@ -23,6 +23,7 @@ export const AddressCaptureModal = ({ isOpen: propIsOpen, onClose: propOnClose, 
     city, 
     address,
     addressComplement,
+    coordinates,
     isModalOpen: contextIsOpen, 
     setDistrict,
     setFullAddress,
@@ -33,7 +34,7 @@ export const AddressCaptureModal = ({ isOpen: propIsOpen, onClose: propOnClose, 
   const isOpen = propIsOpen ?? contextIsOpen;
   const closeModal = propOnClose ?? contextCloseModal;
   
-  const [step, setStep] = useState<Step>('gps_loading');
+  const [step, setStep] = useState<Step>('manual_entry');
   const [gpsProgress, setGpsProgress] = useState(0);
   const [detectedAddress, setDetectedAddress] = useState("");
   
@@ -50,11 +51,21 @@ export const AddressCaptureModal = ({ isOpen: propIsOpen, onClose: propOnClose, 
       setManualAddress(address || "");
       setManualQuartier(district || "");
       setManualComplement(addressComplement || "");
-      setStep('gps_loading');
-      setGpsProgress(0);
-      handleRequestGPS();
+      
+      // If we already have GPS coords from Welcome page, skip GPS request
+      if (coordinates) {
+        setHasGpsCoords(true);
+        setCoords(coordinates);
+        setDetectedAddress(`GPS: ${coordinates.latitude.toFixed(6)}, ${coordinates.longitude.toFixed(6)}`);
+        setStep('manual_entry');
+      } else {
+        // Otherwise, try to get GPS
+        setStep('gps_loading');
+        setGpsProgress(0);
+        handleRequestGPS();
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, coordinates]);
 
   // Simulate GPS progress
   useEffect(() => {
@@ -216,13 +227,13 @@ export const AddressCaptureModal = ({ isOpen: propIsOpen, onClose: propOnClose, 
             {step === 'gps_loading' && "Localisation en cours..."}
             {step === 'gps_success' && "Position trouvée ✅"}
             {step === 'gps_error' && "GPS indisponible"}
-            {step === 'manual_entry' && "Votre adresse de livraison"}
+            {step === 'manual_entry' && (city ? `Livraison à ${city}` : "Votre adresse de livraison")}
           </h2>
           <p className="text-white/80 mt-1 text-sm">
             {step === 'gps_loading' && "Patientez quelques secondes"}
             {step === 'gps_success' && "Coordonnées GPS enregistrées"}
             {step === 'gps_error' && "Saisissez votre adresse manuellement"}
-            {step === 'manual_entry' && "Complétez les informations"}
+            {step === 'manual_entry' && "Complétez votre adresse"}
           </p>
         </div>
 

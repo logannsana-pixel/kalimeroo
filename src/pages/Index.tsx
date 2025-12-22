@@ -34,14 +34,21 @@ interface Restaurant {
 
 const Index = () => {
   const navigate = useNavigate();
-  const { district, city, openModal } = useLocation();
+  const { district, city, address, openModal } = useLocation();
   const { user } = useAuth();
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const hasAddress = !!district && !!city;
+  const hasAddress = !!district && !!address;
   const hasCity = !!city;
   const isConnected = !!user;
+
+  // Open address modal if city is set but detailed address is not
+  useEffect(() => {
+    if (hasCity && !hasAddress) {
+      openModal();
+    }
+  }, [hasCity, hasAddress, openModal]);
 
   useEffect(() => {
     const fetchData = async () => {
