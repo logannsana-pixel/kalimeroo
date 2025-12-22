@@ -284,13 +284,14 @@ export function ArticleEditorModal({
               <div className="space-y-2">
                 <Label>Catégorie</Label>
                 <Select
-                  value={formData.category_id}
-                  onValueChange={(value) => setFormData({ ...formData, category_id: value })}
+                  value={formData.category_id || "none"}
+                  onValueChange={(value) => setFormData({ ...formData, category_id: value === "none" ? "" : value })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Sélectionner..." />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="none">Aucune catégorie</SelectItem>
                     {filteredCategories.map((cat) => (
                       <SelectItem key={cat.id} value={cat.id}>
                         {cat.name}
@@ -302,14 +303,14 @@ export function ArticleEditorModal({
               <div className="space-y-2">
                 <Label>Article parent (FR ↔ EN)</Label>
                 <Select
-                  value={formData.parent_article_id}
-                  onValueChange={(value) => setFormData({ ...formData, parent_article_id: value })}
+                  value={formData.parent_article_id || "none"}
+                  onValueChange={(value) => setFormData({ ...formData, parent_article_id: value === "none" ? "" : value })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Lier à..." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Aucun</SelectItem>
+                    <SelectItem value="none">Aucun</SelectItem>
                     {relatedArticles.map((art) => (
                       <SelectItem key={art.id} value={art.id}>
                         {art.title} ({art.language.toUpperCase()})
