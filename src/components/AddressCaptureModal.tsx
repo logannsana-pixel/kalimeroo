@@ -24,7 +24,7 @@ export const AddressCaptureModal = ({ isOpen: propIsOpen, onClose: propOnClose, 
     address,
     addressComplement,
     isModalOpen: contextIsOpen, 
-    setLocation, 
+    setDistrict,
     setFullAddress,
     setCoordinates,
     closeModal: contextCloseModal, 
@@ -157,8 +157,9 @@ export const AddressCaptureModal = ({ isOpen: propIsOpen, onClose: propOnClose, 
     // Save neighborhood to DB for future data exploitation
     await saveNeighborhood(manualQuartier);
 
-    // Update location context
-    setLocation(manualQuartier.trim(), ""); // No city selection anymore
+    // Update location context - keep the city from Welcome page
+    setDistrict(manualQuartier.trim());
+    setFullAddress(manualAddress.trim(), manualComplement.trim());
     setFullAddress(manualAddress.trim(), manualComplement.trim());
     if (coords) {
       setCoordinates(coords);
