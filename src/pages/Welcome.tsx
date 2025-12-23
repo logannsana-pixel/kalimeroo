@@ -7,17 +7,17 @@ import { Progress } from "@/components/ui/progress";
 import { useLocation } from "@/contexts/LocationContext";
 import { toast } from "sonner";
 
-const CAMEROON_CITIES = [
-  "Douala",
-  "Yaoundé", 
-  "Bafoussam",
-  "Bamenda",
-  "Garoua",
-  "Maroua",
-  "Ngaoundéré",
-  "Bertoua",
-  "Ebolowa",
-  "Kribi"
+const CONGO_CITIES = [
+  "Brazzaville",
+  "Pointe-Noire", 
+  "Dolisie",
+  "Nkayi",
+  "Ouesso",
+  "Impfondo",
+  "Owando",
+  "Sibiti",
+  "Kinkala",
+  "Madingou"
 ];
 
 type Step = "loading" | "success" | "error" | "manual";
@@ -29,7 +29,7 @@ const Welcome = () => {
   const [progress, setProgress] = useState(0);
   const [detectedCity, setDetectedCity] = useState("");
   const [manualCity, setManualCity] = useState("");
-  const [filteredCities, setFilteredCities] = useState(CAMEROON_CITIES);
+  const [filteredCities, setFilteredCities] = useState(CONGO_CITIES);
 
   // If city is already set, redirect to home
   useEffect(() => {
@@ -62,12 +62,12 @@ const Welcome = () => {
   // Filter cities for manual input
   useEffect(() => {
     if (manualCity.trim()) {
-      const filtered = CAMEROON_CITIES.filter(c => 
+      const filtered = CONGO_CITIES.filter(c => 
         c.toLowerCase().includes(manualCity.toLowerCase())
       );
       setFilteredCities(filtered);
     } else {
-      setFilteredCities(CAMEROON_CITIES);
+      setFilteredCities(CONGO_CITIES);
     }
   }, [manualCity]);
 
@@ -102,18 +102,18 @@ const Welcome = () => {
 
   // Simple city detection based on coordinates
   const detectCityFromCoords = (lat: number, lng: number): string => {
-    // Approximate city centers in Cameroon
+    // Approximate city centers in Congo
     const cities = [
-      { name: "Douala", lat: 4.0511, lng: 9.7679 },
-      { name: "Yaoundé", lat: 3.8480, lng: 11.5021 },
-      { name: "Bafoussam", lat: 5.4764, lng: 10.4176 },
-      { name: "Bamenda", lat: 5.9527, lng: 10.1582 },
-      { name: "Garoua", lat: 9.3000, lng: 13.4000 },
-      { name: "Maroua", lat: 10.5953, lng: 14.3158 },
-      { name: "Ngaoundéré", lat: 7.3167, lng: 13.5833 },
-      { name: "Bertoua", lat: 4.5833, lng: 13.6833 },
-      { name: "Ebolowa", lat: 2.9000, lng: 11.1500 },
-      { name: "Kribi", lat: 2.9500, lng: 9.9167 },
+      { name: "Brazzaville", lat: -4.2634, lng: 15.2429 },
+      { name: "Pointe-Noire", lat: -4.7781, lng: 11.8635 },
+      { name: "Dolisie", lat: -4.2000, lng: 12.6667 },
+      { name: "Nkayi", lat: -4.1667, lng: 13.2833 },
+      { name: "Ouesso", lat: 1.6167, lng: 16.0500 },
+      { name: "Impfondo", lat: 1.6167, lng: 18.0667 },
+      { name: "Owando", lat: -0.4833, lng: 15.9000 },
+      { name: "Sibiti", lat: -3.6833, lng: 13.3500 },
+      { name: "Kinkala", lat: -4.3667, lng: 14.7667 },
+      { name: "Madingou", lat: -4.1500, lng: 13.5500 },
     ];
 
     let closest = cities[0];
@@ -127,8 +127,8 @@ const Welcome = () => {
       }
     }
 
-    // If too far from any city (> ~100km), default to Douala
-    return minDist < 1 ? closest.name : "Douala";
+    // If too far from any city (> ~100km), default to Brazzaville
+    return minDist < 1 ? closest.name : "Brazzaville";
   };
 
   const handleConfirmCity = () => {
@@ -324,7 +324,7 @@ const Welcome = () => {
           </div>
 
           <p className="text-center text-xs text-muted-foreground">
-            Livraison disponible dans plus de 10 villes au Cameroun
+            Livraison disponible dans les principales villes du Congo
           </p>
         </div>
       </main>
