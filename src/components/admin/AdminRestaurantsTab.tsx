@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { 
   Store, Search, CheckCircle, XCircle, Eye, Edit, 
-  MoreHorizontal, FileText, Clock, MapPin, Phone, Settings
+  MoreHorizontal, FileText, Clock, MapPin, Phone, Settings, Trash2
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -23,11 +23,13 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
 import { RestaurantDetailModal } from "./RestaurantDetailModal";
 import { PaymentSettingsModal } from "./PaymentSettingsModal";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 interface Restaurant {
   id: string;
@@ -53,8 +55,10 @@ export function AdminRestaurantsTab() {
   const [showValidationModal, setShowValidationModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [validationNotes, setValidationNotes] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     fetchRestaurants();
@@ -121,6 +125,69 @@ export function AdminRestaurantsTab() {
     } catch (error) {
       console.error("Error toggling restaurant:", error);
       toast.error("Erreur lors de la mise à jour");
+    }
+  };
+
+  const handleDeleteRestaurant = async () => {
+    if (!selectedRestaurant) return;
+    setDeleting(true);
+    
+    try {
+      // Delete related data first
+      // Delete menu item options and option groups
+      const { data: menuItems } = await supabase
+        .from("menu_items")
+        .select("id")
+        .eq("restaurant_id", selectedRestaurant.id);
+      
+      if (menuItems) {
+        for (const item of menuItems) {
+          const { data: optionGroups } = await supabase
+            .from("menu_item_option_groups")
+            .select("id")
+            .eq("menu_item_id", item.id);
+          
+          if (optionGroups) {
+            for (const group of optionGroups) {
+              await supabase.from("menu_item_options").delete().eq("option_group_id", group.id);
+            }
+            await supabase.from("menu_item_option_groups").delete().eq("menu_item_id", item.id);
+          }
+        }
+      }
+      
+      // Delete menu items
+      await supabase.from("menu_items").delete().eq("restaurant_id", selectedRestaurant.id);
+      
+      // Delete bundles
+      await supabase.from("bundles").delete().eq("restaurant_id", selectedRestaurant.id);
+      
+      // Delete reviews
+      await supabase.from("reviews").delete().eq("restaurant_id", selectedRestaurant.id);
+      
+      // Delete favorites
+      await supabase.from("favorites").delete().eq("restaurant_id", selectedRestaurant.id);
+      
+      // Delete promo codes
+      await supabase.from("promo_codes").delete().eq("restaurant_id", selectedRestaurant.id);
+      
+      // Delete restaurant
+      const { error } = await supabase
+        .from("restaurants")
+        .delete()
+        .eq("id", selectedRestaurant.id);
+
+      if (error) throw error;
+      
+      toast.success(`Restaurant "${selectedRestaurant.name}" supprimé`);
+      setShowDeleteDialog(false);
+      setSelectedRestaurant(null);
+      fetchRestaurants();
+    } catch (error) {
+      console.error("Error deleting restaurant:", error);
+      toast.error("Erreur lors de la suppression");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -293,7 +360,7 @@ export function AdminRestaurantsTab() {
                           <MoreHorizontal className="w-4 h-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
+                      <DropdownMenuContent align="end" className="bg-popover">
                         <DropdownMenuItem onClick={() => {
                           setSelectedRestaurant(restaurant);
                           setValidationNotes(restaurant.validation_notes || "");
@@ -315,6 +382,17 @@ export function AdminRestaurantsTab() {
                         }}>
                           <Settings className="w-4 h-4 mr-2" />
                           Config. paiement
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem 
+                          className="text-destructive focus:text-destructive"
+                          onClick={() => {
+                            setSelectedRestaurant(restaurant);
+                            setShowDeleteDialog(true);
+                          }}
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Supprimer
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -424,6 +502,18 @@ export function AdminRestaurantsTab() {
           setShowPaymentModal(false);
           setSelectedRestaurant(null);
         }}
+      />
+
+      <ConfirmDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title="Supprimer ce restaurant ?"
+        description={`Cette action est irréversible. Le restaurant "${selectedRestaurant?.name}" et toutes ses données (menu, avis, commandes) seront supprimés définitivement.`}
+        confirmText="Supprimer définitivement"
+        cancelText="Annuler"
+        onConfirm={handleDeleteRestaurant}
+        loading={deleting}
+        variant="destructive"
       />
     </div>
   );

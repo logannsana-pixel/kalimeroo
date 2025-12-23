@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { 
   Users, Search, MoreHorizontal, Phone, MapPin, 
-  ShoppingBag, User, Store, Truck, Shield, Eye
+  ShoppingBag, User, Store, Truck, Shield, Eye, Trash2, Loader2
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -15,9 +15,11 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { UserDetailModal } from "./UserDetailModal";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 interface UserWithRole {
   id: string;
@@ -44,6 +46,9 @@ export function AdminUsersTab() {
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<UserWithRole | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -99,6 +104,55 @@ export function AdminUsersTab() {
     }
   };
 
+  const handleDeleteUser = async () => {
+    if (!userToDelete) return;
+    setDeleting(true);
+    
+    try {
+      // Delete related data first (cascade)
+      // Delete cart items
+      await supabase.from("cart_items").delete().eq("user_id", userToDelete.id);
+      
+      // Delete favorites
+      await supabase.from("favorites").delete().eq("user_id", userToDelete.id);
+      
+      // Delete reviews
+      await supabase.from("reviews").delete().eq("user_id", userToDelete.id);
+      
+      // Delete driver reviews if driver
+      await supabase.from("driver_reviews").delete().eq("user_id", userToDelete.id);
+      
+      // Delete notifications
+      await supabase.from("notifications").delete().eq("user_id", userToDelete.id);
+      
+      // Delete messages
+      await supabase.from("messages").delete().or(`sender_id.eq.${userToDelete.id},receiver_id.eq.${userToDelete.id}`);
+      
+      // Delete user role
+      await supabase.from("user_roles").delete().eq("user_id", userToDelete.id);
+      
+      // Delete admin permissions if exists
+      await supabase.from("admin_permissions").delete().eq("user_id", userToDelete.id);
+      
+      // Delete profile
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .delete()
+        .eq("id", userToDelete.id);
+
+      if (profileError) throw profileError;
+      
+      toast.success(`Compte de ${userToDelete.full_name || 'utilisateur'} supprimé`);
+      setShowDeleteDialog(false);
+      setUserToDelete(null);
+      fetchUsers();
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      toast.error("Erreur lors de la suppression");
+    } finally {
+      setDeleting(false);
+    }
+  };
   const filteredUsers = users.filter((u) => {
     const matchesSearch = (u.full_name?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
       (u.phone?.toLowerCase() || '').includes(searchQuery.toLowerCase());
@@ -262,7 +316,7 @@ export function AdminUsersTab() {
                             <MoreHorizontal className="w-4 h-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
+                        <DropdownMenuContent align="end" className="bg-popover">
                           <DropdownMenuItem onClick={() => {
                             setSelectedUserId(user.id);
                             setShowDetailModal(true);
@@ -270,7 +324,17 @@ export function AdminUsersTab() {
                             <Eye className="w-4 h-4 mr-2" />
                             Voir détails
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="text-destructive">Suspendre</DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem 
+                            className="text-destructive focus:text-destructive"
+                            onClick={() => {
+                              setUserToDelete(user);
+                              setShowDeleteDialog(true);
+                            }}
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Supprimer le compte
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
@@ -290,6 +354,18 @@ export function AdminUsersTab() {
           setSelectedUserId(null);
         }}
         onUpdate={fetchUsers}
+      />
+
+      <ConfirmDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title="Supprimer ce compte ?"
+        description={`Cette action est irréversible. Toutes les données de ${userToDelete?.full_name || 'cet utilisateur'} seront supprimées définitivement (favoris, avis, messages, etc.).`}
+        confirmText="Supprimer définitivement"
+        cancelText="Annuler"
+        onConfirm={handleDeleteUser}
+        loading={deleting}
+        variant="destructive"
       />
     </div>
   );

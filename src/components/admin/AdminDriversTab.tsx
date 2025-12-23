@@ -8,7 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { 
   Truck, Search, CheckCircle, XCircle, Eye, 
-  MoreHorizontal, FileText, Clock, Phone, MapPin, Car, Settings
+  MoreHorizontal, FileText, Clock, Phone, MapPin, Car, Settings, Trash2
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -22,10 +22,12 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DriverDetailModal } from "./DriverDetailModal";
 import { PaymentSettingsModal } from "./PaymentSettingsModal";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 interface Driver {
   id: string;
@@ -51,8 +53,10 @@ export function AdminDriversTab() {
   const [showValidationModal, setShowValidationModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [validationNotes, setValidationNotes] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     fetchDrivers();
@@ -142,6 +146,50 @@ export function AdminDriversTab() {
     } catch (error) {
       console.error("Error toggling driver:", error);
       toast.error("Erreur lors de la mise à jour");
+    }
+  };
+
+  const handleDeleteDriver = async () => {
+    if (!selectedDriver) return;
+    setDeleting(true);
+    
+    try {
+      // Delete related data
+      // Delete driver reviews
+      await supabase.from("driver_reviews").delete().eq("driver_id", selectedDriver.id);
+      
+      // Delete notifications
+      await supabase.from("notifications").delete().eq("user_id", selectedDriver.id);
+      
+      // Delete messages
+      await supabase.from("messages").delete().or(`sender_id.eq.${selectedDriver.id},receiver_id.eq.${selectedDriver.id}`);
+      
+      // Delete payment settings
+      await supabase.from("payment_settings").delete().eq("entity_id", selectedDriver.id);
+      
+      // Delete transactions
+      await supabase.from("transactions").delete().eq("entity_id", selectedDriver.id);
+      
+      // Delete user role
+      await supabase.from("user_roles").delete().eq("user_id", selectedDriver.id);
+      
+      // Delete profile
+      const { error } = await supabase
+        .from("profiles")
+        .delete()
+        .eq("id", selectedDriver.id);
+
+      if (error) throw error;
+      
+      toast.success(`Livreur "${selectedDriver.full_name || 'Sans nom'}" supprimé`);
+      setShowDeleteDialog(false);
+      setSelectedDriver(null);
+      fetchDrivers();
+    } catch (error) {
+      console.error("Error deleting driver:", error);
+      toast.error("Erreur lors de la suppression");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -312,7 +360,7 @@ export function AdminDriversTab() {
                           <MoreHorizontal className="w-4 h-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
+                      <DropdownMenuContent align="end" className="bg-popover">
                         <DropdownMenuItem onClick={() => {
                           setSelectedDriver(driver);
                           setValidationNotes(driver.validation_notes || "");
@@ -334,6 +382,17 @@ export function AdminDriversTab() {
                         }}>
                           <Settings className="w-4 h-4 mr-2" />
                           Config. paiement
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem 
+                          className="text-destructive focus:text-destructive"
+                          onClick={() => {
+                            setSelectedDriver(driver);
+                            setShowDeleteDialog(true);
+                          }}
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Supprimer
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -444,6 +503,18 @@ export function AdminDriversTab() {
           setShowPaymentModal(false);
           setSelectedDriver(null);
         }}
+      />
+
+      <ConfirmDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title="Supprimer ce livreur ?"
+        description={`Cette action est irréversible. Le compte de "${selectedDriver?.full_name || 'ce livreur'}" et toutes ses données seront supprimés définitivement.`}
+        confirmText="Supprimer définitivement"
+        cancelText="Annuler"
+        onConfirm={handleDeleteDriver}
+        loading={deleting}
+        variant="destructive"
       />
     </div>
   );
