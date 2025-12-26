@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { BottomNav } from "@/components/BottomNav";
 import { AddressCaptureModal } from "@/components/AddressCaptureModal";
 import { HomeHeader } from "@/components/HomeHeader";
-import { ServiceTypes } from "@/components/ServiceTypes";
 import { FoodCategories } from "@/components/FoodCategories";
 import { OrderAgainSection } from "@/components/OrderAgainSection";
 import { IntentionFilters } from "@/components/IntentionFilters";
@@ -20,6 +19,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { MarketingBanner } from "@/components/marketing/MarketingBanner";
 import { MarketingPopup } from "@/components/marketing/MarketingPopup";
 import { SponsoredRestaurants } from "@/components/marketing/SponsoredRestaurants";
+import { isRestaurantOpen, getNextOpenTime } from "@/hooks/useRestaurantAvailability";
 
 interface Restaurant {
   id: string;
@@ -30,6 +30,8 @@ interface Restaurant {
   delivery_time: string | null;
   delivery_fee: number;
   city: string | null;
+  isOpen?: boolean;
+  nextOpenTime?: string | null;
 }
 
 const Index = () => {
@@ -54,7 +56,7 @@ const Index = () => {
     const fetchData = async () => {
       let query = supabase
         .from("restaurants")
-        .select("id, name, image_url, rating, cuisine_type, delivery_time, delivery_fee, city")
+        .select("id, name, image_url, rating, cuisine_type, delivery_time, delivery_fee, city, business_hours")
         .eq("is_active", true)
         .order("rating", { ascending: false })
         .limit(6);
@@ -62,7 +64,15 @@ const Index = () => {
       if (city) query = query.eq("city", city);
 
       const { data } = await query;
-      if (data) setRestaurants(data);
+      if (data) {
+        // Add availability status to each restaurant
+        const restaurantsWithStatus = data.map((r: any) => ({
+          ...r,
+          isOpen: isRestaurantOpen(r.business_hours),
+          nextOpenTime: getNextOpenTime(r.business_hours),
+        }));
+        setRestaurants(restaurantsWithStatus);
+      }
       setLoading(false);
     };
 
@@ -84,11 +94,6 @@ const Index = () => {
         <section className="px-4 mt-4">
           <MarketingBanner />
         </section>
-
-        {/* Services (Quick Actions) */}
-        <div className="mt-6">
-          <ServiceTypes />
-        </div>
 
         {/* CTA Login for non-connected users */}
         {!isConnected && (
@@ -174,9 +179,15 @@ const Index = () => {
                       alt={r.name}
                       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />
-                    {/* Status indicator */}
+                    {/* Status indicator - open/closed */}
                     <div className="absolute top-2 left-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-primary inline-block" />
+                      <span className={`px-1.5 py-0.5 rounded-full text-[8px] font-bold ${
+                        r.isOpen !== false 
+                          ? "bg-success text-success-foreground" 
+                          : "bg-destructive text-destructive-foreground"
+                      }`}>
+                        {r.isOpen !== false ? "Ouvert" : "Fermé"}
+                      </span>
                     </div>
                     {hasAddress && (
                       <div className="absolute top-1.5 right-1.5" onClick={(e) => e.stopPropagation()}>

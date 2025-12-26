@@ -16,6 +16,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import FloatingActionButton from "@/components/FloatingActionButton";
 
 // Lazy loaded pages for code splitting
+const ServicesHome = lazy(() => import("./pages/ServicesHome"));
 const Index = lazy(() => import("./pages/Index"));
 const Welcome = lazy(() => import("./pages/Welcome"));
 const Restaurants = lazy(() => import("./pages/Restaurants"));
@@ -74,7 +75,8 @@ const App = () => (
                   <CityGate>
                     <Routes>
                       <Route path="/welcome" element={<Welcome />} />
-                      <Route path="/" element={<Index />} />
+                      <Route path="/" element={<ServicesHome />} />
+                      <Route path="/home" element={<Index />} />
                       {/* Auth routes - role specific */}
                       <Route path="/auth" element={<CustomerAuth />} />
                       <Route path="/auth/customer" element={<CustomerAuth />} />
