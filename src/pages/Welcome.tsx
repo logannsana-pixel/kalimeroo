@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { MapPin, Navigation, Loader2, ChevronRight, Utensils } from "lucide-react";
+import { MapPin, Navigation, Loader2, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
@@ -85,7 +85,7 @@ const Welcome = () => {
       setCoordinates({ latitude, longitude });
       setProgress(100);
 
-      // Detect city from coordinates (simple approximation for Cameroon)
+      // Detect city from coordinates
       const detected = detectCityFromCoords(latitude, longitude);
       setDetectedCity(detected);
       
@@ -152,14 +152,14 @@ const Welcome = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/10 flex flex-col">
-      {/* Header */}
+    <div className="min-h-screen bg-gradient-primary flex flex-col">
+      {/* Header with Kalimero branding */}
       <header className="p-6 flex items-center justify-center">
-        <div className="flex items-center gap-2">
-          <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
-            <Utensils className="w-6 h-6 text-primary-foreground" />
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-lg">
+            <span className="text-2xl">🍽️</span>
           </div>
-          <span className="text-2xl font-bold text-foreground">Kalyam</span>
+          <span className="text-3xl font-bold text-white drop-shadow-md">Kalimero</span>
         </div>
       </header>
 
@@ -168,16 +168,16 @@ const Welcome = () => {
         <div className="w-full max-w-md space-y-6">
           {/* Hero text */}
           <div className="text-center space-y-2">
-            <h1 className="text-2xl md:text-3xl font-bold text-foreground">
-              Bienvenue sur Kalyam
+            <h1 className="text-2xl md:text-3xl font-bold text-white drop-shadow-md">
+              Bienvenue sur Kalimero
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-white/90">
               Vos restaurants préférés, livrés chez vous
             </p>
           </div>
 
           {/* Card */}
-          <div className="bg-card rounded-2xl shadow-lg border p-6 space-y-5">
+          <div className="bg-white rounded-3xl shadow-xl p-6 space-y-5">
             {/* Loading state */}
             {step === "loading" && (
               <>
@@ -204,7 +204,7 @@ const Welcome = () => {
 
                 <Button
                   variant="ghost"
-                  className="w-full"
+                  className="w-full text-primary"
                   onClick={handleManualEntry}
                 >
                   Saisir ma ville manuellement →
@@ -225,18 +225,18 @@ const Welcome = () => {
                   </div>
                 </div>
 
-                <div className="p-4 bg-accent rounded-xl text-center">
+                <div className="p-4 bg-primary/10 rounded-xl text-center">
                   <p className="text-sm text-muted-foreground mb-1">Ville détectée</p>
-                  <p className="text-xl font-bold text-foreground">{detectedCity}</p>
+                  <p className="text-xl font-bold text-primary">{detectedCity}</p>
                 </div>
 
-                <Button className="w-full h-12 rounded-full" onClick={handleConfirmCity}>
+                <Button className="w-full h-12 rounded-full bg-gradient-primary hover:opacity-90" onClick={handleConfirmCity}>
                   Continuer avec {detectedCity}
                 </Button>
 
                 <Button
                   variant="ghost"
-                  className="w-full"
+                  className="w-full text-primary"
                   onClick={handleManualEntry}
                 >
                   Choisir une autre ville
@@ -258,10 +258,10 @@ const Welcome = () => {
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
-                  <Button variant="outline" className="h-11" onClick={handleRetryGPS}>
+                  <Button variant="outline" className="h-11 rounded-full" onClick={handleRetryGPS}>
                     🔄 Réessayer
                   </Button>
-                  <Button className="h-11" onClick={handleManualEntry}>
+                  <Button className="h-11 rounded-full bg-gradient-primary" onClick={handleManualEntry}>
                     Choisir →
                   </Button>
                 </div>
@@ -285,6 +285,7 @@ const Welcome = () => {
                   placeholder="Rechercher une ville..."
                   value={manualCity}
                   onChange={(e) => setManualCity(e.target.value)}
+                  className="rounded-xl"
                 />
 
                 <div className="space-y-1 max-h-48 overflow-y-auto">
@@ -292,7 +293,7 @@ const Welcome = () => {
                     <button
                       key={cityName}
                       onClick={() => handleSelectCity(cityName)}
-                      className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-accent transition-colors text-left group"
+                      className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-primary/10 transition-colors text-left group"
                     >
                       <div className="flex items-center gap-3">
                         <MapPin className="w-4 h-4 text-muted-foreground group-hover:text-primary" />
@@ -304,7 +305,7 @@ const Welcome = () => {
                   {filteredCities.length === 0 && manualCity.trim() && (
                     <Button
                       variant="outline"
-                      className="w-full"
+                      className="w-full rounded-full"
                       onClick={() => handleSelectCity(manualCity.trim())}
                     >
                       Utiliser "{manualCity}"
@@ -314,7 +315,7 @@ const Welcome = () => {
 
                 <Button
                   variant="ghost"
-                  className="w-full"
+                  className="w-full text-primary"
                   onClick={handleRetryGPS}
                 >
                   🔄 Réessayer le GPS
@@ -323,7 +324,7 @@ const Welcome = () => {
             )}
           </div>
 
-          <p className="text-center text-xs text-muted-foreground">
+          <p className="text-center text-xs text-white/80">
             Livraison disponible dans les principales villes du Congo
           </p>
         </div>

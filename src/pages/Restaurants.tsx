@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Sparkles } from "lucide-react";
 import { AddressCaptureModal } from "@/components/AddressCaptureModal";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
+import { isRestaurantOpen } from "@/hooks/useRestaurantAvailability";
 
 interface Restaurant {
   id: string;
@@ -61,7 +62,13 @@ export default function Restaurants() {
       const { data, error } = await query;
 
       if (error) throw error;
-      setRestaurants(data || []);
+      
+      // Add availability status
+      const restaurantsWithStatus = (data || []).map((r: any) => ({
+        ...r,
+        isOpen: isRestaurantOpen(r.business_hours),
+      }));
+      setRestaurants(restaurantsWithStatus);
     } catch (error) {
       console.error("Error fetching restaurants:", error);
     } finally {
@@ -176,6 +183,16 @@ export default function Restaurants() {
                   <Badge className="absolute top-2 left-2 z-10 bg-primary/90 text-primary-foreground text-[9px] px-1.5 py-0.5">
                     <Sparkles className="w-2.5 h-2.5 mr-0.5" />
                     Vedette
+                  </Badge>
+                )}
+                {/* Open/Closed status */}
+                {!restaurant.is_sponsored && (
+                  <Badge className={`absolute top-2 left-2 z-10 text-[9px] px-1.5 py-0.5 ${
+                    restaurant.isOpen !== false 
+                      ? "bg-success text-success-foreground" 
+                      : "bg-destructive text-destructive-foreground"
+                  }`}>
+                    {restaurant.isOpen !== false ? "Ouvert" : "Fermé"}
                   </Badge>
                 )}
                 <RestaurantCard
