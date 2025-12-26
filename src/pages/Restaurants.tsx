@@ -174,36 +174,35 @@ export default function Restaurants() {
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3">
-            {filteredRestaurants.map((restaurant: any) => (
-              <div key={restaurant.id} className="relative">
-                <div className="absolute top-2 right-2 z-10">
-                  <FavoritesButton restaurantId={restaurant.id} />
+            {filteredRestaurants.map((restaurant: any) => {
+              const isClosed = restaurant.isOpen === false;
+              return (
+                <div key={restaurant.id} className={`relative ${isClosed ? "grayscale opacity-60" : ""}`}>
+                  <div className="absolute top-2 right-2 z-10">
+                    <FavoritesButton restaurantId={restaurant.id} />
+                  </div>
+                  {restaurant.is_sponsored && (
+                    <Badge className="absolute top-2 left-2 z-10 bg-primary/90 text-primary-foreground text-[9px] px-1.5 py-0.5">
+                      <Sparkles className="w-2.5 h-2.5 mr-0.5" />
+                      Vedette
+                    </Badge>
+                  )}
+                  <RestaurantCard
+                    imageUrl={restaurant.image_url || "/placeholder.svg"}
+                    name={restaurant.name}
+                    rating={restaurant.rating ? Math.round(restaurant.rating * 10) : undefined}
+                    badge={restaurant.city || undefined}
+                    onClick={() => navigate(`/restaurant/${restaurant.id}`)}
+                  />
+                  {/* Closed overlay */}
+                  {isClosed && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-background/40 backdrop-blur-[1px] rounded-xl">
+                      <span className="text-xs font-semibold text-foreground">Fermé</span>
+                    </div>
+                  )}
                 </div>
-                {restaurant.is_sponsored && (
-                  <Badge className="absolute top-2 left-2 z-10 bg-primary/90 text-primary-foreground text-[9px] px-1.5 py-0.5">
-                    <Sparkles className="w-2.5 h-2.5 mr-0.5" />
-                    Vedette
-                  </Badge>
-                )}
-                {/* Open/Closed status */}
-                {!restaurant.is_sponsored && (
-                  <Badge className={`absolute top-2 left-2 z-10 text-[9px] px-1.5 py-0.5 ${
-                    restaurant.isOpen !== false 
-                      ? "bg-success text-success-foreground" 
-                      : "bg-destructive text-destructive-foreground"
-                  }`}>
-                    {restaurant.isOpen !== false ? "Ouvert" : "Fermé"}
-                  </Badge>
-                )}
-                <RestaurantCard
-                  imageUrl={restaurant.image_url || "/placeholder.svg"}
-                  name={restaurant.name}
-                  rating={restaurant.rating ? Math.round(restaurant.rating * 10) : undefined}
-                  badge={restaurant.city || undefined}
-                  onClick={() => navigate(`/restaurant/${restaurant.id}`)}
-                />
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </main>

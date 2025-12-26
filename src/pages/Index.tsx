@@ -167,56 +167,58 @@ const Index = () => {
             </Card>
           ) : (
             <div className="grid grid-cols-2 gap-3">
-              {restaurants.map((r) => (
-                <Card
-                  key={r.id}
-                  className="group border-none rounded-xl overflow-hidden bg-card hover:bg-card/80 active:scale-[0.98] transition-all duration-200 cursor-pointer"
-                  onClick={() => navigate(`/restaurant/${r.id}`)}
-                >
-                  <div className="relative h-24">
-                    <LazyImage
-                      src={r.image_url || "/placeholder.svg"}
-                      alt={r.name}
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                    {/* Status indicator - open/closed */}
-                    <div className="absolute top-2 left-2">
-                      <span className={`px-1.5 py-0.5 rounded-full text-[8px] font-bold ${
-                        r.isOpen !== false 
-                          ? "bg-success text-success-foreground" 
-                          : "bg-destructive text-destructive-foreground"
-                      }`}>
-                        {r.isOpen !== false ? "Ouvert" : "Fermé"}
-                      </span>
+              {restaurants.map((r) => {
+                const isClosed = r.isOpen === false;
+                return (
+                  <Card
+                    key={r.id}
+                    className={`group border-none rounded-xl overflow-hidden bg-card hover:bg-card/80 active:scale-[0.98] transition-all duration-200 cursor-pointer relative ${
+                      isClosed ? "grayscale opacity-60" : ""
+                    }`}
+                    onClick={() => navigate(`/restaurant/${r.id}`)}
+                  >
+                    <div className="relative h-24">
+                      <LazyImage
+                        src={r.image_url || "/placeholder.svg"}
+                        alt={r.name}
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                      {hasAddress && (
+                        <div className="absolute top-1.5 right-1.5" onClick={(e) => e.stopPropagation()}>
+                          <FavoritesButton restaurantId={r.id} />
+                        </div>
+                      )}
                     </div>
-                    {hasAddress && (
-                      <div className="absolute top-1.5 right-1.5" onClick={(e) => e.stopPropagation()}>
-                        <FavoritesButton restaurantId={r.id} />
+
+                    <CardContent className="p-2.5 space-y-0.5">
+                      <div className="flex items-start justify-between gap-1">
+                        <h3 className="text-xs font-semibold text-primary line-clamp-1">{r.name}</h3>
+                        <span className="text-[10px] font-medium text-foreground whitespace-nowrap">
+                          {r.delivery_fee ? `${r.delivery_fee.toLocaleString()} FC` : "Gratuit"}
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-muted-foreground line-clamp-1">{r.cuisine_type}</p>
+                      <div className="flex items-center gap-2 text-[10px] pt-0.5">
+                        <span className="flex items-center gap-0.5 font-medium text-foreground">
+                          <Star className="w-2.5 h-2.5 fill-primary text-primary" />
+                          {r.rating?.toFixed(1) || "4.5"}
+                        </span>
+                        <span className="flex items-center gap-0.5 text-muted-foreground">
+                          <Clock className="w-2.5 h-2.5" />
+                          {r.delivery_time || "20-30"} min
+                        </span>
+                      </div>
+                    </CardContent>
+
+                    {/* Closed overlay */}
+                    {isClosed && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-background/40 backdrop-blur-[1px]">
+                        <span className="text-xs font-semibold text-foreground">Fermé</span>
                       </div>
                     )}
-                  </div>
-
-                  <CardContent className="p-2.5 space-y-0.5">
-                    <div className="flex items-start justify-between gap-1">
-                      <h3 className="text-xs font-semibold text-primary line-clamp-1">{r.name}</h3>
-                      <span className="text-[10px] font-medium text-foreground whitespace-nowrap">
-                        {r.delivery_fee ? `${r.delivery_fee.toLocaleString()} FC` : "Gratuit"}
-                      </span>
-                    </div>
-                    <p className="text-[10px] text-muted-foreground line-clamp-1">{r.cuisine_type}</p>
-                    <div className="flex items-center gap-2 text-[10px] pt-0.5">
-                      <span className="flex items-center gap-0.5 font-medium text-foreground">
-                        <Star className="w-2.5 h-2.5 fill-primary text-primary" />
-                        {r.rating?.toFixed(1) || "4.5"}
-                      </span>
-                      <span className="flex items-center gap-0.5 text-muted-foreground">
-                        <Clock className="w-2.5 h-2.5" />
-                        {r.delivery_time || "20-30"} min
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                  </Card>
+                );
+              })}
             </div>
           )}
         </section>
