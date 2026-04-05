@@ -46,7 +46,7 @@ export function ChatInterface({
   const [unreadCount, setUnreadCount] = useState(0);
   const [isTyping, setIsTyping] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout>();
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
   const fetchMessages = useCallback(async () => {
     if (!user) return;
