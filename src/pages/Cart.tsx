@@ -99,8 +99,8 @@ export default function Cart() {
   }
 
   const subtotal = getCartTotal();
-  const deliveryFee = 1500; // Placeholder, will be calculated at checkout
-  const total = subtotal + deliveryFee;
+  const deliveryFee = null;
+  const total = subtotal;
 
   return (
     <div className="min-h-screen flex flex-col pb-40 md:pb-0 bg-background">
@@ -205,7 +205,7 @@ export default function Cart() {
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Frais de livraison</span>
-                <span>{deliveryFee.toFixed(0)} FCFA</span>
+                <span className="italic text-muted-foreground text-xs">Calculés au checkout</span>
               </div>
               <Separator className="my-2" />
               <div className="flex justify-between">

@@ -2,8 +2,8 @@ import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { CartProvider } from "@/hooks/useCart";
 import { LocationProvider } from "@/contexts/LocationContext";
@@ -14,6 +14,7 @@ import { NetworkStatus } from "@/components/NetworkStatus";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import FloatingActionButton from "@/components/FloatingActionButton";
+import { queryClient } from "@/lib/queryClient";
 
 // Lazy loaded pages for code splitting
 const ServicesHome = lazy(() => import("./pages/ServicesHome"));
@@ -41,6 +42,10 @@ const RestaurantAuth = lazy(() => import("./pages/auth/RestaurantAuth"));
 const DeliveryAuth = lazy(() => import("./pages/auth/DeliveryAuth"));
 const AdminAuth = lazy(() => import("./pages/auth/AdminAuth"));
 
+// Blog pages
+const BlogList = lazy(() => import("./pages/blog/BlogList"));
+const BlogArticle = lazy(() => import("./pages/blog/BlogArticle"));
+
 // Page loading fallback
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center">
@@ -48,15 +53,23 @@ const PageLoader = () => (
       <Skeleton className="h-8 w-3/4 mx-auto" />
       <Skeleton className="h-4 w-1/2 mx-auto" />
       <div className="space-y-2">
-        <Skeleton className="h-32 w-full rounded-xl" />
-        <Skeleton className="h-32 w-full rounded-xl" />
-        <Skeleton className="h-32 w-full rounded-xl" />
+        <Skeleton className="h-32 w-full rounded-2xl" />
+        <Skeleton className="h-32 w-full rounded-2xl" />
+        <Skeleton className="h-32 w-full rounded-2xl" />
       </div>
     </div>
   </div>
 );
 
-const queryClient = new QueryClient();
+const ConditionalFAB = () => {
+  const location = useLocation();
+  const hiddenPaths = ["/welcome", "/", "/auth", "/admin-dashboard", "/restaurant-dashboard", "/delivery-dashboard"];
+  const shouldHide = hiddenPaths.some(p => 
+    p === "/" ? location.pathname === "/" : location.pathname.startsWith(p)
+  );
+  if (shouldHide) return null;
+  return <FloatingActionButton />;
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -69,7 +82,7 @@ const App = () => (
             <CartProvider>
               <NetworkStatus />
               <AlertEngine />
-              <FloatingActionButton />
+              <ConditionalFAB />
               <ErrorBoundary>
                 <Suspense fallback={<PageLoader />}>
                   <CityGate>
@@ -77,7 +90,7 @@ const App = () => (
                       <Route path="/welcome" element={<Welcome />} />
                       <Route path="/" element={<ServicesHome />} />
                       <Route path="/home" element={<Index />} />
-                      {/* Auth routes - role specific */}
+                      {/* Auth routes */}
                       <Route path="/auth" element={<CustomerAuth />} />
                       <Route path="/auth/customer" element={<CustomerAuth />} />
                       <Route path="/auth/restaurant" element={<RestaurantAuth />} />
@@ -89,6 +102,8 @@ const App = () => (
                       <Route path="/enable-alerts" element={<EnableAlerts />} />
                       <Route path="/dev/alerts" element={<AlertPlayground />} />
                       <Route path="/help" element={<Help />} />
+                      <Route path="/blog" element={<BlogList />} />
+                      <Route path="/blog/:slug" element={<BlogArticle />} />
                       <Route 
                         path="/affiliate" 
                         element={
@@ -161,7 +176,6 @@ const App = () => (
                           </ProtectedRoute>
                         } 
                       />
-                      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </CityGate>
