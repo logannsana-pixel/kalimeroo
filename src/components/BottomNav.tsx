@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, User, ClipboardList, ShoppingCart, Search, UtensilsCrossed } from "lucide-react";
+import { Home, Search, ClipboardList, ShoppingCart, User, LogIn, LayoutDashboard } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
 
@@ -10,9 +10,12 @@ export const BottomNav = () => {
   const cartCount = getCartCount();
 
   const isActive = (path: string) => {
-    if (path === "/") return location.pathname === "/";
+    if (path === "/" || path === "/home") return location.pathname === path;
     return location.pathname.startsWith(path);
   };
+
+  // Hide on admin dashboard
+  if (userRole === "admin") return null;
 
   const NavItem = ({
     to,
@@ -28,75 +31,89 @@ export const BottomNav = () => {
     const active = isActive(to);
 
     return (
-      <Link 
-        to={to} 
-        className={`flex flex-col items-center justify-center gap-0.5 min-w-[56px] py-2 transition-all duration-200 ${
-          active ? "text-primary" : "text-muted-foreground"
-        }`}
+      <Link
+        to={to}
+        className={`flex flex-col items-center justify-center gap-0.5 min-w-0 flex-1 py-2 transition-all duration-200 active:scale-95`}
       >
         <div className="relative">
-          <Icon 
+          <Icon
             className={`h-5 w-5 transition-colors ${
               active ? "text-primary" : "text-muted-foreground"
-            }`} 
-            strokeWidth={active ? 2.5 : 2} 
+            }`}
+            strokeWidth={active ? 2.5 : 1.8}
           />
-          {badge && badge > 0 && (
-            <span className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center font-bold">
+          {badge != null && badge > 0 && (
+            <span className="absolute -top-1.5 -right-2 h-4 min-w-[16px] rounded-full bg-primary text-primary-foreground text-[11px] flex items-center justify-center font-bold px-1">
               {badge > 9 ? "9+" : badge}
             </span>
           )}
         </div>
-        <span className={`text-[10px] font-medium ${active ? "text-primary" : "text-muted-foreground"}`}>
+        <span
+          className={`text-[11px] font-medium font-body ${
+            active ? "text-primary" : "text-muted-foreground"
+          }`}
+        >
           {label}
         </span>
+        {active && (
+          <div className="w-5 h-[3px] rounded-full bg-primary mt-0.5" />
+        )}
       </Link>
     );
   };
 
   const NavContainer = ({ children }: { children: React.ReactNode }) => (
-    <nav 
+    <nav
       data-testid="bottom-nav"
-      className="md:hidden fixed bottom-4 left-4 right-4 z-50 bg-card/90 backdrop-blur-xl border border-border/20 rounded-2xl shadow-lg safe-area-bottom"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border"
+      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <div className="flex items-center justify-around px-2 py-2">
+      <div className="flex items-center justify-around h-18 px-2">
         {children}
       </div>
     </nav>
   );
 
-  // Non connecté
-  if (!user) {
+  // Delivery driver
+  if (userRole === "delivery_driver") {
     return (
       <NavContainer>
-        <NavItem to="/" icon={Home} label="Accueil" />
-        <NavItem to="/restaurants" icon={UtensilsCrossed} label="Restos" />
-        <NavItem to="/cart" icon={ShoppingCart} label="Panier" badge={cartCount} />
-        <NavItem to="/auth" icon={User} label="Connexion" />
-      </NavContainer>
-    );
-  }
-
-  // Client connecté
-  if (userRole === "customer") {
-    return (
-      <NavContainer>
-        <NavItem to="/" icon={Home} label="Accueil" />
-        <NavItem to="/restaurants" icon={UtensilsCrossed} label="Restos" />
-        <NavItem to="/cart" icon={ShoppingCart} label="Panier" badge={cartCount} />
+        <NavItem to="/delivery-dashboard" icon={LayoutDashboard} label="Dashboard" />
         <NavItem to="/orders" icon={ClipboardList} label="Commandes" />
         <NavItem to="/profile" icon={User} label="Profil" />
       </NavContainer>
     );
   }
 
-  // Autres rôles
+  // Restaurant owner
+  if (userRole === "restaurant_owner") {
+    return (
+      <NavContainer>
+        <NavItem to="/restaurant-dashboard" icon={LayoutDashboard} label="Dashboard" />
+        <NavItem to="/profile" icon={User} label="Profil" />
+      </NavContainer>
+    );
+  }
+
+  // Not logged in
+  if (!user) {
+    return (
+      <NavContainer>
+        <NavItem to="/" icon={Home} label="Accueil" />
+        <NavItem to="/restaurants" icon={Search} label="Explorer" />
+        <NavItem to="/auth" icon={LogIn} label="Connexion" />
+      </NavContainer>
+    );
+  }
+
+  // Customer (default)
   return (
     <NavContainer>
-      <NavItem to="/" icon={Home} label="Accueil" />
-      <NavItem to="/restaurants" icon={UtensilsCrossed} label="Restos" />
+      <NavItem to="/home" icon={Home} label="Accueil" />
+      <NavItem to="/restaurants" icon={Search} label="Rechercher" />
       <NavItem to="/orders" icon={ClipboardList} label="Commandes" />
       <NavItem to="/profile" icon={User} label="Profil" />
+      <NavItem to="/cart" icon={ShoppingCart} label="Panier" badge={cartCount} />
     </NavContainer>
   );
 };

@@ -19,9 +19,20 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Poppins", "Manrope", "system-ui", "sans-serif"],
-        display: ["Poppins", "sans-serif"],
-        body: ["Manrope", "sans-serif"],
+        sans: ["'Plus Jakarta Sans'", "Inter", "system-ui", "sans-serif"],
+        display: ["'Plus Jakarta Sans'", "sans-serif"],
+        body: ["Inter", "sans-serif"],
+      },
+      fontSize: {
+        "2xs": "11px",
+        xs: "13px",
+        sm: "15px",
+        base: "17px",
+        lg: "20px",
+        xl: "24px",
+        "2xl": "28px",
+        "3xl": "34px",
+        "4xl": "42px",
       },
       colors: {
         border: "hsl(var(--border))",
@@ -32,6 +43,8 @@ export default {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
+          dark: "hsl(var(--primary-dark))",
+          light: "hsl(var(--primary-light))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -65,21 +78,35 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        surface: {
+          DEFAULT: "hsl(var(--surface))",
+          2: "hsl(var(--surface-2))",
+          3: "hsl(var(--surface-3))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 0.5rem)",
-        sm: "calc(var(--radius) - 1rem)",
-        "2xl": "1.5rem",
-        "3xl": "2rem",
-        "4xl": "2.5rem",
-        "pill": "9999px",
+        sm: "8px",
+        "2xl": "16px",
+        "3xl": "24px",
+        "4xl": "32px",
+        pill: "9999px",
       },
       boxShadow: {
+        card: "0 2px 12px rgba(0,0,0,0.08)",
+        elevated: "0 8px 32px rgba(0,0,0,0.12)",
+        modal: "0 16px 64px rgba(0,0,0,0.16)",
         soft: "var(--shadow-soft)",
         hover: "var(--shadow-hover)",
         float: "var(--shadow-float)",
         glow: "var(--shadow-glow)",
+      },
+      spacing: {
+        "4.5": "18px",
+        "13": "52px",
+        "15": "60px",
+        "18": "72px",
       },
       keyframes: {
         "accordion-down": {
@@ -106,14 +133,18 @@ export default {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-10px)" },
         },
-        "float": {
+        float: {
           "0%, 100%": { transform: "translateY(0) rotate(0deg)" },
           "50%": { transform: "translateY(-15px) rotate(2deg)" },
         },
-        "wiggle": {
+        wiggle: {
           "0%, 100%": { transform: "rotate(0deg)" },
           "25%": { transform: "rotate(-3deg)" },
           "75%": { transform: "rotate(3deg)" },
+        },
+        "pulse-badge": {
+          "0%, 100%": { transform: "scale(1)" },
+          "50%": { transform: "scale(1.2)" },
         },
       },
       animation: {
@@ -123,8 +154,9 @@ export default {
         "slide-up": "slide-up 0.6s ease-out forwards",
         "scale-in": "scale-in 0.3s ease-out forwards",
         "bounce-soft": "bounce-soft 2s ease-in-out infinite",
-        "float": "float 3s ease-in-out infinite",
-        "wiggle": "wiggle 0.5s ease-in-out",
+        float: "float 3s ease-in-out infinite",
+        wiggle: "wiggle 0.5s ease-in-out",
+        "pulse-badge": "pulse-badge 0.3s ease-out",
       },
     },
   },

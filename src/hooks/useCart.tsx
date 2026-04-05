@@ -24,8 +24,8 @@ export interface CartContextType {
   updateQuantity: (cartItemId: string, quantity: number) => Promise<void>;
   removeFromCart: (cartItemId: string) => Promise<void>;
   clearCart: () => Promise<void>;
-  getCartTotal: () => number | undefined;
-  getCartCount: () => number | undefined;
+  getCartTotal: () => number;
+  getCartCount: () => number;
   refreshCart: () => Promise<void>;
 }
 
@@ -36,8 +36,8 @@ const CartContext = createContext<CartContextType>({
   updateQuantity: async () => {},
   removeFromCart: async () => {},
   clearCart: async () => {},
-  getCartTotal: () => undefined,
-  getCartCount: () => undefined,
+  getCartTotal: () => 0,
+  getCartCount: () => 0,
   refreshCart: async () => {},
 });
 
@@ -189,15 +189,15 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  /** Total price of cart or undefined if empty */
-  const getCartTotal = () => {
-    if (!cartItems.length) return undefined;
-    return cartItems.reduce((total, item) => total + Number(item.menu_items.price) * item.quantity, 0);
+  /** Total price of cart, always returns a number */
+  const getCartTotal = (): number => {
+    if (!cartItems.length) return 0;
+    return cartItems.reduce((total, item) => total + (Number(item.menu_items?.price) || 0) * item.quantity, 0);
   };
 
-  /** Total quantity of items or undefined if empty */
-  const getCartCount = () => {
-    if (!cartItems.length) return undefined;
+  /** Total quantity of items, always returns a number */
+  const getCartCount = (): number => {
+    if (!cartItems.length) return 0;
     return cartItems.reduce((count, item) => count + item.quantity, 0);
   };
 
