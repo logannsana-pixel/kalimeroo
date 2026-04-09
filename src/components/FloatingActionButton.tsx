@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 
 const HIDDEN_PAGES = ['/admin-dashboard', '/restaurant-dashboard', '/delivery-dashboard'];
 const RATE_LIMIT_KEY = 'kalimero_last_ticket';
-const RATE_LIMIT_MS = 30 * 60 * 1000; // 30 minutes
+const RATE_LIMIT_MS = 30 * 60 * 1000;
 
 const FloatingActionButton = () => {
   const location = useLocation();
@@ -24,6 +24,12 @@ const FloatingActionButton = () => {
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  useEffect(() => {
+    const handleOpenChat = () => setIsChatOpen(true);
+    window.addEventListener('openSupportChat', handleOpenChat);
+    return () => window.removeEventListener('openSupportChat', handleOpenChat);
+  }, []);
+
   const cartCount = getCartCount();
   const shouldHide = HIDDEN_PAGES.some(page => location.pathname.startsWith(page));
   if (shouldHide) return null;
@@ -33,18 +39,15 @@ const FloatingActionButton = () => {
 
   const handleSubmitTicket = async () => {
     if (!subject.trim() || !message.trim()) { toast.error('Veuillez remplir tous les champs'); return; }
-
-    // Rate limiting
     const lastTicket = localStorage.getItem(RATE_LIMIT_KEY);
     if (lastTicket) {
       const elapsed = Date.now() - parseInt(lastTicket);
       if (elapsed < RATE_LIMIT_MS) {
         const remaining = Math.ceil((RATE_LIMIT_MS - elapsed) / 60000);
-        toast.error(`Vous avez déjà soumis un ticket récemment. Réessayez dans ${remaining} minute${remaining > 1 ? 's' : ''}`);
+        toast.error(`Réessayez dans ${remaining} min`);
         return;
       }
     }
-
     setIsSubmitting(true);
     try {
       const { error } = await supabase.from('support_tickets').insert({
@@ -59,18 +62,12 @@ const FloatingActionButton = () => {
     finally { setIsSubmitting(false); }
   };
 
-  useEffect(() => {
-    const handleOpenChat = () => setIsChatOpen(true);
-    window.addEventListener('openSupportChat', handleOpenChat);
-    return () => window.removeEventListener('openSupportChat', handleOpenChat);
-  }, []);
-
   return (
     <>
       <div className="fixed bottom-20 right-4 z-50 flex flex-col items-end gap-2">
         {showCart && !isChatOpen && (
           <button onClick={() => navigate('/cart')}
-            className={cn("w-12 h-12 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center shadow-md hover:shadow-lg transition-all animate-in slide-in-from-right-2")}>
+            className={cn("w-12 h-12 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center shadow-md hover:shadow-lg transition-all animate-in slide-in-from-right-2 relative")}>
             <ShoppingBag className="h-5 w-5" />
             <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center font-bold animate-pulse-badge">
               {cartCount}
@@ -78,7 +75,7 @@ const FloatingActionButton = () => {
           </button>
         )}
         <button onClick={() => setIsChatOpen(!isChatOpen)}
-          className={cn("w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-md hover:shadow-lg transition-all")}>
+          className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-md hover:shadow-lg transition-all">
           {isChatOpen ? <X className="w-5 h-5" /> : <MessageCircle className="w-5 h-5" />}
         </button>
       </div>

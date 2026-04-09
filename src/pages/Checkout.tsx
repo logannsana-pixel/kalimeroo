@@ -106,7 +106,10 @@ export default function Checkout() {
       if (orderError) throw orderError;
 
       if (promoCodeId) {
-        await supabase.rpc('use_promo_code', { code_text: '', user_uuid: user!.id }).catch(() => {});
+        try {
+          const { data: promo } = await supabase.from("promo_codes").select("uses_count").eq("id", promoCodeId).single();
+          if (promo) await supabase.from("promo_codes").update({ uses_count: (promo.uses_count || 0) + 1 }).eq("id", promoCodeId);
+        } catch {}
       }
 
       const orderItems = cartItems.map(item => ({
