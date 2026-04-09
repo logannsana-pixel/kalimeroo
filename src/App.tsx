@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { AnimatePresence } from "framer-motion";
 import { AuthProvider } from "@/hooks/useAuth";
 import { CartProvider } from "@/hooks/useCart";
 import { LocationProvider } from "@/contexts/LocationContext";
@@ -16,10 +17,10 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import FloatingActionButton from "@/components/FloatingActionButton";
 import { queryClient } from "@/lib/queryClient";
 
-// Lazy loaded pages for code splitting
 const ServicesHome = lazy(() => import("./pages/ServicesHome"));
 const Index = lazy(() => import("./pages/Index"));
 const Welcome = lazy(() => import("./pages/Welcome"));
+const Onboarding = lazy(() => import("./pages/Onboarding"));
 const Restaurants = lazy(() => import("./pages/Restaurants"));
 const RestaurantDetail = lazy(() => import("./pages/RestaurantDetail"));
 const Cart = lazy(() => import("./pages/Cart"));
@@ -35,25 +36,19 @@ const AlertPlayground = lazy(() => import("./pages/AlertPlayground"));
 const Affiliate = lazy(() => import("./pages/Affiliate"));
 const Help = lazy(() => import("./pages/Help"));
 const NotFound = lazy(() => import("./pages/NotFound"));
-
-// Auth pages
 const CustomerAuth = lazy(() => import("./pages/auth/CustomerAuth"));
 const RestaurantAuth = lazy(() => import("./pages/auth/RestaurantAuth"));
 const DeliveryAuth = lazy(() => import("./pages/auth/DeliveryAuth"));
 const AdminAuth = lazy(() => import("./pages/auth/AdminAuth"));
-
-// Blog pages
 const BlogList = lazy(() => import("./pages/blog/BlogList"));
 const BlogArticle = lazy(() => import("./pages/blog/BlogArticle"));
 
-// Page loading fallback
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center">
     <div className="space-y-4 w-full max-w-md p-4">
       <Skeleton className="h-8 w-3/4 mx-auto" />
       <Skeleton className="h-4 w-1/2 mx-auto" />
       <div className="space-y-2">
-        <Skeleton className="h-32 w-full rounded-2xl" />
         <Skeleton className="h-32 w-full rounded-2xl" />
         <Skeleton className="h-32 w-full rounded-2xl" />
       </div>
@@ -63,12 +58,48 @@ const PageLoader = () => (
 
 const ConditionalFAB = () => {
   const location = useLocation();
-  const hiddenPaths = ["/welcome", "/", "/auth", "/admin-dashboard", "/restaurant-dashboard", "/delivery-dashboard"];
-  const shouldHide = hiddenPaths.some(p => 
+  const hiddenPaths = ["/welcome", "/onboarding", "/", "/auth", "/admin-dashboard", "/restaurant-dashboard", "/delivery-dashboard"];
+  const shouldHide = hiddenPaths.some(p =>
     p === "/" ? location.pathname === "/" : location.pathname.startsWith(p)
   );
   if (shouldHide) return null;
   return <FloatingActionButton />;
+};
+
+const AnimatedRoutes = () => {
+  const location = useLocation();
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/welcome" element={<Welcome />} />
+        <Route path="/onboarding" element={<Onboarding />} />
+        <Route path="/" element={<ServicesHome />} />
+        <Route path="/home" element={<Index />} />
+        <Route path="/auth" element={<CustomerAuth />} />
+        <Route path="/auth/customer" element={<CustomerAuth />} />
+        <Route path="/auth/restaurant" element={<RestaurantAuth />} />
+        <Route path="/auth/delivery" element={<DeliveryAuth />} />
+        <Route path="/auth/admin" element={<AdminAuth />} />
+        <Route path="/restaurants" element={<Restaurants />} />
+        <Route path="/restaurant/:id" element={<RestaurantDetail />} />
+        <Route path="/enable-alerts" element={<EnableAlerts />} />
+        <Route path="/dev/alerts" element={<AlertPlayground />} />
+        <Route path="/help" element={<Help />} />
+        <Route path="/blog" element={<BlogList />} />
+        <Route path="/blog/:slug" element={<BlogArticle />} />
+        <Route path="/affiliate" element={<ProtectedRoute allowedRoles={["customer"]}><Affiliate /></ProtectedRoute>} />
+        <Route path="/cart" element={<ProtectedRoute allowedRoles={["customer"]}><Cart /></ProtectedRoute>} />
+        <Route path="/checkout" element={<ProtectedRoute allowedRoles={["customer"]}><Checkout /></ProtectedRoute>} />
+        <Route path="/orders" element={<ProtectedRoute allowedRoles={["customer"]}><Orders /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/customer-dashboard" element={<ProtectedRoute allowedRoles={["customer"]}><CustomerDashboard /></ProtectedRoute>} />
+        <Route path="/restaurant-dashboard" element={<ProtectedRoute allowedRoles={["restaurant_owner"]}><RestaurantDashboard /></ProtectedRoute>} />
+        <Route path="/delivery-dashboard" element={<ProtectedRoute allowedRoles={["delivery_driver"]}><DeliveryDashboard /></ProtectedRoute>} />
+        <Route path="/admin-dashboard" element={<ProtectedRoute allowedRoles={["admin"]}><AdminDashboard /></ProtectedRoute>} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </AnimatePresence>
+  );
 };
 
 const App = () => (
@@ -86,98 +117,7 @@ const App = () => (
               <ErrorBoundary>
                 <Suspense fallback={<PageLoader />}>
                   <CityGate>
-                    <Routes>
-                      <Route path="/welcome" element={<Welcome />} />
-                      <Route path="/" element={<ServicesHome />} />
-                      <Route path="/home" element={<Index />} />
-                      {/* Auth routes */}
-                      <Route path="/auth" element={<CustomerAuth />} />
-                      <Route path="/auth/customer" element={<CustomerAuth />} />
-                      <Route path="/auth/restaurant" element={<RestaurantAuth />} />
-                      <Route path="/auth/delivery" element={<DeliveryAuth />} />
-                      <Route path="/auth/admin" element={<AdminAuth />} />
-                      
-                      <Route path="/restaurants" element={<Restaurants />} />
-                      <Route path="/restaurant/:id" element={<RestaurantDetail />} />
-                      <Route path="/enable-alerts" element={<EnableAlerts />} />
-                      <Route path="/dev/alerts" element={<AlertPlayground />} />
-                      <Route path="/help" element={<Help />} />
-                      <Route path="/blog" element={<BlogList />} />
-                      <Route path="/blog/:slug" element={<BlogArticle />} />
-                      <Route 
-                        path="/affiliate" 
-                        element={
-                          <ProtectedRoute allowedRoles={["customer"]}>
-                            <Affiliate />
-                          </ProtectedRoute>
-                        } 
-                      />
-                      <Route 
-                        path="/cart" 
-                        element={
-                          <ProtectedRoute allowedRoles={["customer"]}>
-                            <Cart />
-                          </ProtectedRoute>
-                        } 
-                      />
-                      <Route 
-                        path="/checkout" 
-                        element={
-                          <ProtectedRoute allowedRoles={["customer"]}>
-                            <Checkout />
-                          </ProtectedRoute>
-                        } 
-                      />
-                      <Route 
-                        path="/orders" 
-                        element={
-                          <ProtectedRoute allowedRoles={["customer"]}>
-                            <Orders />
-                          </ProtectedRoute>
-                        } 
-                      />
-                      <Route 
-                        path="/profile" 
-                        element={
-                          <ProtectedRoute>
-                            <Profile />
-                          </ProtectedRoute>
-                        } 
-                      />
-                      <Route 
-                        path="/customer-dashboard" 
-                        element={
-                          <ProtectedRoute allowedRoles={["customer"]}>
-                            <CustomerDashboard />
-                          </ProtectedRoute>
-                        } 
-                      />
-                      <Route 
-                        path="/restaurant-dashboard"
-                        element={
-                          <ProtectedRoute allowedRoles={["restaurant_owner"]}>
-                            <RestaurantDashboard />
-                          </ProtectedRoute>
-                        } 
-                      />
-                      <Route 
-                        path="/delivery-dashboard" 
-                        element={
-                          <ProtectedRoute allowedRoles={["delivery_driver"]}>
-                            <DeliveryDashboard />
-                          </ProtectedRoute>
-                        } 
-                      />
-                      <Route 
-                        path="/admin-dashboard" 
-                        element={
-                          <ProtectedRoute allowedRoles={["admin"]}>
-                            <AdminDashboard />
-                          </ProtectedRoute>
-                        } 
-                      />
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
+                    <AnimatedRoutes />
                   </CityGate>
                 </Suspense>
               </ErrorBoundary>

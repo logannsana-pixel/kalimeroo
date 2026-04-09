@@ -10,164 +10,89 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
-// Pages where FAB should NOT appear (isolated dashboards)
 const HIDDEN_PAGES = ['/admin-dashboard', '/restaurant-dashboard', '/delivery-dashboard'];
+const RATE_LIMIT_KEY = 'kalimero_last_ticket';
+const RATE_LIMIT_MS = 30 * 60 * 1000;
 
 const FloatingActionButton = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, userRole } = useAuth();
   const { getCartCount } = useCart();
-  
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const cartCount = getCartCount();
-  
-  // Hide on dashboard pages
-  const shouldHide = HIDDEN_PAGES.some(page => location.pathname.startsWith(page));
-  if (shouldHide) return null;
-
-  // Show cart only on shopping pages for customers
-  const isShoppingPage = ['/restaurants', '/restaurant'].some(page => location.pathname.startsWith(page));
-  const showCart = user && userRole === 'customer' && isShoppingPage && cartCount > 0;
-
-  const handleSubmitTicket = async () => {
-    if (!subject.trim() || !message.trim()) {
-      toast.error('Veuillez remplir tous les champs');
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      const userType = userRole || 'visitor';
-      
-      const { error } = await supabase
-        .from('support_tickets')
-        .insert({
-          user_id: user?.id || null,
-          subject: subject.trim(),
-          description: message.trim(),
-          user_type: userType,
-          category: 'general',
-          priority: 'medium'
-        });
-
-      if (error) throw error;
-
-      toast.success('Message envoyé !');
-      setSubject('');
-      setMessage('');
-      setIsChatOpen(false);
-    } catch (error) {
-      console.error('Error creating ticket:', error);
-      toast.error('Erreur lors de l\'envoi');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // Listen for custom event to open chat
   useEffect(() => {
     const handleOpenChat = () => setIsChatOpen(true);
     window.addEventListener('openSupportChat', handleOpenChat);
     return () => window.removeEventListener('openSupportChat', handleOpenChat);
   }, []);
 
+  const cartCount = getCartCount();
+  const shouldHide = HIDDEN_PAGES.some(page => location.pathname.startsWith(page));
+  if (shouldHide) return null;
+
+  const isShoppingPage = ['/restaurants', '/restaurant'].some(page => location.pathname.startsWith(page));
+  const showCart = user && userRole === 'customer' && isShoppingPage && cartCount > 0;
+
+  const handleSubmitTicket = async () => {
+    if (!subject.trim() || !message.trim()) { toast.error('Veuillez remplir tous les champs'); return; }
+    const lastTicket = localStorage.getItem(RATE_LIMIT_KEY);
+    if (lastTicket) {
+      const elapsed = Date.now() - parseInt(lastTicket);
+      if (elapsed < RATE_LIMIT_MS) {
+        const remaining = Math.ceil((RATE_LIMIT_MS - elapsed) / 60000);
+        toast.error(`Réessayez dans ${remaining} min`);
+        return;
+      }
+    }
+    setIsSubmitting(true);
+    try {
+      const { error } = await supabase.from('support_tickets').insert({
+        user_id: user?.id || null, subject: subject.trim(), description: message.trim(),
+        user_type: userRole || 'visitor', category: 'general', priority: 'medium'
+      });
+      if (error) throw error;
+      localStorage.setItem(RATE_LIMIT_KEY, String(Date.now()));
+      toast.success('Message envoyé !');
+      setSubject(''); setMessage(''); setIsChatOpen(false);
+    } catch (error) { console.error('Error:', error); toast.error("Erreur lors de l'envoi"); }
+    finally { setIsSubmitting(false); }
+  };
+
   return (
     <>
-      {/* Main FAB Container */}
       <div className="fixed bottom-20 right-4 z-50 flex flex-col items-end gap-2">
-        {/* Cart Button - only when shopping */}
         {showCart && !isChatOpen && (
-          <button
-            onClick={() => navigate('/cart')}
-            className={cn(
-              "w-12 h-12 rounded-full",
-              "bg-secondary text-secondary-foreground",
-              "flex items-center justify-center",
-              "shadow-md hover:shadow-lg transition-all",
-              "animate-in slide-in-from-right-2"
-            )}
-          >
+          <button onClick={() => navigate('/cart')}
+            className={cn("w-12 h-12 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center shadow-md hover:shadow-lg transition-all animate-in slide-in-from-right-2 relative")}>
             <ShoppingBag className="h-5 w-5" />
-            <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center font-bold">
+            <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center font-bold animate-pulse-badge">
               {cartCount}
             </span>
           </button>
         )}
-
-        {/* Chat/Help Button */}
-        <button
-          onClick={() => setIsChatOpen(!isChatOpen)}
-          className={cn(
-            "w-12 h-12 rounded-full",
-            "bg-primary text-primary-foreground",
-            "flex items-center justify-center",
-            "shadow-md hover:shadow-lg transition-all"
-          )}
-        >
-          {isChatOpen ? (
-            <X className="w-5 h-5" />
-          ) : (
-            <MessageCircle className="w-5 h-5" />
-          )}
+        <button onClick={() => setIsChatOpen(!isChatOpen)}
+          className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-md hover:shadow-lg transition-all">
+          {isChatOpen ? <X className="w-5 h-5" /> : <MessageCircle className="w-5 h-5" />}
         </button>
       </div>
-
-      {/* Chat Panel */}
       {isChatOpen && (
         <div className="fixed bottom-36 right-4 z-50 w-72 bg-card rounded-2xl shadow-xl border border-border overflow-hidden animate-in slide-in-from-bottom-4">
-          {/* Header */}
-          <div className="bg-primary p-3">
-            <h3 className="text-primary-foreground font-medium text-sm">Aide</h3>
-          </div>
-
-          {/* Content */}
+          <div className="bg-primary p-3"><h3 className="text-primary-foreground font-medium text-sm">Aide</h3></div>
           <div className="p-3 space-y-2">
-            {/* Quick Link to FAQ */}
-            <button
-              onClick={() => {
-                setIsChatOpen(false);
-                navigate('/help');
-              }}
-              className="w-full flex items-center gap-2 p-2 rounded-xl bg-muted/50 hover:bg-muted transition-colors text-left"
-            >
-              <HelpCircle className="w-4 h-4 text-primary" />
-              <span className="text-xs font-medium">FAQ & Aide</span>
+            <button onClick={() => { setIsChatOpen(false); navigate('/help'); }}
+              className="w-full flex items-center gap-2 p-2 rounded-xl bg-muted/50 hover:bg-muted transition-colors text-left">
+              <HelpCircle className="w-4 h-4 text-primary" /><span className="text-xs font-medium">FAQ & Aide</span>
             </button>
-
             <div className="border-t border-border pt-2">
               <p className="text-[10px] text-muted-foreground mb-2">Ou envoyez un message :</p>
-              
-              <Input
-                placeholder="Sujet"
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                className="mb-2 h-8 text-xs"
-              />
-              
-              <Textarea
-                placeholder="Votre message..."
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                className="min-h-[60px] text-xs resize-none"
-              />
-              
-              <Button
-                onClick={handleSubmitTicket}
-                disabled={isSubmitting}
-                className="w-full mt-2 h-8 text-xs"
-                size="sm"
-              >
-                {isSubmitting ? 'Envoi...' : (
-                  <>
-                    <Send className="w-3 h-3 mr-1" />
-                    Envoyer
-                  </>
-                )}
+              <Input placeholder="Sujet" value={subject} onChange={e => setSubject(e.target.value)} className="mb-2 h-8 text-xs" />
+              <Textarea placeholder="Votre message..." value={message} onChange={e => setMessage(e.target.value)} className="min-h-[60px] text-xs resize-none" />
+              <Button onClick={handleSubmitTicket} disabled={isSubmitting} className="w-full mt-2 h-8 text-xs" size="sm">
+                {isSubmitting ? 'Envoi...' : <><Send className="w-3 h-3 mr-1" />Envoyer</>}
               </Button>
             </div>
           </div>
