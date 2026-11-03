@@ -705,6 +705,66 @@ export type Database = {
           },
         ]
       }
+      loyalty_points: {
+        Row: {
+          created_at: string
+          id: string
+          level: string
+          points: number
+          total_earned: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          level?: string
+          points?: number
+          total_earned?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          level?: string
+          points?: number
+          total_earned?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      loyalty_transactions: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          order_id: string | null
+          points: number
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          order_id?: string | null
+          points: number
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          order_id?: string | null
+          points?: number
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       marketing_banners: {
         Row: {
           background_color: string | null
@@ -1492,6 +1552,7 @@ export type Database = {
           avatar_url: string | null
           city: string | null
           created_at: string
+          deleted_at: string | null
           district: string | null
           driver_rating: number | null
           driver_reviews_count: number | null
@@ -1517,6 +1578,7 @@ export type Database = {
           avatar_url?: string | null
           city?: string | null
           created_at?: string
+          deleted_at?: string | null
           district?: string | null
           driver_rating?: number | null
           driver_reviews_count?: number | null
@@ -1542,6 +1604,7 @@ export type Database = {
           avatar_url?: string | null
           city?: string | null
           created_at?: string
+          deleted_at?: string | null
           district?: string | null
           driver_rating?: number | null
           driver_reviews_count?: number | null
@@ -1695,6 +1758,7 @@ export type Database = {
           city: string | null
           created_at: string
           cuisine_type: string | null
+          deleted_at: string | null
           delivery_fee: number | null
           delivery_time: string | null
           description: string | null
@@ -1727,6 +1791,7 @@ export type Database = {
           city?: string | null
           created_at?: string
           cuisine_type?: string | null
+          deleted_at?: string | null
           delivery_fee?: number | null
           delivery_time?: string | null
           description?: string | null
@@ -1759,6 +1824,7 @@ export type Database = {
           city?: string | null
           created_at?: string
           cuisine_type?: string | null
+          deleted_at?: string | null
           delivery_fee?: number | null
           delivery_time?: string | null
           description?: string | null
@@ -2143,6 +2209,7 @@ export type Database = {
         Args: { restaurant_owner_id: string }
         Returns: number
       }
+      earn_points: { Args: { p_order_id: string }; Returns: number }
       generate_referral_code: { Args: never; Returns: string }
       has_blog_role: {
         Args: {
@@ -2157,6 +2224,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      use_promo_code: {
+        Args: { code_text: string; user_uuid: string }
+        Returns: Json
       }
     }
     Enums: {
@@ -2191,12 +2262,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -2220,11 +2291,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -2245,11 +2316,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -2270,11 +2341,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -2287,11 +2358,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
