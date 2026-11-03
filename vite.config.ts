@@ -46,52 +46,7 @@ export default defineConfig(({ mode }) => ({
     VitePWA({
       registerType: "autoUpdate",
       includeAssets: ["pwa-192x192.png", "pwa-512x512.png", "robots.txt"],
-      manifest: {
-        name: "Kalimero",
-        short_name: "Kalimero",
-        description: "Manger comme au restaurant, sans sortir de chez soi. Livraison rapide à Brazzaville et Pointe-Noire.",
-        theme_color: "#FF6B00",
-        background_color: "#FF6B00",
-        display: "standalone",
-        orientation: "portrait",
-        scope: "/",
-        start_url: "/",
-        categories: ["food", "shopping", "lifestyle"],
-        lang: "fr",
-        dir: "ltr",
-        icons: [
-          {
-            src: "/pwa-192x192.png",
-            sizes: "192x192",
-            type: "image/png",
-          },
-          {
-            src: "/pwa-512x512.png",
-            sizes: "512x512",
-            type: "image/png",
-          },
-          {
-            src: "/pwa-512x512.png",
-            sizes: "512x512",
-            type: "image/png",
-            purpose: "maskable",
-          },
-        ],
-        shortcuts: [
-          {
-            name: "Restaurants",
-            short_name: "Restos",
-            url: "/restaurants",
-            icons: [{ src: "/pwa-192x192.png", sizes: "192x192" }],
-          },
-          {
-            name: "Mes commandes",
-            short_name: "Commandes",
-            url: "/orders",
-            icons: [{ src: "/pwa-192x192.png", sizes: "192x192" }],
-          },
-        ],
-      },
+      manifest: false,
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff,woff2}"],
         runtimeCaching: [
