@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useNavigate } from "react-router-dom";
 import { BottomNav } from "@/components/BottomNav";
 import { AddressCaptureModal } from "@/components/AddressCaptureModal";
@@ -35,6 +36,7 @@ interface Restaurant {
 }
 
 const Index = () => {
+  useDocumentTitle("Restaurants");
   const navigate = useNavigate();
   const { district, city, address, openModal } = useLocation();
   const { user } = useAuth();

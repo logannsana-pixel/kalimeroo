@@ -1,4 +1,5 @@
 import { useEffect, useState, lazy, Suspense } from "react";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { BottomNav } from "@/components/BottomNav";
@@ -83,6 +84,7 @@ const statusConfig: Record<OrderStatus, { label: string; variant: "default" | "s
 };
 
 export default function Orders() {
+  useDocumentTitle("Mes commandes");
   const navigate = useNavigate();
   const { user } = useAuth();
   const { coordinates } = useLocationContext();

@@ -45,13 +45,13 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["pwa-192x192.png", "robots.txt"],
+      includeAssets: ["pwa-192x192.png", "pwa-512x512.png", "robots.txt"],
       manifest: {
-        name: "Kalimero - Livraison de repas au Congo",
+        name: "Kalimero",
         short_name: "Kalimero",
         description: "Manger comme au restaurant, sans sortir de chez soi. Livraison rapide à Brazzaville et Pointe-Noire.",
-        theme_color: "#FF8A00",
-        background_color: "#0a0a0a",
+        theme_color: "#FF6B00",
+        background_color: "#FF6B00",
         display: "standalone",
         orientation: "portrait",
         scope: "/",

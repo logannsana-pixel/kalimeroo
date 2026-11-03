@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useParams, useNavigate } from "react-router-dom";
 import { BottomNav } from "@/components/BottomNav";
 import { Footer } from "@/components/Footer";
@@ -53,6 +54,7 @@ export default function RestaurantDetail() {
   const [deliveryMode, setDeliveryMode] = useState<'delivery' | 'takeaway'>('delivery');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  useDocumentTitle(restaurant?.name || "Restaurant", undefined, "Commander sur Kalimero");
 
   useEffect(() => {
     fetchRestaurantData();

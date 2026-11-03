@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { BottomNav } from "@/components/BottomNav";
 import { CheckoutSteps } from "@/components/checkout/CheckoutSteps";
 import { PromoCodeInput } from "@/components/PromoCodeInput";
@@ -12,6 +13,7 @@ import { toast } from "sonner";
 import { ChevronLeft, ShieldCheck, Truck, Clock } from "lucide-react";
 
 export default function Checkout() {
+  useDocumentTitle("Finaliser la commande");
   const navigate = useNavigate();
   const { user } = useAuth();
   const { cartItems, getCartTotal, clearCart, refreshCart } = useCart();
