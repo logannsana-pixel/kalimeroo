@@ -1,13 +1,14 @@
 import { useEffect } from "react";
 
-export const useDocumentTitle = (title: string, description?: string) => {
+export const useDocumentTitle = (title: string, description?: string, suffix = "Kalimero") => {
   useEffect(() => {
     const previousTitle = document.title;
-    document.title = title ? `${title} | Kalimero` : "Kalimero - Livraison de repas au Congo";
+    const metaDescription = document.querySelector('meta[name="description"]');
+    const previousDescription = metaDescription?.getAttribute("content");
+    document.title = title ? `${title} | ${suffix}` : "Kalimero — Livraison de repas au Congo";
     
     // Update meta description if provided
     if (description) {
-      const metaDescription = document.querySelector('meta[name="description"]');
       if (metaDescription) {
         metaDescription.setAttribute("content", description);
       }
@@ -15,6 +16,9 @@ export const useDocumentTitle = (title: string, description?: string) => {
     
     return () => {
       document.title = previousTitle;
+      if (description && metaDescription && previousDescription !== null && previousDescription !== undefined) {
+        metaDescription.setAttribute("content", previousDescription);
+      }
     };
-  }, [title, description]);
+  }, [title, description, suffix]);
 };

@@ -16,7 +16,7 @@ interface State {
 export class ErrorBoundary extends Component<Props, State> {
   public state: State = {
     hasError: false,
-    error: null,
+    error: null
   };
 
   public static getDerivedStateFromError(error: Error): State {
@@ -45,35 +45,33 @@ export class ErrorBoundary extends Component<Props, State> {
         return this.props.fallback;
       }
 
-      const isDev = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-
       return (
         <div className="min-h-screen flex items-center justify-center p-4 bg-background">
-          <Card className="max-w-md w-full p-6 text-center space-y-4 rounded-3xl shadow-elevated">
-            <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
-              <AlertTriangle className="h-8 w-8 text-primary" />
+          <Card className="max-w-md w-full p-6 text-center space-y-4">
+            <div className="w-16 h-16 mx-auto rounded-full bg-destructive/10 flex items-center justify-center">
+              <AlertTriangle className="h-8 w-8 text-destructive" />
             </div>
             <div className="space-y-2">
-              <h2 className="text-lg font-display font-semibold">Une erreur est survenue</h2>
-              <p className="text-sm text-muted-foreground font-body">
+              <h2 className="text-lg font-semibold">Une erreur est survenue</h2>
+              <p className="text-sm text-muted-foreground">
                 Nous nous excusons pour ce désagrément. Veuillez réessayer.
               </p>
             </div>
             <div className="flex flex-col gap-2">
-              <Button onClick={this.handleRetry} className="w-full rounded-full">
+              <Button onClick={this.handleRetry} className="w-full">
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Réessayer
               </Button>
-              <Button variant="outline" onClick={this.handleRefresh} className="w-full rounded-full">
+              <Button variant="outline" onClick={this.handleRefresh} className="w-full">
                 Actualiser la page
               </Button>
-              <Button variant="ghost" onClick={this.handleGoHome} className="w-full rounded-full">
+              <Button variant="ghost" onClick={this.handleGoHome} className="w-full">
                 <Home className="h-4 w-4 mr-2" />
                 Retour à l'accueil
               </Button>
             </div>
-            {isDev && this.state.error && (
-              <details className="text-left text-xs bg-muted p-3 rounded-2xl">
+            {import.meta.env.DEV && this.state.error && (
+              <details className="text-left text-xs bg-muted p-3 rounded-lg">
                 <summary className="cursor-pointer font-medium">Détails techniques</summary>
                 <pre className="mt-2 whitespace-pre-wrap text-destructive">
                   {this.state.error.message}
