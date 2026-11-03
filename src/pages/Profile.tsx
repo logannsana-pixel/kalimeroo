@@ -15,9 +15,12 @@ import { toast } from "sonner";
 import { RestaurantProfileTab } from "@/components/restaurant/RestaurantProfileTab";
 import { DeliveryProfileTab } from "@/components/delivery/DeliveryProfileTab";
 import { ImageUpload } from "@/components/ImageUpload";
+import { Switch } from "@/components/ui/switch";
+import { useTheme } from "next-themes";
 
 export default function Profile() {
   const navigate = useNavigate();
+  const { resolvedTheme, setTheme } = useTheme();
   const { user, userRole, signOut } = useAuth();
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -237,6 +240,14 @@ export default function Profile() {
               </div>
             </CardContent>
           </Card>
+
+          <section className="border-t border-border pt-5 space-y-3">
+            <h2 className="text-lg font-semibold">Préférences</h2>
+            <div className="flex items-center justify-between gap-4">
+              <Label htmlFor="dark-mode">Mode sombre</Label>
+              <Switch id="dark-mode" checked={resolvedTheme === "dark"} onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")} />
+            </div>
+          </section>
 
           {/* Role-specific sections */}
           {userRole === "restaurant_owner" && <RestaurantProfileTab />}

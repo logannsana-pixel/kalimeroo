@@ -64,7 +64,11 @@ export function AdminAdminsTab() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedAdmin, setSelectedAdmin] = useState<AdminUser | null>(null);
   const [showPermissionsModal, setShowPermissionsModal] = useState(false);
-  const [permissions, setPermissions] = useState<Record<string, boolean>>({});
+  const [permissions, setPermissions] = useState<Partial<Pick<AdminUser,
+    "can_manage_restaurants" | "can_manage_drivers" | "can_manage_orders" |
+    "can_manage_users" | "can_manage_payments" | "can_manage_settings" |
+    "can_manage_marketing" | "can_manage_support" | "can_manage_admins"
+  >>>({});
 
   useEffect(() => {
     fetchAdmins();

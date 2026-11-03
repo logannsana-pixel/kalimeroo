@@ -221,7 +221,7 @@ const ServiceBubbleItem = ({
         ${isMain ? "shadow-xl ring-2 ring-primary/30" : "shadow-lg"}
         ${isDashed 
           ? "border-2 border-dashed border-foreground/30 bg-background/80" 
-          : "bg-white"
+          : "bg-card dark:shadow-none dark:ring-1 dark:ring-border"
         }
       `}
     >

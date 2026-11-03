@@ -141,7 +141,7 @@ export function MenuOptionsTab({ restaurantId }: { restaurantId: string }) {
     }
   };
 
-  const updateOptionGroup = async (groupId: string, updates: Partial<MenuItemOptionGroup>) => {
+  const updateOptionGroup = async (groupId: string, updates: Partial<Omit<MenuItemOptionGroup, "options">>) => {
     try {
       const { error } = await supabase
         .from("menu_item_option_groups")
