@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { defaultCheckoutSettings, paymentAmounts, type CheckoutSettings, type PaymentMethod } from "@/lib/checkout-payments";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,11 +13,11 @@ import { toast } from "sonner";
 import { VoiceNoteInput } from "@/components/voice/VoiceNoteInput";
 import { useVoiceNoteUpload } from "@/hooks/useVoiceNoteUpload";
 
-interface CheckoutData {
+export interface CheckoutData {
   phone: string;
   address: string;
   notes: string;
-  paymentMethod: "mobile_money" | "cod";
+  paymentMethod: PaymentMethod;
   mobileMoneyProvider?: string;
   mobileMoneyNumber?: string;
   deliveryMode: "delivery" | "pickup";
@@ -35,6 +36,7 @@ interface CheckoutStepsProps {
   deliveryFee: number;
   discount?: number;
   total?: number;
+  settings?: CheckoutSettings;
   onSubmit: (data: CheckoutData) => Promise<void>;
 }
 
@@ -45,6 +47,7 @@ export function CheckoutSteps({
   discount = 0,
   total: propTotal,
   onSubmit,
+  settings = defaultCheckoutSettings,
 }: CheckoutStepsProps) {
   const { district, city, address, addressComplement, coordinates, hasGPS, openModal } = useLocation();
   const calculatedTotal = propTotal ?? subtotal + deliveryFee - discount;
@@ -61,7 +64,7 @@ export function CheckoutSteps({
     phone: "",
     address: fullAddress,
     notes: "",
-    paymentMethod: "cod",
+    paymentMethod: settings.allow_cod ? "cod" : "mobile_money",
     mobileMoneyProvider: "",
     mobileMoneyNumber: "",
     deliveryMode: "delivery",
@@ -86,10 +89,7 @@ export function CheckoutSteps({
       if (!formData.phone.trim()) newErrors.phone = "Le téléphone est requis";
     }
 
-    if (formData.paymentMethod === "mobile_money") {
-      if (!formData.mobileMoneyProvider) newErrors.mobileMoneyProvider = "Sélectionnez un opérateur";
-      if (!formData.mobileMoneyNumber?.trim()) newErrors.mobileMoneyNumber = "Le numéro est requis";
-    }
+    if (formData.paymentMethod === "deposit" && formData.deliveryMode === "pickup") newErrors.paymentMethod = "Choisissez un paiement complet pour le retrait";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -118,7 +118,7 @@ export function CheckoutSteps({
         city: city || undefined,
         district: district || undefined,
         addressComplement: addressComplement || undefined,
-        phone: formData.orderForSomeoneElse ? formData.recipientPhone! : formData.phone,
+        phone: formData.orderForSomeoneElse ? (formData.recipientPhone ?? "") : formData.phone,
         voiceNoteUrl,
       });
     } finally {
@@ -137,6 +137,7 @@ export function CheckoutSteps({
 
   const effectiveDeliveryFee = formData.deliveryMode === "pickup" ? 0 : deliveryFee;
   const effectiveTotal = subtotal + effectiveDeliveryFee - discount;
+  const amounts = paymentAmounts(effectiveTotal, formData.paymentMethod, settings);
 
   return (
     <div className="space-y-4">
@@ -326,10 +327,10 @@ export function CheckoutSteps({
 
           <RadioGroup
             value={formData.paymentMethod}
-            onValueChange={(value: "mobile_money" | "cod") => setFormData({ ...formData, paymentMethod: value })}
+            onValueChange={(value: PaymentMethod) => setFormData({ ...formData, paymentMethod: value })}
             className="space-y-2"
           >
-            <label
+            {settings.allow_cod && <label
               htmlFor="cod"
               className={`flex items-center gap-2 p-3 border-2 rounded-xl cursor-pointer transition-all ${
                 formData.paymentMethod === "cod" ? "border-primary bg-primary/5" : "border-border"
@@ -341,9 +342,9 @@ export function CheckoutSteps({
                 <p className="font-medium text-sm">Paiement à la livraison</p>
                 <p className="text-[10px] text-muted-foreground">Payez en espèces</p>
               </div>
-            </label>
+            </label>}
 
-            {/* <label
+            {settings.allow_mobile_money && <label
               htmlFor="mobile_money"
               className={`flex items-center gap-3 p-4 border-2 rounded-2xl cursor-pointer transition-all ${
                 formData.paymentMethod === "mobile_money" ? "border-primary bg-primary/5" : "border-border"
@@ -353,12 +354,17 @@ export function CheckoutSteps({
               <CreditCard className="w-5 h-5 text-muted-foreground" />
               <div className="flex-1">
                 <p className="font-medium">Mobile Money</p>
-                <p className="text-xs text-muted-foreground">Orange, Airtel, MTN</p>
+                <p className="text-xs text-muted-foreground">Paiement complet via Nyole</p>
               </div>
-            </label> */}
+            </label>}
+            {settings.allow_mobile_money && settings.deposit_type !== "none" && formData.deliveryMode !== "pickup" && <label htmlFor="deposit" className="flex items-center gap-3 p-3 border border-border rounded-lg cursor-pointer">
+              <RadioGroupItem value="deposit" id="deposit" />
+              <span>Acompte {settings.deposit_value}{settings.deposit_type === "percentage" ? " %" : " FCFA"} · reste à la livraison</span>
+            </label>}
           </RadioGroup>
+          {errors.paymentMethod && <p className="text-sm text-destructive">{errors.paymentMethod}</p>}
 
-          {formData.paymentMethod === "mobile_money" && (
+          {false && formData.paymentMethod === "mobile_money" && (
             <div className="space-y-3 pt-3 border-t">
               <Select
                 value={formData.mobileMoneyProvider}
@@ -411,6 +417,8 @@ export function CheckoutSteps({
             <span>Total</span>
             <span className="text-primary">{effectiveTotal.toFixed(0)} FCFA</span>
           </div>
+          <div className="flex justify-between text-sm"><span>À payer maintenant</span><span>{amounts.dueNow} FCFA</span></div>
+          <div className="flex justify-between text-sm"><span>À payer à la réception</span><span>{amounts.dueOnDelivery} FCFA</span></div>
 
           <Button
             onClick={handleSubmit}
@@ -423,7 +431,7 @@ export function CheckoutSteps({
                 {uploadingVoiceNote ? "Envoi de la note vocale..." : "Traitement..."}
               </span>
             ) : (
-              `Payer ${effectiveTotal.toFixed(0)} FCFA`
+              formData.paymentMethod === "cod" ? "Commander · paiement à la livraison" : `Payer ${amounts.dueNow} FCFA avec Nyole`
             )}
           </Button>
 
