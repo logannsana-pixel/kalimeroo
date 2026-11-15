@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { BottomNav } from "@/components/BottomNav";
-import { CheckoutSteps } from "@/components/checkout/CheckoutSteps";
+import { CheckoutSteps, type CheckoutData } from "@/components/checkout/CheckoutSteps";
+import { defaultCheckoutSettings, type CheckoutSettings } from "@/lib/checkout-payments";
+import { invokePayment } from "@/services/checkoutPayments";
+import { Button } from "@/components/ui/button";
 import { PromoCodeInput } from "@/components/PromoCodeInput";
 import { GuestCheckoutModal } from "@/components/checkout/GuestCheckoutModal";
 import { AddressCaptureModal } from "@/components/AddressCaptureModal";
@@ -16,7 +19,11 @@ export default function Checkout() {
   useDocumentTitle("Finaliser la commande");
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { cartItems, getCartTotal, clearCart, refreshCart } = useCart();
+  const { cartItems, getCartTotal, refreshCart, loading: cartLoading } = useCart();
+  const [settings, setSettings] = useState<CheckoutSettings>(defaultCheckoutSettings);
+  const [settingsLoading, setSettingsLoading] = useState(true);
+  const [settingsError, setSettingsError] = useState(false);
+  const [requestId] = useState(() => crypto.randomUUID());
   const [deliveryFee, setDeliveryFee] = useState(0);
   const [promoCodeId, setPromoCodeId] = useState<string>("");
   const [discount, setDiscount] = useState(0);
@@ -32,10 +39,18 @@ export default function Checkout() {
     const fetchDeliveryFee = async () => {
       if (restaurantId && user) {
         try {
+          setSettingsLoading(true);
+          setSettingsError(false);
           const { data } = await supabase.from("restaurants").select("delivery_fee").eq("id", restaurantId).maybeSingle();
           if (data) setDeliveryFee(Number(data.delivery_fee) || 0);
+          const { data: options, error } = await supabase.from("restaurant_checkout_settings").select("*").eq("restaurant_id", restaurantId).maybeSingle();
+          if (error) throw error;
+          setSettings(options ? { ...options, deposit_type: options.deposit_type as CheckoutSettings["deposit_type"] } : defaultCheckoutSettings);
         } catch (error) {
+          setSettingsError(true);
           console.error('Error fetching delivery fee:', error);
+        } finally {
+          setSettingsLoading(false);
         }
       }
     };
@@ -50,54 +65,40 @@ export default function Checkout() {
     );
   }
 
-  if (user && cartItems.length === 0) { navigate("/cart"); return null; }
-
-  const handleSubmit = async (checkoutData: any) => {
+  const handleSubmit = async (checkoutData: CheckoutData) => {
+    if (!user || !restaurantId || settingsLoading || settingsError) return;
     try {
-      const subtotal = getCartTotal();
-      const total = subtotal + deliveryFee - discount;
-      const fullAddress = `${checkoutData.city || ''} - ${checkoutData.district || ''}${checkoutData.addressComplement ? `, ${checkoutData.addressComplement}` : ""}`.replace(/^[\s-]+/, '');
-
-      const { data: order, error: orderError } = await supabase.from("orders").insert({
-        user_id: user.id, 
-        restaurant_id: restaurantId, 
-        phone: checkoutData.phone, 
-        delivery_address: fullAddress || checkoutData.address, 
-        notes: checkoutData.notes, 
-        subtotal, 
-        delivery_fee: deliveryFee, 
-        promo_code_id: promoCodeId || null, 
-        discount_amount: discount, 
-        total, 
-        status: "pending",
-        voice_note_url: checkoutData.voiceNoteUrl || null,
-      }).select().single();
-
+      const fullAddress = [checkoutData.city, checkoutData.district, checkoutData.address].filter(Boolean).join(" - ");
+      const { data: orderId, error: orderError } = await supabase.rpc("create_checkout_order", {
+        p_request_id: requestId, p_method: checkoutData.paymentMethod,
+        p_phone: checkoutData.phone, p_address: checkoutData.deliveryMode === "pickup" ? "À emporter" : fullAddress,
+        p_notes: checkoutData.notes, p_promo_id: promoCodeId || undefined,
+        p_pickup: checkoutData.deliveryMode === "pickup", p_voice_url: checkoutData.voiceNoteUrl,
+      });
       if (orderError) throw orderError;
-
-      if (promoCodeId) {
-        const { data: promo } = await supabase.from("promo_codes").select("uses_count").eq("id", promoCodeId).single();
-        if (promo) await supabase.from("promo_codes").update({ uses_count: promo.uses_count + 1 }).eq("id", promoCodeId);
-      }
-
-      const orderItems = cartItems.map((item) => ({ order_id: order.id, menu_item_id: item.menu_item_id, quantity: item.quantity, price: item.menu_items.price, selected_options: item.selected_options || [] }));
-      await supabase.from("order_items").insert(orderItems);
-      await clearCart();
-
-      toast.success("Commande passée!"); navigate("/orders");
-    } catch (error) { console.error("Error:", error); toast.error("Erreur lors de la commande"); }
+      if (checkoutData.paymentMethod !== "cod") {
+        try {
+          const payment = await invokePayment({ action: "start", order_id: orderId });
+          if (payment.url) { window.location.assign(payment.url); return; }
+        } catch (error) {
+          toast.error(error instanceof Error ? error.message : "Nyole indisponible. Reprenez le paiement dans vos commandes.");
+        }
+      } else toast.success("Commande passée !");
+      await refreshCart();
+      navigate("/orders");
+    } catch (error) { console.error("Error:", error); toast.error(error instanceof Error ? error.message : "Erreur lors de la commande"); }
   };
 
-  const subtotal = getCartTotal();
+  const subtotal = getCartTotal() ?? 0;
   const total = subtotal + deliveryFee - discount;
 
   return (
     <div className="min-h-screen bg-background pb-24">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border/30 px-4 py-3 flex items-center gap-3">
-        <button onClick={() => navigate("/cart")} className="w-8 h-8 flex items-center justify-center">
+        <Button variant="ghost" size="icon" aria-label="Retour au panier" onClick={() => navigate("/cart")}>
           <ChevronLeft className="w-5 h-5" />
-        </button>
+        </Button>
         <span className="text-sm font-medium">Checkout</span>
       </header>
 
@@ -109,7 +110,7 @@ export default function Checkout() {
           <div className="flex gap-2">
             <div className="flex-1 flex flex-col items-center p-3 bg-card rounded-xl">
               <ShieldCheck className="w-5 h-5 text-primary mb-1" />
-              <span className="text-xs text-center">Paiement à la livraison</span>
+              <span className="text-xs text-center">Paiement sécurisé</span>
             </div>
             <div className="flex-1 flex flex-col items-center p-3 bg-card rounded-xl">
               <Truck className="w-5 h-5 text-primary mb-1" />
@@ -151,7 +152,7 @@ export default function Checkout() {
           </div>
 
           {/* Checkout Steps */}
-          <CheckoutSteps cartItems={cartItems} subtotal={subtotal} deliveryFee={deliveryFee} discount={discount} total={total} onSubmit={handleSubmit} />
+          {settingsError ? <p role="alert" className="text-destructive">Impossible de charger les moyens de paiement. Réessayez plus tard.</p> : cartItems.length === 0 ? <p>{cartLoading ? "Chargement du panier…" : "Votre panier est vide"}</p> : settingsLoading ? <p>Chargement des moyens de paiement…</p> : <CheckoutSteps cartItems={cartItems} subtotal={subtotal} deliveryFee={deliveryFee} discount={discount} total={total} settings={settings} onSubmit={handleSubmit} />}
         </main>
       ) : (
         <div className="text-center py-12"><p className="text-sm text-muted-foreground">Connectez-vous pour continuer</p></div>

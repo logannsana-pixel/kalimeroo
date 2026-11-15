@@ -1277,6 +1277,63 @@ export type Database = {
           },
         ]
       }
+      order_payments: {
+        Row: {
+          checkout_url: string | null
+          currency: string
+          due_now: number
+          due_on_delivery: number
+          livemode: boolean | null
+          method: string
+          order_id: string
+          paid_amount: number
+          session_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          checkout_url?: string | null
+          currency?: string
+          due_now: number
+          due_on_delivery: number
+          livemode?: boolean | null
+          method: string
+          order_id: string
+          paid_amount?: number
+          session_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          checkout_url?: string | null
+          currency?: string
+          due_now?: number
+          due_on_delivery?: number
+          livemode?: boolean | null
+          method?: string
+          order_id?: string
+          paid_amount?: number
+          session_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_payments_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_payments_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "restaurant_orders_masked"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           created_at: string
@@ -1751,6 +1808,41 @@ export type Database = {
           },
         ]
       }
+      restaurant_checkout_settings: {
+        Row: {
+          allow_cod: boolean
+          allow_mobile_money: boolean
+          deposit_type: string
+          deposit_value: number
+          restaurant_id: string
+          updated_at: string
+        }
+        Insert: {
+          allow_cod?: boolean
+          allow_mobile_money?: boolean
+          deposit_type?: string
+          deposit_value?: number
+          restaurant_id: string
+          updated_at?: string
+        }
+        Update: {
+          allow_cod?: boolean
+          allow_mobile_money?: boolean
+          deposit_type?: string
+          deposit_value?: number
+          restaurant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "restaurant_checkout_settings_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: true
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       restaurants: {
         Row: {
           address: string
@@ -2208,6 +2300,19 @@ export type Database = {
       calculate_restaurant_balance: {
         Args: { restaurant_owner_id: string }
         Returns: number
+      }
+      create_checkout_order: {
+        Args: {
+          p_address: string
+          p_method: string
+          p_notes?: string
+          p_phone: string
+          p_pickup?: boolean
+          p_promo_id?: string
+          p_request_id: string
+          p_voice_url?: string
+        }
+        Returns: string
       }
       earn_points: { Args: { p_order_id: string }; Returns: number }
       generate_referral_code: { Args: never; Returns: string }

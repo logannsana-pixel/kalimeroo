@@ -21,6 +21,9 @@ import { Database } from "@/integrations/supabase/types";
 import { HorizontalCard, HorizontalCardSkeleton } from "@/components/ui/horizontal-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLocation as useLocationContext } from "@/contexts/LocationContext";
+import { OrderPaymentSummary } from "@/components/checkout/OrderPaymentSummary";
+import { invokePayment } from "@/services/checkoutPayments";
+import { toast } from "sonner";
 
 // Lazy load map component for performance
 const OrderTrackingMap = lazy(() => import("@/components/tracking/OrderTrackingMap"));
@@ -95,6 +98,14 @@ export default function Orders() {
   const [reviewingOrder, setReviewingOrder] = useState<Order | null>(null);
   const [ratingDriverOrder, setRatingDriverOrder] = useState<Order | null>(null);
   const [trackingOrder, setTrackingOrder] = useState<Order | null>(null);
+  useEffect(() => {
+    if (!user) return;
+    const orderId = new URLSearchParams(window.location.search).get("payment_order");
+    if (!orderId || !/^[0-9a-f-]{36}$/i.test(orderId)) return;
+    invokePayment({ action: "status", order_id: orderId }).then(data => {
+      toast.info(data.status === "paid" ? "Paiement confirmé" : "Paiement non confirmé : vous pouvez le reprendre dans la commande");
+    }).catch(error => toast.error(error.message));
+  }, [user]);
 
   const fetchOrders = async (showRefresh = false) => {
     if (!user) return;
@@ -324,6 +335,7 @@ export default function Orders() {
 
                 {isExpanded && (
                   <CardContent className="pt-0 space-y-4 border-t mx-4 pb-4">
+                    <OrderPaymentSummary orderId={order.id} customer cancelled={order.status === "cancelled"} />
                     <div className="pt-4">
                       <h4 className="font-semibold mb-2 text-sm">Articles</h4>
                       <div className="space-y-1">

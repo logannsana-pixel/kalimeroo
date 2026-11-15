@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Wallet, Download, TrendingUp, Clock, CheckCircle, Loader2 } from "lucide-react";
+import { RestaurantCheckoutSettings } from "./RestaurantCheckoutSettings";
 
 interface Payout {
   id: string;
@@ -116,6 +117,7 @@ export const RestaurantPaymentsTab = () => {
       </div>
 
       {/* Stats Cards */}
+      <RestaurantCheckoutSettings />
       <div className="grid md:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="pb-2">
