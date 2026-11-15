@@ -1,7 +1,7 @@
 # Final Kalimero polish
 
 ## Nyole payments
-- [ ] Confirm Nyole API account eligibility and collection ownership.
+- [x] Confirm Nyole API account eligibility and collection ownership: existing API account; Kalimero collects centrally.
 - [ ] Restaurant payment settings: delivery, Mobile Money or both; full payment or percentage/fixed deposits.
 - [ ] Secure checkout, verified payment status and remaining balance on orders.
 - [ ] Run payment calculation tests and verify checkout/settings flows; live processing requires Nyole credentials.
