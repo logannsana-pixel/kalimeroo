@@ -34,6 +34,12 @@ const EnableAlerts = lazy(() => import("./pages/EnableAlerts"));
 const AlertPlayground = lazy(() => import("./pages/AlertPlayground"));
 const Affiliate = lazy(() => import("./pages/Affiliate"));
 const Help = lazy(() => import("./pages/Help"));
+const Terms = lazy(() => import("./pages/legal/Terms"));
+const Privacy = lazy(() => import("./pages/legal/Privacy"));
+const PartnerTerms = lazy(() => import("./pages/legal/PartnerTerms"));
+const About = lazy(() => import("./pages/legal/About"));
+const BlogList = lazy(() => import("./pages/blog/BlogList"));
+const BlogArticle = lazy(() => import("./pages/blog/BlogArticle"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Auth pages
@@ -91,6 +97,13 @@ const App = () => (
                       <Route path="/enable-alerts" element={<EnableAlerts />} />
                       <Route path="/dev/alerts" element={<AlertPlayground />} />
                       <Route path="/help" element={<Help />} />
+                      <Route path="/cgu" element={<Terms />} />
+                      <Route path="/privacy" element={<Privacy />} />
+                      <Route path="/partner-terms" element={<PartnerTerms />} />
+                      <Route path="/about" element={<About />} />
+                      <Route path="/blog" element={<BlogList />} />
+                      <Route path="/:lang/blog" element={<BlogList />} />
+                      <Route path="/:lang/blog/:slug" element={<BlogArticle />} />
                       <Route 
                         path="/affiliate" 
                         element={

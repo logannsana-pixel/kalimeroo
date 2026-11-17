@@ -49,7 +49,7 @@ export const Footer = ({ className }: FooterProps) => {
             <ul className="space-y-3 text-muted-foreground text-sm">
               <li><Link to="/restaurants" className="hover:text-primary transition-colors">Commander</Link></li>
               <li><Link to="/auth/customer" className="hover:text-primary transition-colors">Créer un compte client</Link></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Aide & Contact</a></li>
+              <li><Link to="/help" className="hover:text-primary transition-colors">Aide & Contact</Link></li>
             </ul>
           </div>
           
@@ -72,7 +72,7 @@ export const Footer = ({ className }: FooterProps) => {
                   Devenir livreur
                 </Link>
               </li>
-              <li><a href="#" className="hover:text-primary transition-colors">Conditions partenaires</a></li>
+              <li><Link to="/partner-terms" className="hover:text-primary transition-colors">Conditions partenaires</Link></li>
             </ul>
           </div>
           
@@ -83,9 +83,10 @@ export const Footer = ({ className }: FooterProps) => {
               Informations
             </h4>
             <ul className="space-y-3 text-muted-foreground text-sm">
-              <li><a href="#" className="hover:text-primary transition-colors">À propos</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Confidentialité</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">CGU</a></li>
+              <li><Link to="/about" className="hover:text-primary transition-colors">À propos</Link></li>
+              <li><Link to="/privacy" className="hover:text-primary transition-colors">Confidentialité</Link></li>
+              <li><Link to="/blog" className="hover:text-primary transition-colors">Blog</Link></li>
+              <li><Link to="/cgu" className="hover:text-primary transition-colors">CGU</Link></li>
             </ul>
           </div>
         </div>
