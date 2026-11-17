@@ -49,10 +49,11 @@ const Index = () => {
 
   // Open address modal if city is set but detailed address is not
   useEffect(() => {
-    if (hasCity && !hasAddress) {
+    if (hasCity && !hasAddress && sessionStorage.getItem("addressPromptDismissed") !== "1") {
       openModal();
     }
-  }, [hasCity, hasAddress, openModal]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasCity, hasAddress]);
 
   useEffect(() => {
     const fetchData = async () => {

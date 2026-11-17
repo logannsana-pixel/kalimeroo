@@ -182,10 +182,9 @@ export const AddressCaptureModal = ({ isOpen: propIsOpen, onClose: propOnClose, 
   };
 
   const handleClose = () => {
-    // Only allow closing if we have an address set
-    if (district && address) {
-      closeModal();
-    }
+    // Allow "later": remember dismissal for this visit; checkout still requires an address
+    sessionStorage.setItem("addressPromptDismissed", "1");
+    closeModal();
   };
 
   if (!isOpen) return null;
@@ -201,9 +200,10 @@ export const AddressCaptureModal = ({ isOpen: propIsOpen, onClose: propOnClose, 
       {/* Modal */}
       <div className="relative w-full max-w-md bg-background rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
         {/* Close button */}
-        {(district && address) && (
+        {(
           <button 
             onClick={handleClose}
+            aria-label="Fermer et renseigner plus tard"
             className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors"
           >
             <X className="w-5 h-5" />
