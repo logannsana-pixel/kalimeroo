@@ -2330,6 +2330,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      record_neighborhood: { Args: { p_name: string }; Returns: undefined }
       use_promo_code: {
         Args: { code_text: string; user_uuid: string }
         Returns: Json

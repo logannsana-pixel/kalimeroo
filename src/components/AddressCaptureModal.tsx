@@ -131,25 +131,7 @@ export const AddressCaptureModal = ({ isOpen: propIsOpen, onClose: propOnClose, 
     if (!name.trim()) return;
     
     try {
-      // Check if neighborhood exists
-      const { data: existing } = await supabase
-        .from('neighborhoods')
-        .select('id, usage_count')
-        .eq('name', name.trim().toLowerCase())
-        .maybeSingle();
-
-      if (existing) {
-        // Increment usage count
-        await supabase
-          .from('neighborhoods')
-          .update({ usage_count: (existing.usage_count || 1) + 1, updated_at: new Date().toISOString() })
-          .eq('id', existing.id);
-      } else {
-        // Insert new neighborhood
-        await supabase
-          .from('neighborhoods')
-          .insert({ name: name.trim().toLowerCase() });
-      }
+      await supabase.rpc('record_neighborhood', { p_name: name.trim() });
     } catch (error) {
       console.error("Error saving neighborhood:", error);
     }
