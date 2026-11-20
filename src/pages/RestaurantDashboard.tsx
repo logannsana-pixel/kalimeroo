@@ -96,6 +96,21 @@ export default function RestaurantDashboard() {
     );
   }
 
+  if (!restaurant) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6 bg-background">
+        <div className="max-w-md text-center space-y-4">
+          <h1 className="text-2xl font-bold text-foreground">Aucun restaurant lié à ce compte</h1>
+          <p className="text-muted-foreground">Votre compte est bien connecté, mais aucun restaurant n'y est encore rattaché. Contactez l'équipe Kalimero pour finaliser votre inscription.</p>
+          <div className="flex gap-3 justify-center">
+            <a href="https://whatsapp.com/channel/0029VbBFAsX1NCradFmpV70L" target="_blank" rel="noreferrer" className="px-4 py-2 rounded-xl bg-primary text-primary-foreground font-medium">Contacter le support</a>
+            <button onClick={signOut} className="px-4 py-2 rounded-xl border border-border text-foreground">Se déconnecter</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Show lock screen if not validated
   if (restaurant && !restaurant.is_validated) {
     return (

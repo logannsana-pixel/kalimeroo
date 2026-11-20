@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { authErrorMessage } from "@/lib/auth-errors";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
@@ -71,7 +72,7 @@ const Auth = () => {
       // If using phone method, validate and convert to email
       if (authMethod === "phone") {
         if (!isValidCongoPhone(loginData.identifier)) {
-          toast.error("Numéro congolais invalide");
+          toast.error("Numéro invalide (ex. 06 123 45 67 ou +33 6 12 34 56 78)");
           setIsLoading(false);
           return;
         }
@@ -90,7 +91,7 @@ const Auth = () => {
             : "Email ou mot de passe incorrect"
           );
         } else {
-          toast.error(error.message);
+          toast.error(authErrorMessage(error.message));
         }
       } else {
         toast.success("Connexion réussie !");
@@ -145,7 +146,7 @@ const Auth = () => {
         if (error.message.includes("already registered")) {
           toast.error("Ce compte existe déjà");
         } else {
-          toast.error(error.message);
+          toast.error(authErrorMessage(error.message));
         }
       } else {
         toast.success("Compte créé avec succès !");
@@ -212,7 +213,7 @@ const Auth = () => {
         if (error.message.includes("already registered")) {
           toast.error("Ce compte existe déjà");
         } else {
-          toast.error(error.message);
+          toast.error(authErrorMessage(error.message));
         }
       } else {
         toast.success("Restaurant créé avec succès !");
@@ -261,7 +262,7 @@ const Auth = () => {
         if (error.message.includes("already registered")) {
           toast.error("Ce compte existe déjà");
         } else {
-          toast.error(error.message);
+          toast.error(authErrorMessage(error.message));
         }
       } else {
         toast.success("Compte livreur créé avec succès !");

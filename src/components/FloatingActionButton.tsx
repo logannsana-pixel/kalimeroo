@@ -28,7 +28,6 @@ const FloatingActionButton = () => {
   
   // Hide on dashboard pages
   const shouldHide = HIDDEN_PAGES.some(page => location.pathname.startsWith(page));
-  if (shouldHide) return null;
 
   // Show cart only on shopping pages for customers
   const isShoppingPage = ['/restaurants', '/restaurant'].some(page => location.pathname.startsWith(page));
@@ -75,6 +74,8 @@ const FloatingActionButton = () => {
     window.addEventListener('openSupportChat', handleOpenChat);
     return () => window.removeEventListener('openSupportChat', handleOpenChat);
   }, []);
+
+  if (shouldHide) return null;
 
   return (
     <>

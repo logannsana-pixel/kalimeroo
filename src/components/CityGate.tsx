@@ -15,6 +15,13 @@ const PUBLIC_ROUTES = [
   "/auth/delivery",
   "/auth/admin",
   "/help",
+  "/cgu",
+  "/privacy",
+  "/partner-terms",
+  "/about",
+  "/blog",
+  "/fr",
+  "/en",
   "/admin-dashboard",
   "/restaurant-dashboard",
   "/delivery-dashboard"

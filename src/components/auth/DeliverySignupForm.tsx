@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { passwordStrength } from "@/lib/auth-errors";
+import { PasswordStrengthHint } from "./PasswordStrengthHint";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -52,13 +54,13 @@ export function DeliverySignupForm({ onSubmit, onBack }: DeliverySignupFormProps
     } else {
       if (!formData.phone.trim()) newErrors.phone = "Le numéro est requis";
       else if (!isValidCongoPhone(formData.phone)) {
-        newErrors.phone = "Numéro congolais invalide";
+        newErrors.phone = "Numéro invalide (ex. 06 123 45 67 ou +33 6 12 34 56 78)";
       }
     }
     
     if (!formData.district.trim()) newErrors.district = "Le quartier est requis";
     if (!formData.vehicleType) newErrors.vehicleType = "Le type de véhicule est requis";
-    if (formData.password.length < 6) newErrors.password = "Minimum 6 caractères";
+    if (!passwordStrength(formData.password).ok) newErrors.password = passwordStrength(formData.password).label || "Mot de passe requis";
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Les mots de passe ne correspondent pas";
     }
@@ -165,10 +167,11 @@ export function DeliverySignupForm({ onSubmit, onBack }: DeliverySignupFormProps
             type="password"
             value={formData.password}
             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-            placeholder="Minimum 6 caractères"
+            placeholder="8 caractères, lettres et chiffres"
             className="h-12 rounded-xl"
           />
-          {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
+          <PasswordStrengthHint password={formData.password} />
+              {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
         </div>
 
         <div className="space-y-2">

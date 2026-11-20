@@ -133,15 +133,15 @@ export default function Checkout() {
                     <p className="font-medium line-clamp-1">{item.menu_items?.name}</p>
                     <p className="text-muted-foreground">x{item.quantity}</p>
                   </div>
-                  <span className="font-medium">{(Number(item.menu_items?.price) * item.quantity).toFixed(0)} FC</span>
+                  <span className="font-medium">{(Number(item.menu_items?.price) * item.quantity).toFixed(0)} FCFA</span>
                 </div>
               ))}
             </div>
             <div className="border-t border-border/30 pt-3 space-y-1 text-xs">
-              <div className="flex justify-between"><span className="text-muted-foreground">Sous-total</span><span>{subtotal.toFixed(0)} FC</span></div>
-              <div className="flex justify-between"><span className="text-muted-foreground">Livraison</span><span>{deliveryFee.toFixed(0)} FC</span></div>
-              {discount > 0 && <div className="flex justify-between text-green-500"><span>Réduction</span><span>-{discount.toFixed(0)} FC</span></div>}
-              <div className="flex justify-between text-sm font-semibold pt-2"><span>Total</span><span className="text-primary">{total.toFixed(0)} FC</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground">Sous-total</span><span>{subtotal.toFixed(0)} FCFA</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground">Livraison</span><span>{deliveryFee.toFixed(0)} FCFA</span></div>
+              {discount > 0 && <div className="flex justify-between text-green-500"><span>Réduction</span><span>-{discount.toFixed(0)} FCFA</span></div>}
+              <div className="flex justify-between text-sm font-semibold pt-2"><span>Total</span><span className="text-primary">{total.toFixed(0)} FCFA</span></div>
             </div>
           </div>
 

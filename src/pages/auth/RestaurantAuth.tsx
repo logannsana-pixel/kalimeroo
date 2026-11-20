@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { authErrorMessage } from "@/lib/auth-errors";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -38,7 +39,7 @@ const RestaurantAuth = () => {
     let email = loginData.identifier;
     if (authMethod === "phone") {
       if (!isValidCongoPhone(loginData.identifier)) {
-        setLoginError("Numéro congolais invalide");
+        setLoginError("Numéro invalide (ex. 06 123 45 67 ou +33 6 12 34 56 78)");
         return;
       }
       email = phoneToEmail(loginData.identifier);
@@ -102,7 +103,7 @@ const RestaurantAuth = () => {
         },
       });
       if (error) {
-        toast.error(error.message.includes("already registered") ? "Ce compte existe déjà" : error.message);
+        toast.error(authErrorMessage(error.message));
         return;
       }
       if (logoUrl && data.user) {

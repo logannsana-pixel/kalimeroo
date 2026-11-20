@@ -197,7 +197,7 @@ const Index = () => {
                       <div className="flex items-start justify-between gap-1">
                         <h3 className="text-xs font-semibold text-primary line-clamp-1">{r.name}</h3>
                         <span className="text-[10px] font-medium text-foreground whitespace-nowrap">
-                          {r.delivery_fee ? `${r.delivery_fee.toLocaleString()} FC` : "Gratuit"}
+                          {r.delivery_fee ? `${r.delivery_fee.toLocaleString()} FCFA` : "Gratuit"}
                         </span>
                       </div>
                       <p className="text-[10px] text-muted-foreground line-clamp-1">{r.cuisine_type}</p>
