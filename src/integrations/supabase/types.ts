@@ -2331,6 +2331,10 @@ export type Database = {
         Returns: boolean
       }
       record_neighborhood: { Args: { p_name: string }; Returns: undefined }
+      request_affiliate_withdrawal: {
+        Args: { p_amount: number; p_mobile_money_number: string }
+        Returns: string
+      }
       use_promo_code: {
         Args: { code_text: string; user_uuid: string }
         Returns: Json

@@ -22,6 +22,13 @@
       "when": 1795171560591,
       "tag": "0002_scope_reads_affiliate_neighborhood_driver_reviews",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1795174952544,
+      "tag": "0003_harden_balances_promo_points_storage",
+      "breakpoints": true
     }
   ]
 }

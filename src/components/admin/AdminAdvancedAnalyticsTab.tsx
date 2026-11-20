@@ -260,7 +260,12 @@ export const AdminAdvancedAnalyticsTab = () => {
       ...stats.top_pages.map(p => [p.page, p.count.toString()])
     ];
 
-    const csv = rows.map(r => r.join(',')).join('\n');
+    const cell = (v: string) => {
+      let t = String(v ?? '');
+      if (/^[=+\-@\t\r]/.test(t)) t = "'" + t;
+      return `"${t.replace(/"/g, '""')}"`;
+    };
+    const csv = rows.map(r => r.map(cell).join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');

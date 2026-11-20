@@ -218,26 +218,12 @@ export default function Affiliate() {
 
     setSubmitting(true);
     try {
-      const { error } = await supabase
-        .from("affiliate_withdrawals")
-        .insert({
-          affiliate_id: affiliate.id,
-          amount,
-          payment_method: "mobile_money",
-          mobile_money_number: mobileMoneyNumber,
-          status: "pending",
-        });
+      const { error } = await supabase.rpc("request_affiliate_withdrawal", {
+        p_amount: amount,
+        p_mobile_money_number: mobileMoneyNumber,
+      });
 
       if (error) throw error;
-
-      // Update affiliate balance
-      await supabase
-        .from("affiliates")
-        .update({
-          available_balance: affiliate.available_balance - amount,
-          pending_balance: affiliate.pending_balance + amount,
-        })
-        .eq("id", affiliate.id);
 
       toast.success("Demande de retrait envoyée !");
       setShowWithdrawModal(false);
